@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="EventConsumerProject/EventConsumerProject.csproj" />
+  <Project Path="EventProducerProject/EventProducerProject.csproj" />
+  <Project Path="GeneratedCode/GeneratedCode.csproj" />
+  <Project Path="SampleApp/SampleApp.csproj" />
+</Solution>
