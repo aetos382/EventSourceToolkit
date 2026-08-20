@@ -14,10 +14,11 @@ public sealed partial class TraceEventGenerator :
     {
         context.RegisterPostInitializationOutput(PostInitialize);
 
-        var provider = context.SyntaxProvider.ForAttributeWithMetadataName(
-            "Aetos.Tracing.GeneratedEventSourceAttribute",
-            static (node, _) => node is ClassDeclarationSyntax,
-            ParseEventSourceClass);
+        var provider = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                "Aetos.Tracing.GeneratedEventSourceAttribute",
+                static (node, _) => node is ClassDeclarationSyntax,
+                ParseEventSourceClass);
 
         context.RegisterSourceOutput(
             provider,

@@ -106,7 +106,8 @@ public sealed class EventSourceGeneratorTest
 
     private sealed record GenerateResult(
         CSharpGeneratorDriver Driver,
-        CSharpCompilation Compilation,
+        CSharpCompilation OriginalCompilation,
+        CSharpCompilation UpdatedCompilation,
         ImmutableArray<Diagnostic> GeneratorDiagnostics);
 
     private static GenerateResult RunGenerator(
@@ -121,7 +122,7 @@ public sealed class EventSourceGeneratorTest
         var driverOptions = new GeneratorDriverOptions(
             IncrementalGeneratorOutputKind.None, true);
 
-        var syntaxTree = CSharpSyntaxTree.ParseText(code, parseOptions);
+        var syntaxTree = CSharpSyntaxTree.ParseText(code, parseOptions, cancellationToken: cancellationToken);
 
         var compilation = CSharpCompilation.Create(
             null,
@@ -144,6 +145,7 @@ public sealed class EventSourceGeneratorTest
 
         return new(
             (CSharpGeneratorDriver)driver2,
+            compilation,
             (CSharpCompilation)updatedCompilation,
             generatorDiagnostics);
     }
