@@ -13,6 +13,31 @@ namespace Aetos.Tracing.Tests;
 public sealed class EventSourceGeneratorTest
 {
     [TestMethod]
+    public void とりあえず正常系()
+    {
+        const string Code =
+            """
+            using System.Diagnostics.Tracing;
+
+            using Aetos.Tracing;
+
+            [EventSource(Name = "TestEventSource")]
+            [GeneratedEventSource]
+            partial class InvalidEventSource : EventSource
+            {
+                [Event(1)]
+                public partial void Foo();
+            }
+            """;
+
+        var testCancellationToken = this._testContext.CancellationToken;
+
+        var result = RunGenerator(Code, testCancellationToken);
+
+        Assert.IsEmpty(result.GeneratorDiagnostics);
+    }
+
+    [TestMethod]
     public void partial修飾子がないクラスにはTEG001が出る()
     {
         const string Code =
@@ -23,7 +48,7 @@ public sealed class EventSourceGeneratorTest
 
             [EventSource(Name = "TestEventSource")]
             [GeneratedEventSource]
-            class InvalidEventSource;
+            class InvalidEventSource : EventSource;
             """;
 
         var testCancellationToken = this._testContext.CancellationToken;
@@ -46,7 +71,7 @@ public sealed class EventSourceGeneratorTest
 
             [EventSource(Name = "TestEventSource")]
             [GeneratedEventSource]
-            file partial class InvalidEventSource;
+            file partial class InvalidEventSource : EventSource;
             """;
 
         var testCancellationToken = this._testContext.CancellationToken;
@@ -69,7 +94,7 @@ public sealed class EventSourceGeneratorTest
 
             // [EventSource(Name = "TestEventSource")]
             [GeneratedEventSource]
-            partial class InvalidEventSource;
+            partial class InvalidEventSource : EventSource;
             """;
 
         var testCancellationToken = this._testContext.CancellationToken;
@@ -101,6 +126,30 @@ public sealed class EventSourceGeneratorTest
 
         Assert.Contains(
             static diagnostic => diagnostic.Id == DiagnosticIds.EventSourceClassMustHaveValidEventSourceAttribute,
+            result.GeneratorDiagnostics);
+    }
+
+    [TestMethod]
+    public void EventSourceから派生していないクラスにはTEG003が出る()
+    {
+        // lang=csharp
+        const string Code =
+            """
+            using System.Diagnostics.Tracing;
+
+            using Aetos.Tracing;
+
+            [EventSource(Name = "TestEventSource")]
+            [GeneratedEventSource]
+            partial class InvalidEventSource;
+            """;
+
+        var testCancellationToken = this._testContext.CancellationToken;
+
+        var result = RunGenerator(Code, testCancellationToken);
+
+        Assert.Contains(
+            static diagnostic => diagnostic.Id == DiagnosticIds.EventSourceClassMustInheritFromEventSource,
             result.GeneratorDiagnostics);
     }
 

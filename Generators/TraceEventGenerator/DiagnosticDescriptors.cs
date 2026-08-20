@@ -27,10 +27,20 @@ internal static class DiagnosticDescriptors
         true,
         CreateString(nameof(Resources.EventSourceClassMustHaveValidEventSourceAttributeDescription)));
 
+    private static readonly DiagnosticDescriptor EventSourceClassMustInheritFromEventSource = new(
+        DiagnosticIds.EventSourceClassMustInheritFromEventSource,
+        CreateString(nameof(Resources.EventSourceClassMustInheritFromEventSourceTitle)),
+        CreateString(nameof(Resources.EventSourceClassMustInheritFromEventSourceMessage)),
+        DiagnosticCategories.General,
+        DiagnosticSeverity.Error,
+        true,
+        CreateString(nameof(Resources.EventSourceClassMustInheritFromEventSourceDescription)));
+
     private static readonly Dictionary<string, DiagnosticDescriptor> Descriptors = new(StringComparer.Ordinal)
     {
         [DiagnosticIds.EventSourceClassMustHaveValidSignature] = EventSourceClassMustHaveValidSignature,
-        [DiagnosticIds.EventSourceClassMustHaveValidEventSourceAttribute] = EventSourceClassMustHaveValidEventSourceAttribute
+        [DiagnosticIds.EventSourceClassMustHaveValidEventSourceAttribute] = EventSourceClassMustHaveValidEventSourceAttribute,
+        [DiagnosticIds.EventSourceClassMustInheritFromEventSource] = EventSourceClassMustInheritFromEventSource
     };
 
     public static DiagnosticDescriptor GetDescriptor(string id)

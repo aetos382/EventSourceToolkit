@@ -118,21 +118,30 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="EventSourceClassMustHaveValidSignatureDescription" xml:space="preserve">
-    <value>foo</value>
+    <value>1</value>
   </data>
   <data name="EventSourceClassMustHaveValidSignatureTitle" xml:space="preserve">
-    <value>foo</value>
+    <value>1</value>
   </data>
   <data name="EventSourceClassMustHaveValidSignatureMessage" xml:space="preserve">
-    <value>foo</value>
+    <value>1</value>
   </data>
   <data name="EventSourceClassMustHaveValidEventSourceAttributeTitle" xml:space="preserve">
-    <value>あ</value>
+    <value>2</value>
   </data>
   <data name="EventSourceClassMustHaveValidEventSourceAttributeMessage" xml:space="preserve">
-    <value>あ</value>
+    <value>2</value>
   </data>
   <data name="EventSourceClassMustHaveValidEventSourceAttributeDescription" xml:space="preserve">
-    <value>あ</value>
+    <value>2</value>
+  </data>
+  <data name="EventSourceClassMustInheritFromEventSourceTitle" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="EventSourceClassMustInheritFromEventSourceMessage" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="EventSourceClassMustInheritFromEventSourceDescription" xml:space="preserve">
+    <value>3</value>
   </data>
 </root>
