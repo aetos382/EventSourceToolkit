@@ -2,10 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Aetos.Tracing.Samples</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Generators\Generator\Generator.csproj">
+    <ProjectReference Include="..\..\Generators\TraceEventGenerator\TraceEventGenerator.csproj">
       <OutputItemType>analyzer</OutputItemType>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>

@@ -2,11 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Aetos.Tracing</RootNamespace>
     <IsRoslynComponent>true</IsRoslynComponent>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aetos.CSharpPolyfills">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp">
       <PrivateAssets>all</PrivateAssets>
       <ExcludeAssets>runtime</ExcludeAssets>

@@ -9,6 +9,7 @@
     <GlobalPackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
   <ItemGroup>
+    <PackageVersion Include="Aetos.CSharpPolyfills" Version="0.1.2" />
     <PackageVersion Include="JetBrains.Annotations" Version="2026.2.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
   </ItemGroup>

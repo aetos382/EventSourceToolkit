@@ -1,9 +1,9 @@
 <Solution>
   <Folder Name="/Generators/">
-    <Project Path="Generators/Generator/Generator.csproj" />
+    <Project Path="Generators/TraceEventGenerator/TraceEventGenerator.csproj" />
   </Folder>
   <Folder Name="/Tests/">
-    <Project Path="Tests/Generator.Samples/Sample.csproj" />
-    <Project Path="Tests/Generator.Tests/Generator.Tests.csproj" Id="d2903b8f-ebd3-4b98-81c7-de8b614fadb3" />
+    <Project Path="Tests/TraceEvebtGenerator.Samples/TraceEventGenerator.Samples.csproj" />
+    <Project Path="Tests/TraceEventGenerator.Tests/TraceEventGenerator.Tests.csproj" Id="d2903b8f-ebd3-4b98-81c7-de8b614fadb3" />
   </Folder>
 </Solution>

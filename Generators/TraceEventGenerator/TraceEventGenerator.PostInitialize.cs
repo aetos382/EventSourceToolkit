@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace Generator;
+namespace Aetos.Tracing;
 
 public partial class TraceEventGenerator
 {
@@ -17,7 +17,7 @@ public partial class TraceEventGenerator
             namespace Aetos.TraceEventGenerator
             {
                 [global::Microsoft.CodeAnalysis.Embedded]
-                [global::System.AttributeUsasge(global::System.AttributeTargets.Class)]
+                [global::System.AttributeUsage(global::System.AttributeTargets.Class)]
                 [global::System.Diagnostics.Conditional("COMPILE_TIME_ONLY")]
                 internal sealed class GeneratedEventSourceAttribute : global::System.Attribute
                 {
@@ -33,7 +33,7 @@ public partial class TraceEventGenerator
             namespace Aetos.TraceEventGenerator
             {
                 [global::Microsoft.CodeAnalysis.Embedded]
-                [global::System.AttributeUsasge(global::System.AttributeTargets.Class)]
+                [global::System.AttributeUsage(global::System.AttributeTargets.Class)]
                 [global::System.Diagnostics.Conditional("COMPILE_TIME_ONLY")]
                 internal sealed class GeneratedEventListenerAttribute : global::System.Attribute
                 {

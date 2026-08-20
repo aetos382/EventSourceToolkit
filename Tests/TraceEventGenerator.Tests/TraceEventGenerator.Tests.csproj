@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Aetos.Tracing.Tests</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -9,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Generators\Generator\Generator.csproj" />
+    <ProjectReference Include="..\..\Generators\TraceEventGenerator\TraceEventGenerator.csproj" />
   </ItemGroup>
 
 </Project>

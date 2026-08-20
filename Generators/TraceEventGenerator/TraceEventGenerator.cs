@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace Generator;
+namespace Aetos.Tracing;
 
 [Generator(LanguageNames.CSharp)]
 public sealed partial class TraceEventGenerator :
