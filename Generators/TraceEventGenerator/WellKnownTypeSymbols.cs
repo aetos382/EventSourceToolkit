@@ -67,6 +67,6 @@ internal sealed class WellKnownTypeSymbols
 
     private INamedTypeSymbol GetTypeSymbol(SpecialType specialType)
     {
-        return this._compilation.GetSpecialType(specialType)!;
+        return this._compilation.GetSpecialType(specialType);
     }
 }
