@@ -1,7 +1,7 @@
-﻿namespace Aetos.TraceEventGenerator.Samples;
+namespace Aetos.Tracing.Samples;
 
 [TestClass]
-public sealed class Test1
+public sealed partial class Test1
 {
     [TestMethod]
     public void TestMethod1()

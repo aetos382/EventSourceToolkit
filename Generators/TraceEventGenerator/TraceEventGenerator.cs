@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Aetos.Tracing;
 
@@ -12,5 +13,14 @@ public sealed partial class TraceEventGenerator :
         IncrementalGeneratorInitializationContext context)
     {
         context.RegisterPostInitializationOutput(PostInitialize);
+
+        var provider = context.SyntaxProvider.ForAttributeWithMetadataName(
+            "Aetos.Tracing.GeneratedEventSourceAttribute",
+            static (node, _) => node is ClassDeclarationSyntax,
+            ParseEventSourceClass);
+
+        context.RegisterSourceOutput(
+            provider,
+            EmitEventSourceClass);
     }
 }
