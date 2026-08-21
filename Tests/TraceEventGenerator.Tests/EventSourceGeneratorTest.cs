@@ -32,7 +32,7 @@ public sealed class EventSourceGeneratorTest
     }
 
     [TestMethod]
-    public async Task partial修飾子がないクラスにはTEG001が出る()
+    public async Task partial修飾子がないクラスにはTEG001()
     {
         const string Code =
             """
@@ -55,7 +55,7 @@ public sealed class EventSourceGeneratorTest
     }
 
     [TestMethod]
-    public async Task file修飾子があるクラスにはTEG001が出る()
+    public async Task file修飾子があるクラスにはTEG001()
     {
         const string Code =
             """
@@ -78,7 +78,7 @@ public sealed class EventSourceGeneratorTest
     }
 
     [TestMethod]
-    public async Task EventSourceAttributeがないクラスにはTEG002が出る()
+    public async Task EventSourceAttributeがないクラスにはTEG002()
     {
         const string Code =
             """
@@ -100,7 +100,7 @@ public sealed class EventSourceGeneratorTest
     }
 
     [TestMethod]
-    public async Task EventSourceAttributeのNameがnullなクラスにはTEG002が出る()
+    public async Task EventSourceAttributeのNameがnullなクラスにはTEG002()
     {
         const string Code =
             """
@@ -123,7 +123,7 @@ public sealed class EventSourceGeneratorTest
     }
 
     [TestMethod]
-    public async Task EventSourceから派生していないクラスにはTEG003が出る()
+    public async Task EventSourceから派生していないクラスにはTEG003()
     {
         const string Code =
             """
@@ -146,7 +146,7 @@ public sealed class EventSourceGeneratorTest
     }
 
     [TestMethod]
-    public async Task 戻り値がvoidでないEventSourceメソッドにはTEG004が出る()
+    public async Task 戻り値がvoidでないEventSourceメソッドにはTEG004()
     {
         const string Code =
             """
@@ -172,7 +172,7 @@ public sealed class EventSourceGeneratorTest
     }
 
     [TestMethod]
-    public async Task partial修飾子がないEventSourceメソッドにはTEG004が出る()
+    public async Task partial修飾子がないEventSourceメソッドにはTEG004()
     {
         const string Code =
             """
@@ -240,6 +240,39 @@ public sealed class EventSourceGeneratorTest
                 {|TEG005:[Event(1)]
                 [NonEvent]
                 public void Foo() {}|}
+            }
+            """;
+
+        var test = new Test
+        {
+            TestCode = Code,
+            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+        };
+
+        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task staticメソッドにEventAttributeがついていたらTEG004()
+    {
+        const string Code =
+            """
+            using System.Diagnostics.Tracing;
+
+            using Aetos.Tracing;
+
+            [EventSource(Name = "TestEventSource")]
+            [GeneratedEventSource]
+            partial class TestEventSource : EventSource
+            {
+                {|TEG004:[Event(1)]
+                public static partial void Foo();|}
+            }
+
+            partial class TestEventSource
+            {
+                // コンパイルエラーを避けるためのダミーの実装本体
+                public static partial void Foo() {}
             }
             """;
 
