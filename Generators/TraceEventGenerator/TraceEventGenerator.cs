@@ -8,7 +8,6 @@ public sealed partial class TraceEventGenerator :
     IIncrementalGenerator
 {
     /// <inheritdoc/>
-    /// <param name="context"></param>
     void IIncrementalGenerator.Initialize(
         IncrementalGeneratorInitializationContext context)
     {
@@ -22,7 +21,8 @@ public sealed partial class TraceEventGenerator :
                     context.SemanticModel,
                     (ClassDeclarationSyntax)context.TargetNode,
                     (INamedTypeSymbol)context.TargetSymbol,
-                    cancellationToken));
+                    cancellationToken))
+            .WithTrackingName("EventSourceInfo");
 
         context.RegisterSourceOutput(
             eventSourceInfoProvider,

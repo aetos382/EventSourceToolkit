@@ -158,8 +158,9 @@ public sealed class EventSourceGeneratorTest
             [GeneratedEventSource]
             partial class TestEventSource : EventSource
             {
-                [NonEvent]
-                public void Foo() {}
+                [NonEvent] public void Foo() {}
+                [NonEvent] public int Bar() => 0;
+                [NonEvent] public static void Baz() {}
             }
             """;
 
