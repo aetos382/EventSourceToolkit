@@ -54,6 +54,15 @@ internal static class DiagnosticDescriptors
         true,
         CreateString(nameof(Resources.EventSourceMethodMustHaveValidAttributesDescription)));
 
+    public static readonly DiagnosticDescriptor EventSourceMethodShouldHaveEventAttribute = new(
+        DiagnosticIds.EventSourceMethodShouldHaveEventAttribute,
+        CreateString(nameof(Resources.EventSourceMethodShouldHaveEventAttributeTitle)),
+        CreateString(nameof(Resources.EventSourceMethodShouldHaveEventAttributeMessage)),
+        DiagnosticCategories.General,
+        DiagnosticSeverity.Warning,
+        true,
+        CreateString(nameof(Resources.EventSourceMethodShouldHaveEventAttributeDescription)));
+
     private static readonly Dictionary<string, DiagnosticDescriptor> Descriptors = new(StringComparer.Ordinal)
     {
         [DiagnosticIds.EventSourceClassMustHaveValidSignature] = EventSourceClassMustHaveValidSignature,
@@ -61,6 +70,7 @@ internal static class DiagnosticDescriptors
         [DiagnosticIds.EventSourceClassMustInheritFromEventSource] = EventSourceClassMustInheritFromEventSource,
         [DiagnosticIds.EventSourceMethodMustHaveValidSignature] = EventSourceMethodMustHaveValidSignature,
         [DiagnosticIds.EventSourceMethodMustHaveValidAttributes] = EventSourceMethodMustHaveValidAttributes,
+        [DiagnosticIds.EventSourceMethodShouldHaveEventAttribute] = EventSourceMethodShouldHaveEventAttribute,
     };
 
     public static DiagnosticDescriptor GetDescriptor(string id)

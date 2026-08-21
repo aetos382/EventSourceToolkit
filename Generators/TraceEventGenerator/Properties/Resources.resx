@@ -162,4 +162,13 @@
   <data name="EventSourceMethodMustHaveValidAttributesDescription" xml:space="preserve">
     <value>5</value>
   </data>
+  <data name="EventSourceMethodShouldHaveEventAttributeTitle" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="EventSourceMethodShouldHaveEventAttributeMessage" xml:space="preserve">
+    <value>6</value>
+  </data>
+  <data name="EventSourceMethodShouldHaveEventAttributeDescription" xml:space="preserve">
+    <value>6</value>
+  </data>
 </root>

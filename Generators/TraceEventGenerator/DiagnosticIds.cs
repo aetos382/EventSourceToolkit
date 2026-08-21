@@ -7,4 +7,5 @@ public static class DiagnosticIds
     public const string EventSourceClassMustInheritFromEventSource = "TEG003";
     public const string EventSourceMethodMustHaveValidSignature = "TEG004";
     public const string EventSourceMethodMustHaveValidAttributes = "TEG005";
+    public const string EventSourceMethodShouldHaveEventAttribute = "TEG006";
 }

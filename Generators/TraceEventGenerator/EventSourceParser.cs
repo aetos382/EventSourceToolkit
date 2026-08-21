@@ -57,6 +57,19 @@ internal sealed class EventSourceParser
 
         foreach (var method in node.GetMethods())
         {
+            /*
+             * 本来あるべきでない（イベント記録メソッドとして不適切な形式の）メソッドに [Event] がついていたら TEG004
+             * - 戻り値が void でない
+             * - static である
+             * - file である
+             * - partial がない
+             */
+
+            /*
+             * EventSource は [Event] がなくてもイベント記録メソッドとして扱うが、本ジェネレータは [Event] が付いているものをだけを扱う。
+             * 適切な形式のメソッドに [Event] が付いていない場合は付けることを推奨する警告 TEG006 を上げる
+             */
+
             var methodSymbol = semanticModel.GetDeclaredSymbol(method, cancellationToken)!;
             var eventAttribute = methodSymbol.GetAttribute(wellKnownTypes.EventAttribute);
             var hasEventAttribute = eventAttribute is not null;
@@ -74,6 +87,8 @@ internal sealed class EventSourceParser
                 continue;
             }
 
+            var validSignature = true;
+
             if (hasEventAttribute)
             {
                 // static だったらエラー
@@ -82,6 +97,8 @@ internal sealed class EventSourceParser
                     diagnostics.Add(new(
                         DiagnosticIds.EventSourceMethodMustHaveValidSignature,
                         method.CreateLocationInfo()));
+
+                    validSignature = false;
                 }
             }
 
@@ -90,6 +107,15 @@ internal sealed class EventSourceParser
             {
                 diagnostics.Add(new(
                     DiagnosticIds.EventSourceMethodMustHaveValidSignature,
+                    method.CreateLocationInfo()));
+
+                validSignature = false;
+            }
+
+            if (validSignature && !hasEventAttribute)
+            {
+                diagnostics.Add(new(
+                    DiagnosticIds.EventSourceMethodShouldHaveEventAttribute,
                     method.CreateLocationInfo()));
             }
         }

@@ -286,6 +286,38 @@ public sealed class EventSourceParserDiagnosticsTest
         await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
     }
 
+    [TestMethod]
+    public async Task 正しいシグネチャのメソッドにEventAttributeがなければTEG006()
+    {
+        const string Code =
+            """
+            using System.Diagnostics.Tracing;
+
+            using Aetos.Tracing;
+
+            [EventSource(Name = "TestEventSource")]
+            [GeneratedEventSource]
+            partial class TestEventSource : EventSource
+            {
+                {|TEG006:public partial void Foo();|}
+            }
+
+            partial class TestEventSource
+            {
+                // コンパイルエラーを避けるためのダミーの実装本体
+                public partial void Foo() {}
+            }
+            """;
+
+        var test = new Test
+        {
+            TestCode = Code,
+            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+        };
+
+        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
+    }
+
     public EventSourceParserDiagnosticsTest(
         TestContext testContext)
     {
