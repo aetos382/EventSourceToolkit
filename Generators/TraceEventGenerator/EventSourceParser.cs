@@ -55,6 +55,8 @@ internal sealed class EventSourceParser
         var semanticModel = this._semanticModel;
         var wellKnownTypes = this._wellKnownTypes;
 
+        var eventMethods = new List<EventSourceMethodInfo>();
+
         foreach (var method in node.GetMethods())
         {
             /*
@@ -118,9 +120,71 @@ internal sealed class EventSourceParser
                     DiagnosticIds.EventSourceMethodShouldHaveEventAttribute,
                     method.CreateLocationInfo()));
             }
+
+            if (!validSignature)
+            {
+                continue;
+            }
+
+            var parameters = new List<EventSourceMethodParameterInfo>();
+
+            foreach (var parameter in method.ParameterList.Parameters)
+            {
+                var parameterSymbol = semanticModel.GetDeclaredSymbol(parameter, cancellationToken)!;
+                var parameterType = parameterSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+                parameters.Add(new(parameterType, parameter.Identifier.Text));
+            }
+
+            eventMethods.Add(new(method.Identifier.Text, parameters.ToArray()));
         }
 
-        return new(diagnostics.ToArray());
+        EventSourceClassInfo? classInfo = null;
+
+        if (eventSourceName is not null)
+        {
+            var ancestors = new List<AncestorTypeInfo>();
+            var parent = node.Parent;
+
+            while (parent is not null and not CompilationUnitSyntax)
+            {
+                var syntaxKind = parent.Kind();
+
+                if (syntaxKind is (SyntaxKind.NamespaceDeclaration or SyntaxKind.FileScopedNamespaceDeclaration))
+                {
+                    break;
+                }
+
+                if (parent is not TypeDeclarationSyntax typeNode)
+                {
+                    break;
+                }
+
+                var typeKind = syntaxKind switch
+                {
+                    SyntaxKind.ClassDeclaration => TypeKind.Class,
+                    SyntaxKind.StructDeclaration => TypeKind.Struct,
+                    SyntaxKind.InterfaceDeclaration => TypeKind.Interface,
+                    SyntaxKind.RecordDeclaration => TypeKind.Record
+                };
+
+                ancestors.Insert(0, new(typeKind, typeNode.Identifier.Text));
+
+                parent = parent.Parent;
+            }
+
+            string? namespaceName = null;
+
+            if (parent is BaseNamespaceDeclarationSyntax namespaceNode)
+            {
+                var namespaceSymbol = semanticModel.GetDeclaredSymbol(namespaceNode)!;
+                namespaceName = namespaceSymbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedFormatWithoutGlobalPrefix);
+            }
+
+            classInfo = new(namespaceName, ancestors.ToArray(), node.Identifier.Text, eventSourceName);
+        }
+
+        return new(classInfo, eventMethods.ToArray(), diagnostics.ToArray());
     }
 
     private static bool IsValidClassModifiers(

@@ -2,9 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Aetos.Tracing;
 
+[CollectionBuilder(typeof(EquatableArray), nameof(EquatableArray.Create))]
 internal readonly struct EquatableArray<T> :
     IEquatable<EquatableArray<T>>,
     IReadOnlyList<T>
@@ -61,4 +63,12 @@ internal readonly struct EquatableArray<T> :
     public T this[int index] => this._array[index];
 
     public static implicit operator EquatableArray<T>(ReadOnlySpan<T> source) => new(source);
+}
+
+internal static class EquatableArray
+{
+    public static EquatableArray<T> Create<T>(ReadOnlySpan<T> source)
+    {
+        return new(source);
+    }
 }

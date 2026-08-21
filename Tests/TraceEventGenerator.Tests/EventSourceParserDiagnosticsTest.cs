@@ -17,9 +17,21 @@ public sealed class EventSourceParserDiagnosticsTest
 
             using Aetos.Tracing;
 
+            namespace Sample;
+
             [EventSource(Name = "TestEventSource")]
             [GeneratedEventSource]
-            partial class TestEventSource : EventSource;
+            partial class TestEventSource : EventSource
+            {
+                [Event(1)]
+                public partial void Foo(int i);
+            }
+
+            partial class TestEventSource
+            {
+                // コンパイルエラーを避けるためのダミーの実装本体
+                public partial void Foo(int i) {}
+            }
             """;
 
         var test = new Test
