@@ -4,14 +4,20 @@ using Microsoft.CodeAnalysis.Text;
 namespace Aetos.Tracing;
 
 internal sealed record NodeLocationInfo(
+    TextSpan Span,
     FileLinePositionSpan LinePositionSpan,
-    TextSpan Span)
+    FileLinePositionSpan MappedLinePositionSpan)
 {
     public Location CreateLocation()
     {
+        var linePositionSpan = this.LinePositionSpan;
+        var mappedLinePositionSpan = this.MappedLinePositionSpan;
+
         return Location.Create(
-            this.LinePositionSpan.Path,
+            linePositionSpan.Path,
             this.Span,
-            this.LinePositionSpan.Span);
+            linePositionSpan.Span,
+            mappedLinePositionSpan.Path,
+            mappedLinePositionSpan.Span);
     }
 }

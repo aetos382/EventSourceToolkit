@@ -12,7 +12,9 @@ internal static class SyntaxExtensions
     {
         public NodeLocationInfo CreateLocationInfo()
         {
-            return new NodeLocationInfo(node.GetLocation().GetLineSpan(), node.Span);
+            var location = node.GetLocation();
+
+            return new NodeLocationInfo(node.Span, location.GetLineSpan(), location.GetMappedLineSpan());
         }
     }
 
