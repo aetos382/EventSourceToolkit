@@ -146,6 +146,33 @@ public sealed class EventSourceGeneratorTest
     }
 
     [TestMethod]
+    public async Task 対象外のシグネチャのメソッドでもNonEventAttributeがついていればエラーにならない()
+    {
+        const string Code =
+            """
+            using System.Diagnostics.Tracing;
+
+            using Aetos.Tracing;
+
+            [EventSource(Name = "TestEventSource")]
+            [GeneratedEventSource]
+            partial class TestEventSource : EventSource
+            {
+                [NonEvent]
+                public void Foo() {}
+            }
+            """;
+
+        var test = new Test
+        {
+            TestCode = Code,
+            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+        };
+
+        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
+    }
+
+    [TestMethod]
     public async Task 戻り値がvoidでないEventSourceメソッドにはTEG004()
     {
         const string Code =
@@ -198,7 +225,7 @@ public sealed class EventSourceGeneratorTest
     }
 
     [TestMethod]
-    public async Task 対象外のシグネチャのメソッドでもNonEventAttributeがついていればエラーにならない()
+    public async Task staticメソッドにEventAttributeがついていたらTEG004()
     {
         const string Code =
             """
@@ -210,8 +237,14 @@ public sealed class EventSourceGeneratorTest
             [GeneratedEventSource]
             partial class TestEventSource : EventSource
             {
-                [NonEvent]
-                public void Foo() {}
+                {|TEG004:[Event(1)]
+                public static partial void Foo();|}
+            }
+
+            partial class TestEventSource
+            {
+                // コンパイルエラーを避けるためのダミーの実装本体
+                public static partial void Foo() {}
             }
             """;
 
@@ -240,39 +273,6 @@ public sealed class EventSourceGeneratorTest
                 {|TEG005:[Event(1)]
                 [NonEvent]
                 public void Foo() {}|}
-            }
-            """;
-
-        var test = new Test
-        {
-            TestCode = Code,
-            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
-        };
-
-        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
-    }
-
-    [TestMethod]
-    public async Task staticメソッドにEventAttributeがついていたらTEG004()
-    {
-        const string Code =
-            """
-            using System.Diagnostics.Tracing;
-
-            using Aetos.Tracing;
-
-            [EventSource(Name = "TestEventSource")]
-            [GeneratedEventSource]
-            partial class TestEventSource : EventSource
-            {
-                {|TEG004:[Event(1)]
-                public static partial void Foo();|}
-            }
-
-            partial class TestEventSource
-            {
-                // コンパイルエラーを避けるためのダミーの実装本体
-                public static partial void Foo() {}
             }
             """;
 
