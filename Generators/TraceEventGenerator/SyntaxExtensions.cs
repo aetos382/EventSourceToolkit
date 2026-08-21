@@ -8,25 +8,11 @@ namespace Aetos.Tracing;
 
 internal static class SyntaxExtensions
 {
-    extension(MethodDeclarationSyntax node)
+    extension(SyntaxNode node)
     {
-        public bool ReturnsVoid
+        public NodeLocationInfo CreateLocationInfo()
         {
-            get
-            {
-                var returnType = node.ReturnType;
-                if (!returnType.IsKind(SyntaxKind.PredefinedType))
-                {
-                    return false;
-                }
-
-                if (!((PredefinedTypeSyntax)returnType).Keyword.IsKind(SyntaxKind.VoidKeyword))
-                {
-                    return false;
-                }
-
-                return true;
-            }
+            return new NodeLocationInfo(node.GetLocation().GetLineSpan(), node.Span);
         }
     }
 
@@ -47,6 +33,28 @@ internal static class SyntaxExtensions
                 {
                     yield return (MethodDeclarationSyntax)member;
                 }
+            }
+        }
+    }
+
+    extension(MethodDeclarationSyntax node)
+    {
+        public bool ReturnsVoid
+        {
+            get
+            {
+                var returnType = node.ReturnType;
+                if (!returnType.IsKind(SyntaxKind.PredefinedType))
+                {
+                    return false;
+                }
+
+                if (!((PredefinedTypeSyntax)returnType).Keyword.IsKind(SyntaxKind.VoidKeyword))
+                {
+                    return false;
+                }
+
+                return true;
             }
         }
     }
