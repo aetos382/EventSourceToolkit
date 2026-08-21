@@ -1,10 +1,7 @@
 
-using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using System.Threading;
 
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Aetos.Tracing;
@@ -12,14 +9,16 @@ namespace Aetos.Tracing;
 public partial class TraceEventGenerator
 {
     private static EventSourceInfo ParseEventSourceClass(
-        GeneratorAttributeSyntaxContext context,
+        SemanticModel semanticModel,
+        ClassDeclarationSyntax node,
+        INamedTypeSymbol symbol,
         CancellationToken cancellationToken)
     {
-        var parser = new EventSourceParser(context.SemanticModel);
+        var parser = new EventSourceParser(semanticModel);
 
         return parser.ParseType(
-            (ClassDeclarationSyntax)context.TargetNode,
-            (INamedTypeSymbol)context.TargetSymbol,
+            node,
+            symbol,
             cancellationToken);
     }
 
@@ -27,9 +26,9 @@ public partial class TraceEventGenerator
         SourceProductionContext context,
         EventSourceInfo source)
     {
-        if (source.DiagnosticInfo is { } diagnosticInfo)
+        foreach (var diagnostic in source.Diagnostics)
         {
-            context.ReportDiagnostic(diagnosticInfo.CreateDiagnostic());
+            context.ReportDiagnostic(diagnostic.CreateDiagnostic());
         }
     }
 }

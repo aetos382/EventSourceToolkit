@@ -59,5 +59,7 @@ internal static class SyntaxExtensions
                 return true;
             }
         }
+
+        public bool IsStatic => node.Modifiers.Any(SyntaxKind.StaticKeyword);
     }
 }

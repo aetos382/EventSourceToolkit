@@ -5,6 +5,7 @@
     <RootNamespace>Aetos.Tracing</RootNamespace>
     <IsRoslynComponent>true</IsRoslynComponent>
     <IsPackable>true</IsPackable>
+    <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +26,10 @@
     <EmbeddedResource Update="Properties\Resources.resx">
       <Generator></Generator>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TraceEventGenerator.Tests"/>
   </ItemGroup>
 
 </Project>

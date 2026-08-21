@@ -28,41 +28,28 @@ internal sealed class EventSourceParser
         INamedTypeSymbol symbol,
         CancellationToken cancellationToken)
     {
+        var diagnostics = new List<DiagnosticInfo>();
+
         if (!IsValidClassModifiers(node))
         {
-            var result = new EventSourceInfo
-            {
-                DiagnosticInfo = new(
-                    DiagnosticIds.EventSourceClassMustHaveValidSignature,
-                    node.CreateLocationInfo())
-            };
-
-            return result;
+            diagnostics.Add(
+                new(
+                    DiagnosticIds.EventSourceClassMustHaveValidSignature, node.CreateLocationInfo()));
         }
 
         var eventSourceName = this.GetEventSourceName(symbol);
         if (eventSourceName is null)
         {
-            var result = new EventSourceInfo
-            {
-                DiagnosticInfo = new(
-                    DiagnosticIds.EventSourceClassMustHaveValidEventSourceAttribute,
-                    node.CreateLocationInfo())
-            };
-
-            return result;
+            diagnostics.Add(
+                new(
+                    DiagnosticIds.EventSourceClassMustHaveValidEventSourceAttribute, node.CreateLocationInfo()));
         }
 
         if (!this.IsDerivedFromEventSource(symbol))
         {
-            var result = new EventSourceInfo
-            {
-                DiagnosticInfo = new(
-                    DiagnosticIds.EventSourceClassMustInheritFromEventSource,
-                    node.CreateLocationInfo())
-            };
-
-            return result;
+            diagnostics.Add(
+                new(
+                    DiagnosticIds.EventSourceClassMustInheritFromEventSource, node.CreateLocationInfo()));
         }
 
         var semanticModel = this._semanticModel;
@@ -70,24 +57,44 @@ internal sealed class EventSourceParser
 
         foreach (var method in node.GetMethods())
         {
-            var returnsVoid = method.ReturnsVoid;
-
-            if (!method.HasPartialModifier)
-            {
-                continue;
-            }
-
             var methodSymbol = semanticModel.GetDeclaredSymbol(method, cancellationToken)!;
+            var eventAttribute = methodSymbol.GetAttribute(wellKnownTypes.EventAttribute);
+            var hasEventAttribute = eventAttribute is not null;
 
+            // [NonEvent] が付いているメソッドは無視
             if (methodSymbol.HasAttribute(wellKnownTypes.NonEventAttribute))
             {
+                if (hasEventAttribute)
+                {
+                    // [Event] と [NonEvent] が両方ついていたら警告
+                    diagnostics.Add(
+                        new(DiagnosticIds.EventSourceMethodMustHaveValidAttributes, method.CreateLocationInfo()));
+                }
+
                 continue;
             }
 
-            var eventAttribute = methodSymbol.GetAttribute(wellKnownTypes.EventAttribute);
+            if (hasEventAttribute)
+            {
+                // static だったらエラー
+                if (method.IsStatic)
+                {
+                    diagnostics.Add(new(
+                        DiagnosticIds.EventSourceMethodMustHaveValidSignature,
+                        method.CreateLocationInfo()));
+                }
+            }
+
+            var returnsVoid = method.ReturnsVoid;
+            if (!returnsVoid || !method.HasPartialModifier)
+            {
+                diagnostics.Add(new(
+                    DiagnosticIds.EventSourceMethodMustHaveValidSignature,
+                    method.CreateLocationInfo()));
+            }
         }
 
-        return new();
+        return new(diagnostics.ToArray());
     }
 
     private static bool IsValidClassModifiers(

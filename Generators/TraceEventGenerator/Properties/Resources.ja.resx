@@ -144,4 +144,22 @@
   <data name="EventSourceClassMustInheritFromEventSourceDescription" xml:space="preserve">
     <value>3</value>
   </data>
+  <data name="EventSourceMethodMustHaveValidSignatureMessage" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="EventSourceMethodMustHaveValidSignatureTitle" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="EventSourceMethodMustHaveValidSignatureDescription" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="EventSourceMethodMustHaveValidAttributesTitle" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="EventSourceMethodMustHaveValidAttributesMessage" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="EventSourceMethodMustHaveValidAttributesDescription" xml:space="preserve">
+    <value>5</value>
+  </data>
 </root>

@@ -9,7 +9,7 @@ namespace Aetos.Tracing;
 
 internal static class DiagnosticDescriptors
 {
-    private static readonly DiagnosticDescriptor EventSourceClassMustHaveValidSignature = new(
+    public static readonly DiagnosticDescriptor EventSourceClassMustHaveValidSignature = new(
         DiagnosticIds.EventSourceClassMustHaveValidSignature,
         CreateString(nameof(Resources.EventSourceClassMustHaveValidSignatureTitle)),
         CreateString(nameof(Resources.EventSourceClassMustHaveValidSignatureMessage)),
@@ -18,7 +18,7 @@ internal static class DiagnosticDescriptors
         true,
         CreateString(nameof(Resources.EventSourceClassMustHaveValidSignatureDescription)));
 
-    private static readonly DiagnosticDescriptor EventSourceClassMustHaveValidEventSourceAttribute = new(
+    public static readonly DiagnosticDescriptor EventSourceClassMustHaveValidEventSourceAttribute = new(
         DiagnosticIds.EventSourceClassMustHaveValidEventSourceAttribute,
         CreateString(nameof(Resources.EventSourceClassMustHaveValidEventSourceAttributeTitle)),
         CreateString(nameof(Resources.EventSourceClassMustHaveValidEventSourceAttributeMessage)),
@@ -27,7 +27,7 @@ internal static class DiagnosticDescriptors
         true,
         CreateString(nameof(Resources.EventSourceClassMustHaveValidEventSourceAttributeDescription)));
 
-    private static readonly DiagnosticDescriptor EventSourceClassMustInheritFromEventSource = new(
+    public static readonly DiagnosticDescriptor EventSourceClassMustInheritFromEventSource = new(
         DiagnosticIds.EventSourceClassMustInheritFromEventSource,
         CreateString(nameof(Resources.EventSourceClassMustInheritFromEventSourceTitle)),
         CreateString(nameof(Resources.EventSourceClassMustInheritFromEventSourceMessage)),
@@ -36,11 +36,31 @@ internal static class DiagnosticDescriptors
         true,
         CreateString(nameof(Resources.EventSourceClassMustInheritFromEventSourceDescription)));
 
+    public static readonly DiagnosticDescriptor EventSourceMethodMustHaveValidSignature = new(
+        DiagnosticIds.EventSourceMethodMustHaveValidSignature,
+        CreateString(nameof(Resources.EventSourceMethodMustHaveValidSignatureTitle)),
+        CreateString(nameof(Resources.EventSourceMethodMustHaveValidSignatureMessage)),
+        DiagnosticCategories.General,
+        DiagnosticSeverity.Error,
+        true,
+        CreateString(nameof(Resources.EventSourceMethodMustHaveValidSignatureDescription)));
+
+    public static readonly DiagnosticDescriptor EventSourceMethodMustHaveValidAttributes = new(
+        DiagnosticIds.EventSourceMethodMustHaveValidAttributes,
+        CreateString(nameof(Resources.EventSourceMethodMustHaveValidAttributesTitle)),
+        CreateString(nameof(Resources.EventSourceMethodMustHaveValidAttributesMessage)),
+        DiagnosticCategories.General,
+        DiagnosticSeverity.Warning,
+        true,
+        CreateString(nameof(Resources.EventSourceMethodMustHaveValidAttributesDescription)));
+
     private static readonly Dictionary<string, DiagnosticDescriptor> Descriptors = new(StringComparer.Ordinal)
     {
         [DiagnosticIds.EventSourceClassMustHaveValidSignature] = EventSourceClassMustHaveValidSignature,
         [DiagnosticIds.EventSourceClassMustHaveValidEventSourceAttribute] = EventSourceClassMustHaveValidEventSourceAttribute,
-        [DiagnosticIds.EventSourceClassMustInheritFromEventSource] = EventSourceClassMustInheritFromEventSource
+        [DiagnosticIds.EventSourceClassMustInheritFromEventSource] = EventSourceClassMustInheritFromEventSource,
+        [DiagnosticIds.EventSourceMethodMustHaveValidSignature] = EventSourceMethodMustHaveValidSignature,
+        [DiagnosticIds.EventSourceMethodMustHaveValidAttributes] = EventSourceMethodMustHaveValidAttributes,
     };
 
     public static DiagnosticDescriptor GetDescriptor(string id)
