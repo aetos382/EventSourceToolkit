@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Testing;
 namespace Aetos.Tracing.Tests;
 
 [TestClass]
-public sealed class EventSourceGeneratorTest
+public sealed class EventSourceParserDiagnosticsTest
 {
     [TestMethod]
     public async Task とりあえず正常系()
@@ -286,7 +286,7 @@ public sealed class EventSourceGeneratorTest
         await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
     }
 
-    public EventSourceGeneratorTest(
+    public EventSourceParserDiagnosticsTest(
         TestContext testContext)
     {
         ArgumentNullException.ThrowIfNull(testContext);
