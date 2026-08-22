@@ -1,6 +1,8 @@
+using Aetos.Tracing.Diagnostics;
+
 using Microsoft.CodeAnalysis;
 
-namespace Aetos.Tracing;
+namespace Aetos.Tracing.Models;
 
 internal sealed record DiagnosticInfo(
     string Id,

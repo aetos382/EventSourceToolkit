@@ -1,4 +1,4 @@
-namespace Aetos.Tracing;
+namespace Aetos.Tracing.Diagnostics;
 
 internal static class DiagnosticCategories
 {

@@ -1,3 +1,6 @@
+using Aetos.Tracing.Diagnostics;
+using Aetos.Tracing.Models;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -23,174 +26,127 @@ internal sealed class EventSourceParser
         this._wellKnownTypes = new WellKnownTypeSymbols(semanticModel.Compilation);
     }
 
-    public EventSourceInfo ParseType(
-        ClassDeclarationSyntax node,
-        INamedTypeSymbol symbol,
+    public EventSourceMethodInfo? ParseEventSourceMethod(
+        MethodDeclarationSyntax syntaxNode,
+        IMethodSymbol symbol,
         CancellationToken cancellationToken)
     {
-        var diagnostics = new List<DiagnosticInfo>();
+        var containingType = symbol.ContainingType;
 
-        if (!IsValidClassModifiers(node))
+        // そのメソッドを含むクラスに GeneratedEventSourceAttribute がついているか → 無視, 生成対象外
+        var markerAttribute = containingType.GetAttribute(this._wellKnownTypes.GeneratedEventSourceAttribute);
+        if (markerAttribute is null)
         {
-            diagnostics.Add(
-                new(
-                    DiagnosticIds.EventSourceClassMustHaveValidSignature, node.CreateLocationInfo()));
+            return null;
         }
 
-        var eventSourceName = this.GetEventSourceName(symbol);
-        if (eventSourceName is null)
+        // そのメソッドを含むクラスが（間接的に）EventSource から派生しているか → 警告, 生成対象外
+        if (!this.IsDerivedFromEventSource(containingType))
         {
-            diagnostics.Add(
-                new(
-                    DiagnosticIds.EventSourceClassMustHaveValidEventSourceAttribute, node.CreateLocationInfo()));
+            return null;
         }
 
-        if (!this.IsDerivedFromEventSource(symbol))
+        // そのメソッドを含むクラスに EventSourceAttribute がついているか → 警告, 生成対象外
+        if (this.GetEventSourceAttribute(containingType) is null)
         {
-            diagnostics.Add(
-                new(
-                    DiagnosticIds.EventSourceClassMustInheritFromEventSource, node.CreateLocationInfo()));
+            return null;
         }
+
+        // クラスに対する警告はメソッド単位でのコード生成では大変なので、別の Analyzer を用意する
+
+        // そのメソッドは partial か → 無視, 生成対象外
+        if (!syntaxNode.HasPartialModifier)
+        {
+            return null;
+        }
+
+        // そのメソッドの実装が存在しないか → 無視, 生成対象外
+        if (symbol.PartialImplementationPart is not null)
+        {
+            return null;
+        }
+
+        // そのメソッドの戻り値は void か → 無視, 生成対象外
+        if (!syntaxNode.ReturnsVoid)
+        {
+            return null;
+        }
+
+        var parameterList = syntaxNode.ParameterList.Parameters;
+        var parameters = new List<EventSourceMethodParameterInfo>(parameterList.Count);
 
         var semanticModel = this._semanticModel;
-        var wellKnownTypes = this._wellKnownTypes;
 
-        var eventMethods = new List<EventSourceMethodInfo>();
-
-        foreach (var method in node.GetMethods())
+        foreach (var parameter in parameterList)
         {
-            /*
-             * 本来あるべきでない（イベント記録メソッドとして不適切な形式の）メソッドに [Event] がついていたら TEG004
-             * - 戻り値が void でない
-             * - static である
-             * - file である
-             * - partial がない
-             */
+            var parameterSymbol = semanticModel.GetDeclaredSymbol(parameter, cancellationToken)!;
+            var parameterTypeName = parameterSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
-            /*
-             * EventSource は [Event] がなくてもイベント記録メソッドとして扱うが、本ジェネレータは [Event] が付いているものをだけを扱う。
-             * 適切な形式のメソッドに [Event] が付いていない場合は付けることを推奨する警告 TEG006 を上げる
-             */
-
-            var methodSymbol = semanticModel.GetDeclaredSymbol(method, cancellationToken)!;
-            var eventAttribute = methodSymbol.GetAttribute(wellKnownTypes.EventAttribute);
-            var hasEventAttribute = eventAttribute is not null;
-
-            // [NonEvent] が付いているメソッドは無視
-            if (methodSymbol.HasAttribute(wellKnownTypes.NonEventAttribute))
-            {
-                if (hasEventAttribute)
-                {
-                    // [Event] と [NonEvent] が両方ついていたら警告
-                    diagnostics.Add(
-                        new(DiagnosticIds.EventSourceMethodMustHaveValidAttributes, method.CreateLocationInfo()));
-                }
-
-                continue;
-            }
-
-            var validSignature = true;
-
-            if (hasEventAttribute)
-            {
-                // static だったらエラー
-                if (method.IsStatic)
-                {
-                    diagnostics.Add(new(
-                        DiagnosticIds.EventSourceMethodMustHaveValidSignature,
-                        method.CreateLocationInfo()));
-
-                    validSignature = false;
-                }
-            }
-
-            var returnsVoid = method.ReturnsVoid;
-            if (!returnsVoid || !method.HasPartialModifier)
-            {
-                diagnostics.Add(new(
-                    DiagnosticIds.EventSourceMethodMustHaveValidSignature,
-                    method.CreateLocationInfo()));
-
-                validSignature = false;
-            }
-
-            if (validSignature && !hasEventAttribute)
-            {
-                diagnostics.Add(new(
-                    DiagnosticIds.EventSourceMethodShouldHaveEventAttribute,
-                    method.CreateLocationInfo()));
-            }
-
-            if (!validSignature)
-            {
-                continue;
-            }
-
-            var parameters = new List<EventSourceMethodParameterInfo>();
-
-            foreach (var parameter in method.ParameterList.Parameters)
-            {
-                var parameterSymbol = semanticModel.GetDeclaredSymbol(parameter, cancellationToken)!;
-                var parameterType = parameterSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-
-                parameters.Add(new(parameterType, parameter.Identifier.Text));
-            }
-
-            eventMethods.Add(new(method.Identifier.Text, parameters.ToArray()));
+            var parameterInfo = new EventSourceMethodParameterInfo(parameterTypeName, parameter.Identifier.Text);
+            parameters.Add(parameterInfo);
         }
 
-        EventSourceClassInfo? classInfo = null;
+        var ancestorTypes = new List<ContainingTypeInfo>();
+        var namespaceSegments = new List<string>();
 
-        if (eventSourceName is not null)
+        var parentNode = syntaxNode.Parent;
+        while (parentNode is not null and not CompilationUnitSyntax)
         {
-            var ancestors = new List<AncestorTypeInfo>();
-            var parent = node.Parent;
-
-            while (parent is not null and not CompilationUnitSyntax)
+            if (parentNode is TypeDeclarationSyntax parentTypeNode)
             {
-                var syntaxKind = parent.Kind();
-
-                if (syntaxKind is (SyntaxKind.NamespaceDeclaration or SyntaxKind.FileScopedNamespaceDeclaration))
+                var kind = parentTypeNode.Keyword.Kind() switch
                 {
-                    break;
-                }
-
-                if (parent is not TypeDeclarationSyntax typeNode)
-                {
-                    break;
-                }
-
-                var typeKind = syntaxKind switch
-                {
-                    SyntaxKind.ClassDeclaration => TypeKind.Class,
-                    SyntaxKind.StructDeclaration => TypeKind.Struct,
-                    SyntaxKind.InterfaceDeclaration => TypeKind.Interface,
-                    SyntaxKind.RecordDeclaration => TypeKind.Record
+                    SyntaxKind.ClassKeyword => ContainingTypeKind.Class,
+                    SyntaxKind.StructKeyword => ContainingTypeKind.Struct,
+                    SyntaxKind.InterfaceKeyword => ContainingTypeKind.Interface,
+                    SyntaxKind.RecordKeyword => ContainingTypeKind.Record,
+                    _ => ContainingTypeKind.Unknown
                 };
 
-                ancestors.Insert(0, new(typeKind, typeNode.Identifier.Text));
-
-                parent = parent.Parent;
+                ancestorTypes.Insert(0, new(kind, parentTypeNode.Identifier.Text));
             }
-
-            string? namespaceName = null;
-
-            if (parent is BaseNamespaceDeclarationSyntax namespaceNode)
+            else if (parentNode is BaseNamespaceDeclarationSyntax { Name: var name })
             {
-                var namespaceSymbol = semanticModel.GetDeclaredSymbol(namespaceNode)!;
-                namespaceName = namespaceSymbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedFormatWithoutGlobalPrefix);
+                while (true)
+                {
+                    if (name is IdentifierNameSyntax identifierName)
+                    {
+                        namespaceSegments.Insert(0, identifierName.Identifier.Text);
+                        break;
+                    }
+
+                    if (name is QualifiedNameSyntax qualifiedName)
+                    {
+                        namespaceSegments.Insert(0, qualifiedName.Right.Identifier.Text);
+                        name = qualifiedName.Left;
+                    }
+                }
+
+                break;
             }
 
-            classInfo = new(namespaceName, ancestors.ToArray(), node.Identifier.Text, eventSourceName);
+            parentNode = parentNode.Parent;
         }
 
-        return new(classInfo, eventMethods.ToArray(), diagnostics.ToArray());
+        var methodInfo = new EventSourceMethodInfo(
+            namespaceSegments.ToArray(),
+            ancestorTypes.ToArray(),
+            syntaxNode.Identifier.Text,
+            parameters.ToArray(),
+            []);
+
+        return methodInfo;
     }
 
     private static bool IsValidClassModifiers(
         ClassDeclarationSyntax node)
     {
         return node is { HasPartialModifier: true, HasFileModifier: false };
+    }
+
+    private AttributeData? GetEventSourceAttribute(INamedTypeSymbol type)
+    {
+        return type.GetAttribute(this._wellKnownTypes.EventSourceAttribute);
     }
 
     private string? GetEventSourceName(INamedTypeSymbol type)

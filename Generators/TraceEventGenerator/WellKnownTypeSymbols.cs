@@ -60,6 +60,15 @@ internal sealed class WellKnownTypeSymbols
         }
     }
 
+    public INamedTypeSymbol GeneratedEventSourceAttribute
+    {
+        get
+        {
+            field ??= this.GetTypeSymbol("Aetos.Tracing.GeneratedEventSourceAttribute");
+            return field;
+        }
+    }
+
     private INamedTypeSymbol GetTypeSymbol(string metadataName)
     {
         return this._compilation.GetTypeByMetadataName(metadataName)!;

@@ -26,12 +26,6 @@ public sealed class EventSourceParserDiagnosticsTest
                 [Event(1)]
                 public partial void Foo(int i);
             }
-
-            partial class TestEventSource
-            {
-                // コンパイルエラーを避けるためのダミーの実装本体
-                public partial void Foo(int i) {}
-            }
             """;
 
         var test = new Test

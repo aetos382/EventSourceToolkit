@@ -15,17 +15,22 @@ public sealed partial class TraceEventGenerator :
 
         var eventSourceInfoProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                "Aetos.Tracing.GeneratedEventSourceAttribute",
-                static (node, _) => node is ClassDeclarationSyntax,
-                static (context, cancellationToken) => ParseEventSourceClass(
-                    context.SemanticModel,
-                    (ClassDeclarationSyntax)context.TargetNode,
-                    (INamedTypeSymbol)context.TargetSymbol,
-                    cancellationToken))
-            .WithTrackingName("EventSourceInfo");
+                "System.Diagnostics.Tracing.EventAttribute",
+                static (node, _) => node is MethodDeclarationSyntax,
+                static (context, cancellationToken) =>
+                {
+                    var parser = new EventSourceParser(context.SemanticModel);
+
+                    return parser.ParseEventSourceMethod(
+                        (MethodDeclarationSyntax)context.TargetNode,
+                        (IMethodSymbol)context.TargetSymbol,
+                        cancellationToken);
+                })
+            .WhereNotNull()
+            .WithTrackingName("EventSourceMethodInfo");
 
         context.RegisterSourceOutput(
             eventSourceInfoProvider,
-            EmitEventSourceClass);
+            EventSourceEmitter.EmitEventSourceMethod);
     }
 }

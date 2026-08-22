@@ -5,7 +5,7 @@ using Aetos.Tracing.Properties;
 
 using Microsoft.CodeAnalysis;
 
-namespace Aetos.Tracing;
+namespace Aetos.Tracing.Diagnostics;
 
 internal static class DiagnosticDescriptors
 {
