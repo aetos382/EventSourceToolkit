@@ -25,20 +25,12 @@ internal static class EventSourceEmitter
 
         foreach (var containingType in methodInfo.ContainingTypes)
         {
-            var kind = containingType.Kind switch
-            {
-                ContainingTypeKind.Class => "class",
-                ContainingTypeKind.Struct => "struct",
-                ContainingTypeKind.Interface => "interface",
-                ContainingTypeKind.Record => "record"
-            };
-
-            codeBuilder.AppendLine($"partial {kind} {containingType.Name}");
+            codeBuilder.AppendLine($"partial {containingType.KindKeyword} {containingType.Name}");
             codeBuilder.AppendLine("{");
             codeBuilder.Indent();
         }
 
-        codeBuilder.AppendLine($"partial void {methodInfo.MethodName}(");
+        codeBuilder.AppendLine($"{methodInfo.AccessibilityKeyword} partial void {methodInfo.MethodName}(");
         codeBuilder.Indent();
 
         var parameters = methodInfo.Parameters;
@@ -46,20 +38,13 @@ internal static class EventSourceEmitter
         for (var i = 0; i <= lastParameterIndex; ++i)
         {
             var parameter = parameters[i];
+            var delimiter = i < lastParameterIndex ? "," : ")";
 
-            codeBuilder.AppendLine($"{parameter.FullyQualifiedTypeName} {parameter.Name}");
-            if (i < lastParameterIndex)
-            {
-                codeBuilder.Append(",");
-            }
-            else
-            {
-                codeBuilder.Append(")");
-            }
+            codeBuilder.AppendLine($"{parameter.FullyQualifiedTypeName} {parameter.Name}{delimiter}");
         }
 
         codeBuilder.Unindent();
-        codeBuilder.Append("{");
+        codeBuilder.AppendLine("{");
         codeBuilder.Indent();
 
         while (codeBuilder.IndentationLevel != 0)

@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 
 namespace Aetos.Tracing;
@@ -28,19 +27,29 @@ internal sealed class IndentedStringBuilder
         return this;
     }
 
-    public IndentedStringBuilder AppendLine(string? value)
+    public IndentedStringBuilder AppendLine(string? value, bool noIndent = false)
     {
         if (!string.IsNullOrEmpty(value))
         {
-            this.AppendLineCore(value);
+            if (!noIndent)
+            {
+                this.AddIndent();
+            }
+
+            this._stringBuilder.AppendLine(value);
         }
 
         return this;
     }
 
-    public IndentedStringBuilder AppendLine()
+    public IndentedStringBuilder AppendLine(bool noIndent = false)
     {
-        this.AppendLineCore(string.Empty);
+        if (!noIndent)
+        {
+            this.AddIndent();
+        }
+
+        this._stringBuilder.AppendLine();
         return this;
     }
 
@@ -60,13 +69,11 @@ internal sealed class IndentedStringBuilder
         return this._stringBuilder.ToString();
     }
 
-    private void AppendLineCore(string value)
+    private void AddIndent()
     {
         for (var i = 0; i < this.IndentationLevel; ++i)
         {
             this._stringBuilder.Append(this._indent);
         }
-
-        this._stringBuilder.AppendLine(value);
     }
 }

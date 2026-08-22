@@ -1,16 +1,7 @@
 namespace Aetos.Tracing.Models;
 
-internal enum ContainingTypeKind
-{
-    Unknown,
-    Class,
-    Struct,
-    Interface,
-    Record
-}
-
 internal sealed record ContainingTypeInfo(
-    ContainingTypeKind Kind,
+    string KindKeyword,
     string Name);
 
 internal sealed record EventSourceMethodParameterInfo(
@@ -20,6 +11,7 @@ internal sealed record EventSourceMethodParameterInfo(
 internal sealed record EventSourceMethodInfo(
     EquatableArray<string> NamespaceSegments,
     EquatableArray<ContainingTypeInfo> ContainingTypes,
+    string? AccessibilityKeyword,
     string MethodName,
     EquatableArray<EventSourceMethodParameterInfo> Parameters,
     EquatableArray<DiagnosticInfo> Diagnostics);

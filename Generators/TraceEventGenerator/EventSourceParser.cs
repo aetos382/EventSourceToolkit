@@ -94,16 +94,7 @@ internal sealed class EventSourceParser
         {
             if (parentNode is TypeDeclarationSyntax parentTypeNode)
             {
-                var kind = parentTypeNode.Keyword.Kind() switch
-                {
-                    SyntaxKind.ClassKeyword => ContainingTypeKind.Class,
-                    SyntaxKind.StructKeyword => ContainingTypeKind.Struct,
-                    SyntaxKind.InterfaceKeyword => ContainingTypeKind.Interface,
-                    SyntaxKind.RecordKeyword => ContainingTypeKind.Record,
-                    _ => ContainingTypeKind.Unknown
-                };
-
-                ancestorTypes.Insert(0, new(kind, parentTypeNode.Identifier.Text));
+                ancestorTypes.Insert(0, new(parentTypeNode.Keyword.Text, parentTypeNode.Identifier.Text));
             }
             else if (parentNode is BaseNamespaceDeclarationSyntax { Name: var name })
             {
@@ -131,6 +122,7 @@ internal sealed class EventSourceParser
         var methodInfo = new EventSourceMethodInfo(
             namespaceSegments.ToArray(),
             ancestorTypes.ToArray(),
+            syntaxNode.AccessibilityKeyword,
             syntaxNode.Identifier.Text,
             parameters.ToArray(),
             []);
