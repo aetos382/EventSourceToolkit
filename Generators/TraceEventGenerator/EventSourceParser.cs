@@ -99,8 +99,10 @@ internal sealed class EventSourceParser
             // https://github.com/dotnet/roslyn/issues/76895
 
             // なお UIntPtr はイベント メソッドのパラメーター型としてサポートされない。
-            var parameterTypeName = comparer.Equals(parameterTypeSymbol, wellKnownTypes.IntPtr)
-                ? "global::System.IntPtr"
+            var parameterTypeName = parameterTypeSymbol.IsNativeIntegerType
+                ? parameterTypeSymbol.SpecialType == SpecialType.System_IntPtr
+                    ? "global::System.IntPtr"
+                    : "global::System.UIntPtr"
                 : parameterTypeSymbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeFormat);
 
             var parameterInfo = new EventSourceMethodParameterInfo(parameterTypeName, parameter.Identifier.Text);
