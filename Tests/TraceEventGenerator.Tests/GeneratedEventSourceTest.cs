@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -32,7 +33,7 @@ public sealed class GeneratedEventSourceTest
             [GeneratedEventSource]
             partial class TestEventSource : EventSource
             {
-                [Event(1)]
+                [Event(1, Level = EventLevel.Informational)]
                 public partial void Foo();
             }
             """;
@@ -81,7 +82,14 @@ public sealed class GeneratedEventSourceTest
             [GeneratedEventSource]
             partial class TestEventSource : EventSource
             {
-                [Event(1)]
+                public static class Keywords
+                {
+                    public const EventKeywords A = (EventKeywords)1;
+                    public const EventKeywords B = (EventKeywords)2;
+                    public const EventKeywords C = (EventKeywords)4;
+                }
+
+                [Event(1, Keywords = Keywords.A | Keywords.C)]
                 public partial void Foo(
                     bool p0, byte p1, sbyte p2, char p3, short p4, ushort p5, int p6, uint p7, long p8, ulong p9,
                     float p10, double p11, string p12, DateTime p13, Guid p14, decimal p15, IntPtr p16, byte[] p17);
@@ -116,7 +124,7 @@ public sealed class GeneratedEventSourceTest
                         global::System.IntPtr p16,
                         global::System.Byte[] p17)
                     {
-                        if (!this.IsEnabled(global::System.Diagnostics.Tracing.EventLevel.Informational, global::System.Diagnostics.Tracing.EventKeywords.None))
+                        if (!this.IsEnabled(global::System.Diagnostics.Tracing.EventLevel.Informational, global::Sample.TestEventSource.Keywords.A | global::Sample.TestEventSource.Keywords.C))
                         {
                             return;
                         }

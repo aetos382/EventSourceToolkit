@@ -1,3 +1,5 @@
+using System.Diagnostics.Tracing;
+
 namespace Aetos.Tracing.Models;
 
 internal sealed record ContainingTypeInfo(
@@ -10,7 +12,8 @@ internal sealed record EventSourceMethodParameterInfo(
 
 internal sealed record EventMetadataInfo(
     int EventId,
-    string Level);
+    string Level,
+    EquatableArray<string> Keywords);
 
 internal sealed record EventSourceMethodInfo(
     EquatableArray<string> NamespaceSegments,

@@ -222,6 +222,15 @@ internal sealed class WellKnownTypeSymbols
         }
     }
 
+    public INamedTypeSymbol EventKeywords
+    {
+        get
+        {
+            field ??= this.GetTypeSymbol("System.Diagnostics.Tracing.EventKeywords");
+            return field;
+        }
+    }
+
     public INamedTypeSymbol GeneratedEventSourceAttribute
     {
         get

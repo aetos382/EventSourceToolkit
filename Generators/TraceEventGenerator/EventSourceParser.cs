@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
+using System.Linq;
 using System.Threading;
 
 namespace Aetos.Tracing;
@@ -74,7 +75,13 @@ internal sealed class EventSourceParser
             return EventSourceMethodInfoWithDiagnostics.Empty;
         }
 
-        var eventMetadata = this.ParseEventAttribute(symbol.GetAttribute(wellKnownTypes.EventAttribute)!);
+        Dictionary<string, EventKeywords> keywords = [];
+
+        var keywordsType = containingType.GetTypeMembers("Keywords").SingleOrDefault();
+
+        var eventMetadata = this.ParseEventAttribute(
+            symbol.GetAttribute(wellKnownTypes.EventAttribute)!,
+            keywordsType);
 
         var parameterList = syntaxNode.ParameterList.Parameters;
         var parameters = new List<EventSourceMethodParameterInfo>(parameterList.Count);
@@ -102,7 +109,7 @@ internal sealed class EventSourceParser
                 ? parameterTypeSymbol.SpecialType == SpecialType.System_IntPtr
                     ? "global::System.IntPtr"
                     : "global::System.UIntPtr"
-                : parameterTypeSymbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeFormat);
+                : parameterTypeSymbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedFormat);
 
             var parameterInfo = new EventSourceMethodParameterInfo(parameterTypeName, parameter.Identifier.Text);
             parameters.Add(parameterInfo);
@@ -202,13 +209,29 @@ internal sealed class EventSourceParser
         return type.IsDerivedFrom(this._wellKnownTypes.EventSource);
     }
 
-    private EventMetadataInfo ParseEventAttribute(AttributeData data)
+    private EventMetadataInfo ParseEventAttribute(
+        AttributeData data,
+        INamedTypeSymbol? keywordsTypeSymbol)
     {
         var wellKnownTypes = this._wellKnownTypes;
         var comparer = SymbolEqualityComparer.Default;
 
         var id = 0;
         var level = nameof(EventLevel.Informational);
+        var keywords = new List<string>();
+
+        (EventKeywords Keyword, IFieldSymbol Symbol)[] eventKeywords = [];
+
+        if (keywordsTypeSymbol is not null)
+        {
+            eventKeywords = keywordsTypeSymbol
+                .GetMembers()
+                .OfType<IFieldSymbol>()
+                .Where(static x => x is { IsConst: true, HasConstantValue: true })
+                .Where(x => comparer.Equals(x.Type, wellKnownTypes.EventKeywords))
+                .Select(static x => (Keyword: (EventKeywords)x.ConstantValue!, Symbol: x))
+                .ToArray();
+        }
 
         var ctorArgs = data.ConstructorArguments;
         if (ctorArgs.Length == 1)
@@ -226,14 +249,19 @@ internal sealed class EventSourceParser
             switch (key)
             {
                 case nameof(EventAttribute.Level):
-                    if (value.Kind == TypedConstantKind.Primitive && comparer.Equals(value.Type, wellKnownTypes.EventLevel) && value.Value is EventLevel levelValue)
-                    {
-                        level = Enum.GetName(typeof(EventLevel), levelValue)!;
-                    }
-
+                    level = Enum.GetName(typeof(EventLevel), value.Value!);
                     break;
 
                 case nameof(EventAttribute.Keywords):
+                    var keywordsValue = (EventKeywords)value.Value!;
+                    foreach (var (keywordValue, fieldSymbol) in eventKeywords)
+                    {
+                        if (keywordsValue.HasFlag(keywordValue))
+                        {
+                            keywords.Add(fieldSymbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedFormat));
+                        }
+                    }
+
                     break;
 
                 default:
@@ -241,6 +269,11 @@ internal sealed class EventSourceParser
             }
         }
 
-        return new(id, level);
+        if (keywords.Count == 0)
+        {
+            keywords.Add("global::System.Diagnostics.Tracing.EventKeywords.None");
+        }
+
+        return new(id, level, keywords.ToArray());
     }
 }

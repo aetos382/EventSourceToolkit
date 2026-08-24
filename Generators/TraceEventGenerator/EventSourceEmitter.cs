@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 
 using Aetos.Tracing.Models;
@@ -74,9 +76,12 @@ internal static class EventSourceEmitter
         codeBuilder.AppendLineWithIndent("{");
         codeBuilder.Indent();
 
+        var eventLevel = $"global::System.Diagnostics.Tracing.EventLevel.{methodInfo.Metadata.Level}";
+        var eventKeywords = string.Join(" | ", methodInfo.Metadata.Keywords);
+
         codeBuilder.AppendLineWithIndent(
             $$"""
-              if (!this.IsEnabled(global::System.Diagnostics.Tracing.EventLevel.{{methodInfo.Metadata.Level}}, global::System.Diagnostics.Tracing.EventKeywords.None))
+              if (!this.IsEnabled({{eventLevel}}, {{eventKeywords}}))
               {
               """);
         codeBuilder.Indent();
