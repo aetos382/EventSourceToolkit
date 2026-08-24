@@ -96,6 +96,8 @@ internal sealed class EventSourceParser
 
             // SymbolDisplayFormat では SymbolDisplayMiscellaneousOptions.UseSpecialTypes フラグが含まれていなくても
             // IntPtr / UIntPtr は "nint" / "nuint" になってしまうので、自力で文字列化する。
+            // https://github.com/dotnet/roslyn/issues/76895
+
             // なお UIntPtr はイベント メソッドのパラメーター型としてサポートされない。
             var parameterTypeName = comparer.Equals(parameterTypeSymbol, wellKnownTypes.IntPtr)
                 ? "global::System.IntPtr"
