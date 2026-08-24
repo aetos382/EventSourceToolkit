@@ -81,7 +81,6 @@ internal sealed class EventSourceParser
 
         var semanticModel = this._semanticModel;
         var supportedTypes = new SupportedTypes(wellKnownTypes);
-        var comparer = SymbolEqualityComparer.Default;
 
         foreach (var parameter in parameterList)
         {
