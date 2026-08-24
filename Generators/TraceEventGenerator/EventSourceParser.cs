@@ -81,6 +81,7 @@ internal sealed class EventSourceParser
 
         var semanticModel = this._semanticModel;
         var supportedTypes = new SupportedTypes(wellKnownTypes);
+        var comparer = SymbolEqualityComparer.Default;
 
         foreach (var parameter in parameterList)
         {
@@ -93,7 +94,12 @@ internal sealed class EventSourceParser
                 diagnostics.Add(new DiagnosticInfo(DiagnosticIds.ParameterTypeNotSupported, parameter.GetNodeLocationInfo()));
             }
 
-            var parameterTypeName = parameterTypeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            // SymbolDisplayFormat では SymbolDisplayMiscellaneousOptions.UseSpecialTypes フラグが含まれていなくても
+            // IntPtr / UIntPtr は "nint" / "nuint" になってしまうので、自力で文字列化する。
+            // なお UIntPtr はイベント メソッドのパラメーター型としてサポートされない。
+            var parameterTypeName = comparer.Equals(parameterTypeSymbol, wellKnownTypes.IntPtr)
+                ? "global::System.IntPtr"
+                : parameterTypeSymbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeFormat);
 
             var parameterInfo = new EventSourceMethodParameterInfo(parameterTypeName, parameter.Identifier.Text);
             parameters.Add(parameterInfo);
@@ -222,6 +228,9 @@ internal sealed class EventSourceParser
                         level = Enum.GetName(typeof(EventLevel), levelValue)!;
                     }
 
+                    break;
+
+                case nameof(EventAttribute.Keywords):
                     break;
 
                 default:

@@ -47,8 +47,14 @@ public sealed class GeneratedEventSourceTest
                 {
                     public partial void Foo()
                     {
-                        if (this.IsEnabled(global::System.Diagnostics.Tracing.EventLevel.Informational))
+                        if (!this.IsEnabled(global::System.Diagnostics.Tracing.EventLevel.Informational, global::System.Diagnostics.Tracing.EventKeywords.None))
                         {
+                            return;
+                        }
+
+                        unsafe
+                        {
+                            this.WriteEventCore(1, 0, null);
                         }
                     }
                 }
@@ -60,10 +66,11 @@ public sealed class GeneratedEventSourceTest
     }
 
     [TestMethod]
-    public async Task Foo()
+    public async Task いろんな型の引数を並べてみる()
     {
         const string Code =
             """
+            using System;
             using System.Diagnostics.Tracing;
 
             using Aetos.Tracing;
@@ -75,7 +82,9 @@ public sealed class GeneratedEventSourceTest
             partial class TestEventSource : EventSource
             {
                 [Event(1)]
-                public partial void Foo(int i);
+                public partial void Foo(
+                    bool p0, byte p1, sbyte p2, char p3, short p4, ushort p5, int p6, uint p7, long p8, ulong p9,
+                    float p10, double p11, string p12, DateTime p13, Guid p14, decimal p15, IntPtr p16, byte[] p17);
             }
             """;
 
@@ -88,10 +97,112 @@ public sealed class GeneratedEventSourceTest
                 partial class TestEventSource
                 {
                     public partial void Foo(
-                        int i)
+                        global::System.Boolean p0,
+                        global::System.Byte p1,
+                        global::System.SByte p2,
+                        global::System.Char p3,
+                        global::System.Int16 p4,
+                        global::System.UInt16 p5,
+                        global::System.Int32 p6,
+                        global::System.UInt32 p7,
+                        global::System.Int64 p8,
+                        global::System.UInt64 p9,
+                        global::System.Single p10,
+                        global::System.Double p11,
+                        global::System.String p12,
+                        global::System.DateTime p13,
+                        global::System.Guid p14,
+                        global::System.Decimal p15,
+                        global::System.IntPtr p16,
+                        global::System.Byte[] p17)
                     {
-                        if (this.IsEnabled(global::System.Diagnostics.Tracing.EventLevel.Informational))
+                        if (!this.IsEnabled(global::System.Diagnostics.Tracing.EventLevel.Informational, global::System.Diagnostics.Tracing.EventKeywords.None))
                         {
+                            return;
+                        }
+
+                        unsafe
+                        {
+                            global::System.Diagnostics.Tracing.EventSource.EventData *data = stackalloc global::System.Diagnostics.Tracing.EventSource.EventData[19];
+
+                            int __arg0Value = p0 ? 1 : 0;
+                            data[0].DataPointer = (global::System.IntPtr)(&__arg0Value);
+                            data[0].Size = 4;
+
+                            data[1].DataPointer = (global::System.IntPtr)(&p1);
+                            data[1].Size = 1;
+
+                            data[2].DataPointer = (global::System.IntPtr)(&p2);
+                            data[2].Size = 1;
+
+                            data[3].DataPointer = (global::System.IntPtr)(&p3);
+                            data[3].Size = 2;
+
+                            data[4].DataPointer = (global::System.IntPtr)(&p4);
+                            data[4].Size = 2;
+
+                            data[5].DataPointer = (global::System.IntPtr)(&p5);
+                            data[5].Size = 2;
+
+                            data[6].DataPointer = (global::System.IntPtr)(&p6);
+                            data[6].Size = 4;
+
+                            data[7].DataPointer = (global::System.IntPtr)(&p7);
+                            data[7].Size = 4;
+
+                            data[8].DataPointer = (global::System.IntPtr)(&p8);
+                            data[8].Size = 8;
+
+                            data[9].DataPointer = (global::System.IntPtr)(&p9);
+                            data[9].Size = 8;
+
+                            data[10].DataPointer = (global::System.IntPtr)(&p10);
+                            data[10].Size = 4;
+
+                            data[11].DataPointer = (global::System.IntPtr)(&p11);
+                            data[11].Size = 8;
+
+                            p12 ??= "";
+                            fixed (char *__arg12Value = p12)
+                            {
+                                data[12].DataPointer = (global::System.IntPtr)__arg12Value;
+                                data[12].Size = (p12.Length + 1) * 2;
+                            }
+
+                            long __arg13Value = p13.ToFileTimeUtc();
+                            data[13].DataPointer = (global::System.IntPtr)(&__arg13Value);
+                            data[13].Size = 8;
+
+                            data[14].DataPointer = (global::System.IntPtr)(&p14);
+                            data[14].Size = 16;
+
+                            data[15].DataPointer = (global::System.IntPtr)(&p15);
+                            data[15].Size = 16;
+
+                            data[16].DataPointer = (global::System.IntPtr)(&p16);
+                            data[16].Size = global::System.IntPtr.Size;
+
+                            if (p17 == null || p17.Length == 0)
+                            {
+                                int blobSize = 0;
+                                data[17].DataPointer = (global::System.IntPtr)(&blobSize);
+                                data[17].Size = 4;
+                                data[18].DataPointer = (global::System.IntPtr)(&blobSize);
+                                data[18].Size = 0;
+                            }
+                            else
+                            {
+                                int blobSize = p17.Length;
+                                fixed (byte *blob = &p17[0])
+                                {
+                                    data[17].DataPointer = (global::System.IntPtr)(&blobSize);
+                                    data[17].Size = 4;
+                                    data[18].DataPointer = (global::System.IntPtr)blob;
+                                    data[18].Size = blobSize;
+                                }
+                            }
+
+                            this.WriteEventCore(1, 19, data);
                         }
                     }
                 }
@@ -120,6 +231,7 @@ public sealed class GeneratedEventSourceTest
 
         var compilationOptions = new CSharpCompilationOptions(
             OutputKind.DynamicallyLinkedLibrary,
+            allowUnsafe: true,
             nullableContextOptions: NullableContextOptions.Enable);
 
         var driverOptions = new GeneratorDriverOptions(

@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 
 namespace Aetos.Tracing;
@@ -28,34 +29,38 @@ internal sealed class IndentedStringBuilder
 
     public IndentedStringBuilder Unindent()
     {
+        if (this.IndentationLevel == 0)
+        {
+            throw new InvalidOperationException();
+        }
+
         --this.IndentationLevel;
         return this;
     }
 
-    public IndentedStringBuilder AppendLine(string? value, bool noIndent = false)
+    public IndentedStringBuilder AppendLineWithIndent()
     {
-        if (!string.IsNullOrEmpty(value))
-        {
-            if (!noIndent)
-            {
-                this.AddIndent();
-            }
-
-            this._stringBuilder.Append(value);
-            this._stringBuilder.Append(this._newLine);
-        }
-
+        this.AppendCore("", true, true);
         return this;
     }
 
-    public IndentedStringBuilder AppendLine(bool noIndent = false)
+    public IndentedStringBuilder AppendLineWithoutIndent()
     {
-        if (!noIndent)
+        this.AppendCore("", false, true);
+        return this;
+    }
+
+    public IndentedStringBuilder AppendLineWithIndent(string? value)
+    {
+        if (!string.IsNullOrEmpty(value))
         {
-            this.AddIndent();
+            var lines = value!.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);
+            foreach (var line in lines)
+            {
+                this.AppendCore(line, true, true);
+            }
         }
 
-        this._stringBuilder.Append(this._newLine);
         return this;
     }
 
@@ -63,8 +68,7 @@ internal sealed class IndentedStringBuilder
     {
         if (!string.IsNullOrEmpty(value))
         {
-            this.AddIndent();
-            this._stringBuilder.Append(value);
+            this.AppendCore(value, true, false);
         }
 
         return this;
@@ -74,10 +78,25 @@ internal sealed class IndentedStringBuilder
     {
         if (!string.IsNullOrEmpty(value))
         {
-            this._stringBuilder.Append(value);
+            this.AppendCore(value, false, false);
         }
 
         return this;
+    }
+
+    private void AppendCore(string? value, bool indent, bool newLine)
+    {
+        if (indent)
+        {
+            this.AddIndent();
+        }
+
+        this._stringBuilder.Append(value);
+
+        if (newLine)
+        {
+            this._stringBuilder.Append(this._newLine);
+        }
     }
 
     /// <inheritdoc />

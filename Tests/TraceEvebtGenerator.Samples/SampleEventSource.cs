@@ -7,4 +7,6 @@ namespace Aetos.Tracing.Samples;
 public sealed partial class SampleEventSource :
     EventSource
 {
+    [Event(1)]
+    public partial void Foo(int p0);
 }
