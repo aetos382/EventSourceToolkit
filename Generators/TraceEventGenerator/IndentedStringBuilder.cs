@@ -5,11 +5,16 @@ namespace Aetos.Tracing;
 internal sealed class IndentedStringBuilder
 {
     private readonly string _indent;
+    private readonly string _newLine;
     private readonly StringBuilder _stringBuilder;
 
-    public IndentedStringBuilder(string indent = "    ")
+    public IndentedStringBuilder(
+        string indent = "    ",
+        string newLine = "\n")
     {
         this._indent = indent;
+        this._newLine = newLine;
+
         this._stringBuilder = new StringBuilder();
     }
 
@@ -36,7 +41,8 @@ internal sealed class IndentedStringBuilder
                 this.AddIndent();
             }
 
-            this._stringBuilder.AppendLine(value);
+            this._stringBuilder.Append(value);
+            this._stringBuilder.Append(this._newLine);
         }
 
         return this;
@@ -49,7 +55,7 @@ internal sealed class IndentedStringBuilder
             this.AddIndent();
         }
 
-        this._stringBuilder.AppendLine();
+        this._stringBuilder.Append(this._newLine);
         return this;
     }
 

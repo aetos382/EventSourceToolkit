@@ -68,5 +68,10 @@ internal static class SymbolExtensions
 
             return false;
         }
+
+        public bool Equals(ITypeSymbol otherSymbol)
+        {
+            return SymbolEqualityComparer.Default.Equals(symbol, otherSymbol);
+        }
     }
 }

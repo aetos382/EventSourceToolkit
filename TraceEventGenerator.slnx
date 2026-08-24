@@ -3,6 +3,7 @@
     <Project Path="Generators/TraceEventGenerator/TraceEventGenerator.csproj" />
   </Folder>
   <Folder Name="/Tests/">
+    <Project Path="Tests/GeneratedEventSourceTests/GeneratedEventSourceTests.csproj" Id="aee56ff0-70e0-4026-be28-69c5867fd326" />
     <Project Path="Tests/TraceEvebtGenerator.Samples/TraceEventGenerator.Samples.csproj" />
     <Project Path="Tests/TraceEventGenerator.Tests/TraceEventGenerator.Tests.csproj" Id="d2903b8f-ebd3-4b98-81c7-de8b614fadb3" />
   </Folder>

@@ -15,6 +15,15 @@ internal sealed class WellKnownTypeSymbols
         this._compilation = compilation;
     }
 
+    public INamedTypeSymbol Int32
+    {
+        get
+        {
+            field ??= this.GetTypeSymbol(SpecialType.System_Int32);
+            return field;
+        }
+    }
+
     public INamedTypeSymbol String
     {
         get
@@ -56,6 +65,15 @@ internal sealed class WellKnownTypeSymbols
         get
         {
             field ??= this.GetTypeSymbol("System.Diagnostics.Tracing.NonEventAttribute");
+            return field;
+        }
+    }
+
+    public INamedTypeSymbol EventLevel
+    {
+        get
+        {
+            field ??= this.GetTypeSymbol("System.Diagnostics.Tracing.EventLevel");
             return field;
         }
     }

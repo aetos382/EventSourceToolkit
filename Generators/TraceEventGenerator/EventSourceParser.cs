@@ -32,9 +32,10 @@ internal sealed class EventSourceParser
         CancellationToken cancellationToken)
     {
         var containingType = symbol.ContainingType;
+        var wellKnownTypes = this._wellKnownTypes;
 
         // そのメソッドを含むクラスに GeneratedEventSourceAttribute がついているか → 無視, 生成対象外
-        var markerAttribute = containingType.GetAttribute(this._wellKnownTypes.GeneratedEventSourceAttribute);
+        var markerAttribute = containingType.GetAttribute(wellKnownTypes.GeneratedEventSourceAttribute);
         if (markerAttribute is null)
         {
             return null;
@@ -71,6 +72,8 @@ internal sealed class EventSourceParser
         {
             return null;
         }
+
+        var eventMetadata = this.ParseEventAttribute(symbol.GetAttribute(wellKnownTypes.EventAttribute)!);
 
         var parameterList = syntaxNode.ParameterList.Parameters;
         var parameters = new List<EventSourceMethodParameterInfo>(parameterList.Count);
@@ -124,6 +127,7 @@ internal sealed class EventSourceParser
             ancestorTypes.ToArray(),
             syntaxNode.AccessibilityKeyword,
             syntaxNode.Identifier.Text,
+            eventMetadata,
             parameters.ToArray(),
             []);
 
@@ -158,7 +162,7 @@ internal sealed class EventSourceParser
                 continue;
             }
 
-            if (!SymbolEqualityComparer.Default.Equals(value.Type, wellKnownTypes.String))
+            if (!value.Type.Equals(wellKnownTypes.String))
             {
                 continue;
             }
@@ -172,5 +176,43 @@ internal sealed class EventSourceParser
     private bool IsDerivedFromEventSource(INamedTypeSymbol type)
     {
         return type.IsDerivedFrom(this._wellKnownTypes.EventSource);
+    }
+
+    private EventMetadataInfo ParseEventAttribute(AttributeData data)
+    {
+        var wellKnownTypes = this._wellKnownTypes;
+
+        var id = 0;
+        var level = nameof(EventLevel.Informational);
+
+        var ctorArgs = data.ConstructorArguments;
+        if (ctorArgs.Length == 1)
+        {
+            var idArg = ctorArgs[0];
+            if (idArg.Kind == TypedConstantKind.Primitive && idArg.Type!.Equals(wellKnownTypes.Int32) && idArg.Value is int idValue)
+            {
+                id = idValue;
+            }
+        }
+
+        var namedArgs = data.NamedArguments;
+        foreach (var (key, value) in namedArgs)
+        {
+            switch (key)
+            {
+                case nameof(EventAttribute.Level):
+                    if (value.Kind == TypedConstantKind.Primitive && value.Type!.Equals(wellKnownTypes.EventLevel) && value.Value is EventLevel levelValue)
+                    {
+                        level = Enum.GetName(typeof(EventLevel), levelValue)!;
+                    }
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        return new(id, level);
     }
 }
