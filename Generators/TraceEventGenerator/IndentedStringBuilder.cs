@@ -59,7 +59,18 @@ internal sealed class IndentedStringBuilder
         return this;
     }
 
-    public IndentedStringBuilder Append(string? value)
+    public IndentedStringBuilder AppendWithIndent(string? value)
+    {
+        if (!string.IsNullOrEmpty(value))
+        {
+            this.AddIndent();
+            this._stringBuilder.Append(value);
+        }
+
+        return this;
+    }
+
+    public IndentedStringBuilder AppendWithoutIndent(string? value)
     {
         if (!string.IsNullOrEmpty(value))
         {

@@ -18,5 +18,11 @@ internal sealed record EventSourceMethodInfo(
     string? AccessibilityKeyword,
     string MethodName,
     EventMetadataInfo Metadata,
-    EquatableArray<EventSourceMethodParameterInfo> Parameters,
-    EquatableArray<DiagnosticInfo> Diagnostics);
+    EquatableArray<EventSourceMethodParameterInfo> Parameters);
+
+internal sealed record EventSourceMethodInfoWithDiagnostics(
+    EventSourceMethodInfo? MethodInfo,
+    EquatableArray<DiagnosticInfo> Diagnostics)
+{
+    public static readonly EventSourceMethodInfoWithDiagnostics Empty = new(null, []);
+}

@@ -8,6 +8,19 @@ namespace Aetos.Tracing;
 
 internal static class SyntaxExtensions
 {
+    extension(SyntaxNode node)
+    {
+        public NodeLocationInfo GetNodeLocationInfo()
+        {
+            var location = node.GetLocation();
+
+            return new NodeLocationInfo(
+                node.Span,
+                location.GetLineSpan(),
+                location.GetMappedLineSpan());
+        }
+    }
+
     extension(MemberDeclarationSyntax node)
     {
         public bool HasPartialModifier => node.Modifiers.Any(SyntaxKind.PartialKeyword);
