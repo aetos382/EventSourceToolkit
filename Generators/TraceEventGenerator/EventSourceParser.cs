@@ -100,18 +100,20 @@ internal sealed class EventSourceParser
                 diagnostics.Add(new DiagnosticInfo(DiagnosticIds.ParameterTypeNotSupported, parameter.GetNodeLocationInfo()));
             }
 
-            // SymbolDisplayFormat では SymbolDisplayMiscellaneousOptions.UseSpecialTypes フラグが含まれていなくても
-            // IntPtr / UIntPtr は "nint" / "nuint" になってしまうので、自力で文字列化する。
-            // https://github.com/dotnet/roslyn/issues/76895
+            var parameterTypeName = parameterTypeSymbol.ToFullyQualifiedString();
 
-            // なお UIntPtr はイベント メソッドのパラメーター型としてサポートされない。
-            var parameterTypeName = parameterTypeSymbol.IsNativeIntegerType
-                ? parameterTypeSymbol.SpecialType == SpecialType.System_IntPtr
-                    ? "global::System.IntPtr"
-                    : "global::System.UIntPtr"
-                : parameterTypeSymbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedFormat);
+            var isEnum = false;
+            var size = this.GetParameterSize(parameterTypeName);
+            if (size is null)
+            {
+                if (parameterTypeSymbol is INamedTypeSymbol { EnumUnderlyingType: { } enumUnderlyingType })
+                {
+                    isEnum = true;
+                    size = this.GetParameterSize(enumUnderlyingType.ToFullyQualifiedString());
+                }
+            }
 
-            var parameterInfo = new EventSourceMethodParameterInfo(parameterTypeName, parameter.Identifier.Text);
+            var parameterInfo = new EventSourceMethodParameterInfo(parameterTypeName, parameter.Identifier.Text, isEnum, size);
             parameters.Add(parameterInfo);
         }
 
@@ -275,5 +277,34 @@ internal sealed class EventSourceParser
         }
 
         return new(id, level, keywords.ToArray());
+    }
+
+    private readonly Dictionary<string, int> _typeSize = new(StringComparer.Ordinal)
+    {
+        ["global::System.Boolean"] = 4,
+        ["global::System.Byte"] = 1,
+        ["global::System.SByte"] = 1,
+        ["global::System.Char"] = 2,
+        ["global::System.Int16"] = 2,
+        ["global::System.UInt16"] = 2,
+        ["global::System.Int32"] = 4,
+        ["global::System.UInt32"] = 4,
+        ["global::System.Int64"] = 8,
+        ["global::System.UInt64"] = 8,
+        ["global::System.Single"] = 4,
+        ["global::System.Double"] = 8,
+        ["global::System.DateTime"] = 8,
+        ["global::System.Guid"] = 16,
+        ["global::System.Decimal"] = 16
+    };
+
+    private int? GetParameterSize(string typeName)
+    {
+        if (!this._typeSize.TryGetValue(typeName, out var size))
+        {
+            return null;
+        }
+
+        return size;
     }
 }

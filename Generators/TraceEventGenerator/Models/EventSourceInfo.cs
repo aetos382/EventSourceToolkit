@@ -8,7 +8,9 @@ internal sealed record ContainingTypeInfo(
 
 internal sealed record EventSourceMethodParameterInfo(
     string FullyQualifiedTypeName,
-    string Name);
+    string Name,
+    bool IsEnum,
+    int? FixedSize);
 
 internal sealed record EventMetadataInfo(
     int EventId,

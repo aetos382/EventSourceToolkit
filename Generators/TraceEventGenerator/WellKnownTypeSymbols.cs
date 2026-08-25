@@ -132,6 +132,15 @@ internal sealed class WellKnownTypeSymbols
         }
     }
 
+    public INamedTypeSymbol Enum
+    {
+        get
+        {
+            field ??= this.GetTypeSymbol(SpecialType.System_Enum);
+            return field;
+        }
+    }
+
     public INamedTypeSymbol DateTime
     {
         get

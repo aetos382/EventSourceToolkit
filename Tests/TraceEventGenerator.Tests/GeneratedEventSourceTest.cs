@@ -91,7 +91,10 @@ public sealed class GeneratedEventSourceTest
                 [Event(1, Keywords = Keywords.A | Keywords.C)]
                 public partial void Foo(
                     bool p0, byte p1, sbyte p2, char p3, short p4, ushort p5, int p6, uint p7, long p8, ulong p9,
-                    float p10, double p11, string p12, DateTime p13, Guid p14, decimal p15, IntPtr p16, byte[] p17);
+                    float p10, double p11, string p12, DateTime p13, Guid p14, decimal p15, IntPtr p16, byte[] p17,
+                    E p18);
+
+                public enum E { A }
             }
             """;
 
@@ -121,7 +124,8 @@ public sealed class GeneratedEventSourceTest
                         global::System.Guid p14,
                         global::System.Decimal p15,
                         global::System.IntPtr p16,
-                        global::System.Byte[] p17)
+                        global::System.Byte[] p17,
+                        global::Sample.TestEventSource.E p18)
                     {
                         if (!this.IsEnabled(global::System.Diagnostics.Tracing.EventLevel.Informational, global::Sample.TestEventSource.Keywords.A | global::Sample.TestEventSource.Keywords.C))
                         {
@@ -130,7 +134,7 @@ public sealed class GeneratedEventSourceTest
 
                         unsafe
                         {
-                            global::System.Diagnostics.Tracing.EventSource.EventData *data = stackalloc global::System.Diagnostics.Tracing.EventSource.EventData[19];
+                            global::System.Diagnostics.Tracing.EventSource.EventData *data = stackalloc global::System.Diagnostics.Tracing.EventSource.EventData[20];
 
                             int __arg0Value = p0 ? 1 : 0;
                             data[0].DataPointer = (global::System.IntPtr)(&__arg0Value);
@@ -209,7 +213,10 @@ public sealed class GeneratedEventSourceTest
                                 }
                             }
 
-                            this.WriteEventCore(1, 19, data);
+                            data[19].DataPointer = (global::System.IntPtr)(&p18);
+                            data[19].Size = 4;
+
+                            this.WriteEventCore(1, 20, data);
                         }
                     }
                 }

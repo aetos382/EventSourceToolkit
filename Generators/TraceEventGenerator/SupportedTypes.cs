@@ -6,11 +6,13 @@ namespace Aetos.Tracing;
 
 internal sealed class SupportedTypes
 {
+    private readonly WellKnownTypeSymbols _wellKnownTypes;
     private readonly ITypeSymbol[] _supportedTypes;
 
     public SupportedTypes(
         WellKnownTypeSymbols wellKnownTypes)
     {
+        this._wellKnownTypes = wellKnownTypes;
         var list = new List<ITypeSymbol>
         {
             wellKnownTypes.Boolean,
@@ -38,6 +40,11 @@ internal sealed class SupportedTypes
 
     public bool IsSupported(ITypeSymbol type)
     {
+        if (type.IsDerivedFrom(this._wellKnownTypes.Enum))
+        {
+            return true;
+        }
+
         var comparer = SymbolEqualityComparer.Default;
 
         foreach (var supportedType in this._supportedTypes)

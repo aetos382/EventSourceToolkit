@@ -51,7 +51,7 @@ internal static class SymbolExtensions
 
     extension(ITypeSymbol symbol)
     {
-        public bool IsDerivedFrom(INamedTypeSymbol baseType)
+        public bool IsDerivedFrom(ITypeSymbol baseType)
         {
             var currentSymbol = symbol;
             var comparer = SymbolEqualityComparer.Default;
@@ -67,6 +67,20 @@ internal static class SymbolExtensions
             }
 
             return false;
+        }
+
+        public string ToFullyQualifiedString()
+        {
+            // SymbolDisplayFormat では SymbolDisplayMiscellaneousOptions.UseSpecialTypes フラグが含まれていなくても
+            // IntPtr / UIntPtr は "nint" / "nuint" になってしまうので、自力で文字列化する。
+            // https://github.com/dotnet/roslyn/issues/76895
+            var name = symbol.IsNativeIntegerType
+                ? symbol.SpecialType == SpecialType.System_IntPtr
+                    ? "global::System.IntPtr"
+                    : "global::System.UIntPtr"
+                : symbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedFormat);
+
+            return name;
         }
     }
 }

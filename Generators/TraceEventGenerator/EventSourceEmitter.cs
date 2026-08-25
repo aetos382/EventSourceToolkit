@@ -1,6 +1,5 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
+using System.Globalization;
 using System.Linq;
 
 using Aetos.Tracing.Models;
@@ -108,41 +107,43 @@ internal static class EventSourceEmitter
         }
         else
         {
-            codeBuilder.AppendLineWithIndent($"global::System.Diagnostics.Tracing.EventSource.EventData *data = stackalloc global::System.Diagnostics.Tracing.EventSource.EventData[{parametersCount + byteArrayParameterCount}];");
+            var dataEntryCount = parametersCount + byteArrayParameterCount;
+
+            codeBuilder.AppendLineWithIndent($"global::System.Diagnostics.Tracing.EventSource.EventData *data = stackalloc global::System.Diagnostics.Tracing.EventSource.EventData[{dataEntryCount}];");
             codeBuilder.AppendLineWithoutIndent();
 
-            for (var i = 0; i < parametersCount; ++i)
+            for (int i = 0, j = 0; i < parametersCount; ++i, ++j)
             {
-                var (typeName, parameterName) = parameters[i];
+                var (typeName, parameterName, isEnum, size) = parameters[i];
+                var sizeExpression = size?.ToString(CultureInfo.InvariantCulture);
+
+                if (isEnum)
+                {
+                    WriteData(codeBuilder, j, parameterName, sizeExpression!);
+                    continue;
+                }
 
                 switch (typeName)
                 {
                     case "global::System.Boolean":
                         codeBuilder.AppendLineWithIndent($"int __arg{i}Value = {parameterName} ? 1 : 0;");
-                        WriteData(codeBuilder, i, $"__arg{i}Value", "4");
+                        WriteData(codeBuilder, j, $"__arg{i}Value", "4");
                         break;
 
                     case "global::System.Byte":
                     case "global::System.SByte":
-                        WriteData(codeBuilder, i, parameterName, "1");
-                        break;
-
                     case "global::System.Char":
                     case "global::System.Int16":
                     case "global::System.UInt16":
-                        WriteData(codeBuilder, i, parameterName, "2");
-                        break;
-
                     case "global::System.Int32":
                     case "global::System.UInt32":
                     case "global::System.Single":
-                        WriteData(codeBuilder, i, parameterName, "4");
-                        break;
-
                     case "global::System.Int64":
                     case "global::System.UInt64":
                     case "global::System.Double":
-                        WriteData(codeBuilder, i, parameterName, "8");
+                    case "global::System.Guid":
+                    case "global::System.Decimal":
+                        WriteData(codeBuilder, j, parameterName, sizeExpression!);
                         break;
 
                     case "global::System.String":
@@ -155,8 +156,8 @@ internal static class EventSourceEmitter
                         codeBuilder.Indent();
                         codeBuilder.AppendLineWithIndent(
                             $$"""
-                              data[{{i}}].DataPointer = (global::System.IntPtr)__arg{{i}}Value;
-                              data[{{i}}].Size = ({{parameterName}}.Length + 1) * 2;
+                              data[{{j}}].DataPointer = (global::System.IntPtr)__arg{{i}}Value;
+                              data[{{j}}].Size = ({{parameterName}}.Length + 1) * 2;
                               """);
                         codeBuilder.Unindent();
                         codeBuilder.AppendLineWithIndent(
@@ -168,16 +169,11 @@ internal static class EventSourceEmitter
 
                     case "global::System.DateTime":
                         codeBuilder.AppendLineWithIndent($"long __arg{i}Value = {parameterName}.ToFileTimeUtc();");
-                        WriteData(codeBuilder, i, $"__arg{i}Value", "8");
-                        break;
-
-                    case "global::System.Guid":
-                    case "global::System.Decimal":
-                        WriteData(codeBuilder, i, parameterName, "16");
+                        WriteData(codeBuilder, j, $"__arg{i}Value", "8");
                         break;
 
                     case "global::System.IntPtr":
-                        WriteData(codeBuilder, i, parameterName, "global::System.IntPtr.Size");
+                        WriteData(codeBuilder, j, parameterName, "global::System.IntPtr.Size");
                         break;
 
                     case "global::System.Byte[]":
@@ -190,11 +186,11 @@ internal static class EventSourceEmitter
                         codeBuilder.AppendLineWithIndent(
                             $$"""
                               int blobSize = 0;
-                              data[{{i}}].DataPointer = (global::System.IntPtr)(&blobSize);
-                              data[{{i}}].Size = 4;
+                              data[{{j}}].DataPointer = (global::System.IntPtr)(&blobSize);
+                              data[{{j}}].Size = 4;
                               """);
-                        codeBuilder.AppendLineWithIndent($"data[{i + 1}].DataPointer = (global::System.IntPtr)(&blobSize);");
-                        codeBuilder.AppendLineWithIndent($"data[{i + 1}].Size = 0;");
+                        codeBuilder.AppendLineWithIndent($"data[{j + 1}].DataPointer = (global::System.IntPtr)(&blobSize);");
+                        codeBuilder.AppendLineWithIndent($"data[{j + 1}].Size = 0;");
                         codeBuilder.Unindent();
                         codeBuilder.AppendLineWithIndent(
                             """
@@ -212,10 +208,10 @@ internal static class EventSourceEmitter
                         codeBuilder.Indent();
                         codeBuilder.AppendLineWithIndent(
                             $$"""
-                              data[{{i}}].DataPointer = (global::System.IntPtr)(&blobSize);
-                              data[{{i}}].Size = 4;
-                              data[{{i + 1}}].DataPointer = (global::System.IntPtr)blob;
-                              data[{{i + 1}}].Size = blobSize;
+                              data[{{j}}].DataPointer = (global::System.IntPtr)(&blobSize);
+                              data[{{j}}].Size = 4;
+                              data[{{j + 1}}].DataPointer = (global::System.IntPtr)blob;
+                              data[{{j + 1}}].Size = blobSize;
                               """);
                         codeBuilder.Unindent();
                         codeBuilder.AppendLineWithIndent(
@@ -228,12 +224,12 @@ internal static class EventSourceEmitter
                             }
                             """);
                         codeBuilder.AppendLineWithoutIndent();
-                        ++i;
+                        ++j;
                         break;
                 }
             }
 
-            codeBuilder.AppendLineWithIndent($"this.WriteEventCore({eventId}, {parametersCount + byteArrayParameterCount}, data);");
+            codeBuilder.AppendLineWithIndent($"this.WriteEventCore({eventId}, {dataEntryCount}, data);");
         }
 
         codeBuilder.Unindent();
@@ -260,12 +256,12 @@ internal static class EventSourceEmitter
 
         static void WriteData(
             IndentedStringBuilder codeBuilder,
-            int parameterIndex,
+            int dataEntryIndex,
             string parameterName,
             string parameterSizeExpression)
         {
-            codeBuilder.AppendLineWithIndent($"data[{parameterIndex}].DataPointer = (global::System.IntPtr)(&{parameterName});");
-            codeBuilder.AppendLineWithIndent($"data[{parameterIndex}].Size = {parameterSizeExpression};");
+            codeBuilder.AppendLineWithIndent($"data[{dataEntryIndex}].DataPointer = (global::System.IntPtr)(&{parameterName});");
+            codeBuilder.AppendLineWithIndent($"data[{dataEntryIndex}].Size = {parameterSizeExpression};");
             codeBuilder.AppendLineWithoutIndent();
         }
     }
