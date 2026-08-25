@@ -13,7 +13,7 @@ public sealed partial class TraceEventGenerator :
     {
         context.RegisterPostInitializationOutput(PostInitialize);
 
-        var eventSourceInfoProvider = context.SyntaxProvider
+        var eventSourceMethodProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "System.Diagnostics.Tracing.EventAttribute",
                 static (node, _) => node is MethodDeclarationSyntax,
@@ -26,11 +26,10 @@ public sealed partial class TraceEventGenerator :
                         (IMethodSymbol)context.TargetSymbol,
                         cancellationToken);
                 })
-            .WhereNotNull()
             .WithTrackingName("EventSourceMethodInfo");
 
         context.RegisterSourceOutput(
-            eventSourceInfoProvider,
+            eventSourceMethodProvider,
             EventSourceEmitter.EmitEventSourceMethod);
     }
 }

@@ -75,8 +75,6 @@ internal sealed class EventSourceParser
             return EventSourceMethodInfoWithDiagnostics.Empty;
         }
 
-        Dictionary<string, EventKeywords> keywords = [];
-
         var keywordsType = containingType.GetTypeMembers("Keywords").SingleOrDefault();
 
         var eventMetadata = this.ParseEventAttribute(
