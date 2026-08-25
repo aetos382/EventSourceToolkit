@@ -10,7 +10,7 @@ namespace Aetos.Tracing;
 
 internal static class EventSourceEmitter
 {
-    public static void EmitEventSourceMethod(
+    public static void EmitEventSource(
         SourceProductionContext context,
         EventSourceMethodInfoWithDiagnostics input)
     {
@@ -250,9 +250,15 @@ internal static class EventSourceEmitter
             codeBuilder.AppendLineWithIndent($"this.WriteEventWithRelatedActivityIdCore({eventId}, {relatedActivityIdExpression}, {dataEntryCount}, data);");
         }
 
+        // method
         codeBuilder.Unindent();
         codeBuilder.AppendLineWithIndent("}");
 
+        // class
+        codeBuilder.Unindent();
+        codeBuilder.AppendLineWithIndent("}");
+
+        // enclosing class and namespace
         while (codeBuilder.IndentationLevel != 0)
         {
             codeBuilder.Unindent();

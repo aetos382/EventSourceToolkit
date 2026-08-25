@@ -30,6 +30,10 @@ public sealed partial class TraceEventGenerator :
 
         context.RegisterSourceOutput(
             eventSourceMethodProvider,
-            EventSourceEmitter.EmitEventSourceMethod);
+            EventSourceEmitter.EmitEventSource);
+
+        context.RegisterSourceOutput(
+            eventSourceMethodProvider,
+            EventListenerBaseEmitter.EmitEventListenerBase);
     }
 }

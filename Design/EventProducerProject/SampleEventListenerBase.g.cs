@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Text;
 using GeneratedCode;
-using static EventProducerProject.SampleEventSource;
 
 namespace EventProducerProject;
 

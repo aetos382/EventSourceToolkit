@@ -1,9 +1,8 @@
-﻿<Project Sdk="MSTest.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <RootNamespace>Aetos.Tracing.Samples</RootNamespace>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>Aetos.Tracing.Samples.EventConsumerProject</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +10,7 @@
       <OutputItemType>analyzer</OutputItemType>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+    <ProjectReference Include="..\EventProducerProject\EventProducerProject.csproj" />
   </ItemGroup>
 
 </Project>
