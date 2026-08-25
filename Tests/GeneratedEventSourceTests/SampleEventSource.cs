@@ -1,7 +1,9 @@
 using System;
 using System.Diagnostics.Tracing;
 
-namespace Aetos.Tracing.Samples.EventProducerProject;
+using Aetos.Tracing;
+
+namespace GeneratedEventSourceTests;
 
 [EventSource(Name = "Aetos-Tracing-Samples-SampleEventSource")]
 [GeneratedEventSource]

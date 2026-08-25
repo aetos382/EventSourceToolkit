@@ -1,9 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="MSTest.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <RootNamespace>Aetos.Tracing.Samples.EventProducerProject</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +10,8 @@
       <OutputItemType>analyzer</OutputItemType>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+
+    <ProjectReference Include="..\GeneratedEventSourceTests\GeneratedEventSourceTests.csproj" />
   </ItemGroup>
 
 </Project>

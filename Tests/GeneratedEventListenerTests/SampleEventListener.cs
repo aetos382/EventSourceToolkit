@@ -1,10 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-using Aetos.Tracing.Samples.EventProducerProject;
+using Aetos.Tracing;
 
-namespace Aetos.Tracing.Samples.EventConsumerProject;
+using GeneratedEventSourceTests;
+
+namespace GeneratedEventListenerTests;
 
 [GeneratedEventListener("Aetos-Tracing-Samples-SampleEventSource")]
 internal sealed class SampleEventListener :

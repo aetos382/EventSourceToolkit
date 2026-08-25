@@ -10,7 +10,6 @@
       <OutputItemType>analyzer</OutputItemType>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\EventProducerProject\EventProducerProject.csproj" />
   </ItemGroup>
 
 </Project>

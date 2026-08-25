@@ -2,11 +2,8 @@
   <Folder Name="/Generators/">
     <Project Path="Generators/TraceEventGenerator/TraceEventGenerator.csproj" />
   </Folder>
-  <Folder Name="/Samples/">
-    <Project Path="Samples/EventConsumerProject/EventConsumerProject.csproj" Id="86f65e7b-dd93-46d8-b167-798b40f95b8e" />
-    <Project Path="Samples/EventProducerProject/EventProducerProject.csproj" Id="fee2483d-1ea3-4945-8198-f2241c200b34" />
-  </Folder>
   <Folder Name="/Tests/">
+    <Project Path="Tests/GeneratedEventListenerTests/GeneratedEventListenerTests.csproj" Id="1d5914e7-9098-4e4c-88d6-ce55278cda7c" />
     <Project Path="Tests/GeneratedEventSourceTests/GeneratedEventSourceTests.csproj" Id="aee56ff0-70e0-4026-be28-69c5867fd326" />
     <Project Path="Tests/TraceEventGenerator.Tests/TraceEventGenerator.Tests.csproj" Id="d2903b8f-ebd3-4b98-81c7-de8b614fadb3" />
   </Folder>
