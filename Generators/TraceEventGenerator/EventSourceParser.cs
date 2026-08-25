@@ -88,11 +88,19 @@ internal sealed class EventSourceParser
 
         var semanticModel = this._semanticModel;
         var supportedTypes = new SupportedTypes(wellKnownTypes);
+        var comparer = SymbolEqualityComparer.Default;
 
-        foreach (var parameter in parameterList)
+        foreach (var (index, parameter) in parameterList.Index())
         {
             var parameterSymbol = semanticModel.GetDeclaredSymbol(parameter, cancellationToken)!;
             var parameterTypeSymbol = parameterSymbol.Type;
+
+            if (index == 0 &&
+                string.Equals(parameter.Identifier.Text, "relatedActivityId", StringComparison.OrdinalIgnoreCase) &&
+                comparer.Equals(parameterTypeSymbol, wellKnownTypes.Guid))
+            {
+                continue;
+            }
 
             if (!supportedTypes.IsSupported(parameterTypeSymbol))
             {
