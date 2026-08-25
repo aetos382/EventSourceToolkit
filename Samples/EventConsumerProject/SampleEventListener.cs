@@ -6,7 +6,7 @@ using Aetos.Tracing.Samples.EventProducerProject;
 
 namespace Aetos.Tracing.Samples.EventConsumerProject;
 
-[GeneratedEventListener("Sample-EventSource")]
+[GeneratedEventListener("Aetos-Tracing-Samples-SampleEventSource")]
 internal sealed class SampleEventListener :
     SampleEventSource.ListenerBase
 {
