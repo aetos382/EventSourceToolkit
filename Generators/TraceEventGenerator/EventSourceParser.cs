@@ -90,14 +90,16 @@ internal sealed class EventSourceParser
 
         foreach (var (index, parameter) in parameterList.Index())
         {
+            var parameterName = parameter.Identifier.ValueText;
             var parameterSymbol = semanticModel.GetDeclaredSymbol(parameter, cancellationToken)!;
             var parameterTypeSymbol = parameterSymbol.Type;
+            var isRelatedActivityIdParameter = false;
 
             if (index == 0 &&
-                string.Equals(parameter.Identifier.Text, "relatedActivityId", StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(parameterName, "relatedActivityId", StringComparison.OrdinalIgnoreCase) &&
                 comparer.Equals(parameterTypeSymbol, wellKnownTypes.Guid))
             {
-                continue;
+                isRelatedActivityIdParameter = true;
             }
 
             if (!supportedTypes.IsSupported(parameterTypeSymbol))
@@ -119,7 +121,7 @@ internal sealed class EventSourceParser
                 }
             }
 
-            var parameterInfo = new EventSourceMethodParameterInfo(parameterTypeName, parameter.Identifier.Text, isEnum, size);
+            var parameterInfo = new EventSourceMethodParameterInfo(parameterTypeName, parameter.Identifier.ValueText, isEnum, size, isRelatedActivityIdParameter);
             parameters.Add(parameterInfo);
         }
 

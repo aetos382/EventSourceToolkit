@@ -54,7 +54,7 @@ public sealed class GeneratedEventSourceTest
 
                         unsafe
                         {
-                            this.WriteEventCore(1, 0, null);
+                            this.WriteEventWithRelatedActivityIdCore(1, null, 0, null);
                         }
                     }
                 }
@@ -90,6 +90,7 @@ public sealed class GeneratedEventSourceTest
 
                 [Event(1, Keywords = Keywords.A | Keywords.C)]
                 public partial void Foo(
+                    Guid relatedActivityId,
                     bool p0, byte p1, sbyte p2, char p3, short p4, ushort p5, int p6, uint p7, long p8, ulong p9,
                     float p10, double p11, string p12, DateTime p13, Guid p14, decimal p15, IntPtr p16, byte[] p17,
                     E p18);
@@ -107,6 +108,7 @@ public sealed class GeneratedEventSourceTest
                 partial class TestEventSource
                 {
                     public partial void Foo(
+                        global::System.Guid relatedActivityId,
                         global::System.Boolean p0,
                         global::System.Byte p1,
                         global::System.SByte p2,
@@ -216,7 +218,7 @@ public sealed class GeneratedEventSourceTest
                             data[19].DataPointer = (global::System.IntPtr)(&p18);
                             data[19].Size = 4;
 
-                            this.WriteEventCore(1, 20, data);
+                            this.WriteEventWithRelatedActivityIdCore(1, &relatedActivityId, 20, data);
                         }
                     }
                 }

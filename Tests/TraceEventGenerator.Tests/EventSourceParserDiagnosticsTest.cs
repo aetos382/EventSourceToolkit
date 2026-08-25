@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Testing;
 
 namespace Aetos.Tracing.Tests;

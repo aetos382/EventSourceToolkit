@@ -1,5 +1,3 @@
-using System.Diagnostics.Tracing;
-
 namespace Aetos.Tracing.Models;
 
 internal sealed record ContainingTypeInfo(
@@ -10,7 +8,8 @@ internal sealed record EventSourceMethodParameterInfo(
     string FullyQualifiedTypeName,
     string Name,
     bool IsEnum,
-    int? FixedSize);
+    int? FixedSize,
+    bool IsRelatedActivityIdParameter);
 
 internal sealed record EventMetadataInfo(
     int EventId,

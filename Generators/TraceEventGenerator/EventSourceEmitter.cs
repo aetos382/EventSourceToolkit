@@ -61,6 +61,7 @@ internal static class EventSourceEmitter
             codeBuilder.Indent();
 
             var lastParameterIndex = parametersCount - 1;
+
             for (var i = 0; i <= lastParameterIndex; ++i)
             {
                 var parameter = parameters[i];
@@ -103,19 +104,31 @@ internal static class EventSourceEmitter
 
         if (parametersCount == 0)
         {
-            codeBuilder.AppendLineWithIndent($"this.WriteEventCore({eventId}, 0, null);");
+            codeBuilder.AppendLineWithIndent($"this.WriteEventWithRelatedActivityIdCore({eventId}, null, 0, null);");
         }
         else
         {
             var dataEntryCount = parametersCount + byteArrayParameterCount;
+            var relatedActivityIdExpression = "null";
+
+            if (parameters[0] is { IsRelatedActivityIdParameter: true, Name: var isRelatedActivityIdParameterName })
+            {
+                relatedActivityIdExpression = $"&{isRelatedActivityIdParameterName}";
+                --dataEntryCount;
+            }
 
             codeBuilder.AppendLineWithIndent($"global::System.Diagnostics.Tracing.EventSource.EventData *data = stackalloc global::System.Diagnostics.Tracing.EventSource.EventData[{dataEntryCount}];");
             codeBuilder.AppendLineWithoutIndent();
 
-            for (int i = 0, j = 0; i < parametersCount; ++i, ++j)
+            for (int i = 0, j = 0, k = 0; i < parametersCount; ++i)
             {
-                var (typeName, parameterName, isEnum, size) = parameters[i];
+                var (typeName, parameterName, isEnum, size, isRelatedActivityIdParameter) = parameters[i];
                 var sizeExpression = size?.ToString(CultureInfo.InvariantCulture);
+
+                if (isRelatedActivityIdParameter)
+                {
+                    continue;
+                }
 
                 if (isEnum)
                 {
@@ -123,11 +136,13 @@ internal static class EventSourceEmitter
                     continue;
                 }
 
+                var temporaryValueParameterName = $"__arg{k}Value";
+
                 switch (typeName)
                 {
                     case "global::System.Boolean":
-                        codeBuilder.AppendLineWithIndent($"int __arg{i}Value = {parameterName} ? 1 : 0;");
-                        WriteData(codeBuilder, j, $"__arg{i}Value", "4");
+                        codeBuilder.AppendLineWithIndent($"int {temporaryValueParameterName} = {parameterName} ? 1 : 0;");
+                        WriteData(codeBuilder, j, temporaryValueParameterName, "4");
                         break;
 
                     case "global::System.Byte":
@@ -150,13 +165,13 @@ internal static class EventSourceEmitter
                         codeBuilder.AppendLineWithIndent(
                             $$"""
                               {{parameterName}} ??= "";
-                              fixed (char *__arg{{i}}Value = {{parameterName}})
+                              fixed (char *{{temporaryValueParameterName}} = {{parameterName}})
                               {
                               """);
                         codeBuilder.Indent();
                         codeBuilder.AppendLineWithIndent(
                             $$"""
-                              data[{{j}}].DataPointer = (global::System.IntPtr)__arg{{i}}Value;
+                              data[{{j}}].DataPointer = (global::System.IntPtr){{temporaryValueParameterName}};
                               data[{{j}}].Size = ({{parameterName}}.Length + 1) * 2;
                               """);
                         codeBuilder.Unindent();
@@ -168,8 +183,8 @@ internal static class EventSourceEmitter
                         break;
 
                     case "global::System.DateTime":
-                        codeBuilder.AppendLineWithIndent($"long __arg{i}Value = {parameterName}.ToFileTimeUtc();");
-                        WriteData(codeBuilder, j, $"__arg{i}Value", "8");
+                        codeBuilder.AppendLineWithIndent($"long {temporaryValueParameterName} = {parameterName}.ToFileTimeUtc();");
+                        WriteData(codeBuilder, j, temporaryValueParameterName, "8");
                         break;
 
                     case "global::System.IntPtr":
@@ -227,9 +242,12 @@ internal static class EventSourceEmitter
                         ++j;
                         break;
                 }
+
+                ++j;
+                ++k;
             }
 
-            codeBuilder.AppendLineWithIndent($"this.WriteEventCore({eventId}, {dataEntryCount}, data);");
+            codeBuilder.AppendLineWithIndent($"this.WriteEventWithRelatedActivityIdCore({eventId}, {relatedActivityIdExpression}, {dataEntryCount}, data);");
         }
 
         codeBuilder.Unindent();
