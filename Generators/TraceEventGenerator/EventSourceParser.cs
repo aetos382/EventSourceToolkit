@@ -36,40 +36,40 @@ internal sealed class EventSourceParser
         var wellKnownTypes = this._wellKnownTypes;
         var diagnostics = new List<DiagnosticInfo>();
 
-        // そのメソッドを含むクラスに GeneratedEventSourceAttribute がついているか → 無視, 生成対象外
+        // クラスに対する警告はメソッド単位でのコード生成では大変なので、別の Analyzer を用意する
+
+        // メソッドを含むクラスに GeneratedEventSourceAttribute がついていない → 無視, 生成対象外
         var markerAttribute = containingType.GetAttribute(wellKnownTypes.GeneratedEventSourceAttribute);
         if (markerAttribute is null)
         {
             return EventSourceMethodInfoWithDiagnostics.Empty;
         }
 
-        // そのメソッドを含むクラスが（間接的に）EventSource から派生しているか → 警告, 生成対象外
+        // メソッドを含むクラスが（間接的に）EventSource から派生していない → 警告, 生成対象外
         if (!this.IsDerivedFromEventSource(containingType))
         {
             return EventSourceMethodInfoWithDiagnostics.Empty;
         }
 
-        // そのメソッドを含むクラスに EventSourceAttribute がついているか → 警告, 生成対象外
+        // メソッドを含むクラスに EventSourceAttribute がついていない → 警告, 生成対象外
         if (this.GetEventSourceAttribute(containingType) is null)
         {
             return EventSourceMethodInfoWithDiagnostics.Empty;
         }
 
-        // クラスに対する警告はメソッド単位でのコード生成では大変なので、別の Analyzer を用意する
-
-        // そのメソッドは partial か → 無視, 生成対象外
+        // メソッドが partial でない → 無視, 生成対象外
         if (!syntaxNode.HasPartialModifier)
         {
             return EventSourceMethodInfoWithDiagnostics.Empty;
         }
 
-        // そのメソッドの実装が存在しないか → 無視, 生成対象外
+        // メソッドの実装が存在する → 無視, 生成対象外
         if (symbol.PartialImplementationPart is not null)
         {
             return EventSourceMethodInfoWithDiagnostics.Empty;
         }
 
-        // そのメソッドの戻り値は void か → 無視, 生成対象外
+        // メソッドの戻り値が void でない → 無視, 生成対象外
         if (!syntaxNode.ReturnsVoid)
         {
             return EventSourceMethodInfoWithDiagnostics.Empty;
