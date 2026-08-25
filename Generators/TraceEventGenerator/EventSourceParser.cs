@@ -1,15 +1,15 @@
-using Aetos.Tracing.Diagnostics;
-using Aetos.Tracing.Models;
-
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Threading;
+
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+using Aetos.Tracing.Diagnostics;
+using Aetos.Tracing.Models;
 
 namespace Aetos.Tracing;
 
