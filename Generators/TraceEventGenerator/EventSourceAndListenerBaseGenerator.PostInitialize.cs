@@ -43,7 +43,7 @@ public partial class EventSourceAndListenerBaseGenerator
             [global::System.AttributeUsage(
                 global::System.AttributeTargets.Method,
                 Inherited = true)]
-            internal sealed class {{GeneratedEventAttributeName}} : global::System.Attribute
+            public sealed class {{GeneratedEventAttributeName}} : global::System.Attribute
             {
                 public {{GeneratedEventAttributeName}}(
                     int eventId,

@@ -11,7 +11,8 @@ internal static class SymbolExtensions
     extension(ISymbol symbol)
     {
         public IEnumerable<AttributeData> GetAttributes(
-            INamedTypeSymbol attributeType)
+            INamedTypeSymbol attributeType,
+            bool inherited = false)
         {
             ArgumentNullException.ThrowIfNull(symbol);
             ArgumentNullException.ThrowIfNull(attributeType);
@@ -25,17 +26,66 @@ internal static class SymbolExtensions
                     yield return attribute;
                 }
             }
+
+            if (!inherited)
+            {
+                yield break;
+            }
+
+            // Roslyn は AttributeUsageAttribute.Inherited を見てくれないので、自分で継承階層を辿る
+            foreach (var attributeOfAttribute in attributeType.GetAttributes())
+            {
+                var fullName = attributeOfAttribute.AttributeClass?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                if (fullName != "global::System.AttributeUsageAttribute")
+                {
+                    continue;
+                }
+
+                foreach (var (name, value) in attributeOfAttribute.NamedArguments)
+                {
+                    if (name != nameof(AttributeUsageAttribute.Inherited))
+                    {
+                        continue;
+                    }
+
+                    if ((bool)value.Value!)
+                    {
+                        break;
+                    }
+
+                    yield break;
+                }
+            }
+
+            if (symbol.IsOverride)
+            {
+                if (symbol is IMethodSymbol { OverriddenMethod: {} baseMethodSymbol })
+                {
+                    foreach (var attribute in baseMethodSymbol.GetAttributes(attributeType, inherited))
+                    {
+                        yield return attribute;
+                    }
+                }
+                else if (symbol is ITypeSymbol { BaseType: { } baseTypeSymbol })
+                {
+                    foreach (var attribute in baseTypeSymbol.GetAttributes(attributeType, inherited))
+                    {
+                        yield return attribute;
+                    }
+                }
+            }
         }
 
         public AttributeData? GetAttribute(
-            INamedTypeSymbol attributeType)
+            INamedTypeSymbol attributeType,
+            bool inherited = false)
         {
             ArgumentNullException.ThrowIfNull(symbol);
             ArgumentNullException.ThrowIfNull(attributeType);
 
             AttributeData? found = null;
 
-            foreach (var data in symbol.GetAttributes(attributeType))
+            foreach (var data in symbol.GetAttributes(attributeType, inherited))
             {
                 if (found is not null)
                 {
@@ -49,12 +99,13 @@ internal static class SymbolExtensions
         }
 
         public bool HasAttribute(
-            INamedTypeSymbol attributeType)
+            INamedTypeSymbol attributeType,
+            bool inherited = false)
         {
             ArgumentNullException.ThrowIfNull(symbol);
             ArgumentNullException.ThrowIfNull(attributeType);
 
-            return symbol.GetAttributes(attributeType).Any();
+            return symbol.GetAttributes(attributeType, inherited).Any();
         }
     }
 

@@ -55,11 +55,11 @@ internal sealed class EventListenerParser
             return EventListenerInfoWithDiagnostics.Empty;
         }
 
-        foreach (var method in baseType.GetMethods())
+        foreach (var method in symbol.GetMethods())
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var eventAttribute = method.GetAttribute(wellKnownTypes.GeneratedEventAttribute);
+            var eventAttribute = method.GetAttribute(wellKnownTypes.GeneratedEventAttribute, true);
             if (eventAttribute is null)
             {
                 continue;

@@ -243,6 +243,15 @@ internal sealed class WellKnownTypeSymbols
         }
     }
 
+    public INamedTypeSymbol AttributeUsageAttribute
+    {
+        get
+        {
+            field ??= this.GetTypeSymbol("System.AttributeUsageAttribute");
+            return field;
+        }
+    }
+
     public INamedTypeSymbol GeneratedEventSourceAttribute
     {
         get
