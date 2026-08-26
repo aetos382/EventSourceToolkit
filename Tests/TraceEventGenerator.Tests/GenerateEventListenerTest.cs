@@ -16,10 +16,12 @@ public sealed class GenerateEventListenerTest
     [TestMethod]
     public void X()
     {
-        var testCancellationToken = this._testContext.CancellationToken;
+        var testContext = this._testContext;
+        var testCancellationToken = testContext.CancellationToken;
 
         const string EventSourceCode =
             """
+            using System;
             using System.Diagnostics.Tracing;
 
             using Aetos.Tracing;
@@ -32,6 +34,15 @@ public sealed class GenerateEventListenerTest
             {
                 [Event(1)]
                 public partial void Foo();
+
+                [Event(2)]
+                public partial void Bar(int i);
+
+                [Event(3)]
+                public partial void Baz(Guid relatedActivityId);
+
+                [Event(4)]
+                public partial void Qux(Guid relatedActivityId, int i);
             }
             """;
 
@@ -68,8 +79,13 @@ public sealed class GenerateEventListenerTest
         eventSourceGeneratorDriver = eventSourceGeneratorDriver.RunGeneratorsAndUpdateCompilation(
             eventSourceCompilation,
             out var updatedEventSourceCompilation,
-            out _,
+            out var eventSourceDiagnostics,
             testCancellationToken);
+
+        foreach (var eventSourceDiagnostic in eventSourceDiagnostics)
+        {
+            testContext.WriteLine(eventSourceDiagnostic.ToString());
+        }
 
         using var eventSourcePeStream = new MemoryStream();
         using var eventSourcePdbStream = new MemoryStream();
@@ -79,6 +95,11 @@ public sealed class GenerateEventListenerTest
             eventSourcePdbStream,
             options: emitOptions,
             cancellationToken: testCancellationToken);
+
+        foreach (var emitDiagnostic in emitResult.Diagnostics)
+        {
+            testContext.WriteLine(emitDiagnostic.ToString());
+        }
 
         Assert.IsTrue(emitResult.Success);
 
@@ -120,6 +141,11 @@ public sealed class GenerateEventListenerTest
             eventListenerCompilation, testCancellationToken);
 
         var eventListenerGenerationResult = eventListenerGeneratorDriver.GetRunResult();
+
+        foreach (var eventListenerDiagnostic in eventListenerGenerationResult.Diagnostics)
+        {
+            testContext.WriteLine(eventListenerDiagnostic.ToString());
+        }
     }
 
     public GenerateEventListenerTest(

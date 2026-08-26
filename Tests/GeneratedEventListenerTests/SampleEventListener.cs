@@ -12,6 +12,7 @@ internal sealed class SampleEventListener :
 {
     public FooArguments? Result { get; private set; }
 
+    /// <inheritdoc />
     protected override void Foo(int p0, string p1, DateTime p2, byte[] p3)
     {
         this.Result = new(p0, p1, p2, p3);

@@ -51,52 +51,9 @@ internal static class EventListenerBaseEmitter
             """);
         codeBuilder.Indent();
 
-        var metadata = methodInfo.Metadata;
-        var eventId = metadata.EventId;
-        var eventLevel = metadata.Level;
-        var eventKeywords = string.Join(" | ", metadata.Keywords);
-
-        codeBuilder.AppendLineWithIndent($"[global::{GeneratedEventAttributeFullName}({eventId}, {eventLevel}, {eventKeywords})]");
-        codeBuilder.AppendWithIndent($"protected virtual void {methodInfo.MethodName}");
-
-        var parameters = methodInfo.Parameters;
-        var parametersCount = parameters.Count;
-
-        if (parametersCount == 0)
-        {
-            codeBuilder.AppendWithoutIndent("()");
-            codeBuilder.AppendLineWithoutIndent();
-        }
-        else
-        {
-            codeBuilder.AppendWithoutIndent("(");
-            codeBuilder.AppendLineWithoutIndent();
-            codeBuilder.Indent();
-
-            var lastParameterIndex = parametersCount - 1;
-
-            for (var i = 0; i <= lastParameterIndex; ++i)
-            {
-                var parameter = parameters[i];
-                var delimiter = i < lastParameterIndex ? "," : ")";
-
-                if (parameter.IsRelatedActivityIdParameter)
-                {
-                    continue;
-                }
-
-                codeBuilder.AppendLineWithIndent($"{parameter.FullyQualifiedTypeName} {parameter.Name}{delimiter}");
-            }
-
-            codeBuilder.Unindent();
-        }
-
-        codeBuilder.AppendLineWithIndent("{");
-        codeBuilder.Indent();
-
-        // method
-        codeBuilder.Unindent();
-        codeBuilder.AppendLineWithIndent("}");
+        EmitMethod(codeBuilder, methodInfo, true);
+        codeBuilder.AppendLineWithoutIndent();
+        EmitMethod(codeBuilder, methodInfo, false);
 
         // class
         codeBuilder.Unindent();
@@ -114,16 +71,117 @@ internal static class EventListenerBaseEmitter
 
         var code = codeBuilder.ToString();
 
-        var fileNameSegment = new List<string>();
+        var fileNameSegments = new List<string>();
 
-        fileNameSegment.AddRange(methodInfo.NamespaceSegments);
-        fileNameSegment.AddRange(methodInfo.ContainingTypes.Select(static x => x.Name));
-        fileNameSegment.Add("ListenerBase");
-        fileNameSegment.Add(methodInfo.MethodName);
-        fileNameSegment.Add(GeneratedFileExtension);
+        fileNameSegments.AddRange(methodInfo.NamespaceSegments);
+        fileNameSegments.AddRange(methodInfo.ContainingTypes.Select(static x => x.Name));
+        fileNameSegments.Add(methodInfo.ClassName);
+        fileNameSegments.Add("ListenerBase");
+        fileNameSegments.Add(methodInfo.MethodName);
+        fileNameSegments.Add(GeneratedFileExtension);
 
-        var fileName = string.Join(".", fileNameSegment);
+        var fileName = string.Join(".", fileNameSegments);
 
         context.AddSource(fileName, code);
+    }
+
+    private static void EmitMethod(
+        IndentedStringBuilder codeBuilder,
+        EventSourceInfo methodInfo,
+        bool emitRawMethod)
+    {
+        var metadata = methodInfo.Metadata;
+        var eventId = metadata.EventId;
+        var eventLevel = metadata.Level;
+        var eventKeywords = string.Join(" | ", metadata.Keywords);
+
+        if (emitRawMethod)
+        {
+            codeBuilder.AppendLineWithIndent(
+                $"[global::{GeneratedEventAttributeFullName}({eventId}, {eventLevel}, {eventKeywords})]");
+        }
+
+        codeBuilder.AppendWithIndent($"protected virtual void {methodInfo.MethodName}");
+
+        var parameters = methodInfo.Parameters;
+        var hasRelatedActivityIdParameter = parameters.Count != 0 && parameters[0].IsRelatedActivityIdParameter;
+
+        if ((parameters.Count == 0 || (parameters.Count == 1 && hasRelatedActivityIdParameter)) && !emitRawMethod)
+        {
+            codeBuilder.AppendWithoutIndent("()");
+            codeBuilder.AppendLineWithoutIndent();
+        }
+        else
+        {
+            codeBuilder.AppendWithoutIndent("(");
+            codeBuilder.AppendLineWithoutIndent();
+            codeBuilder.Indent();
+
+            if (emitRawMethod)
+            {
+                var delimiter = (parameters.Count == 0 || (parameters.Count == 1 && hasRelatedActivityIdParameter)) ? ")" : ",";
+                codeBuilder.AppendLineWithIndent(
+                    $"global::System.Diagnostics.Tracing.EventWrittenEventArgs args{delimiter}");
+            }
+
+            var parameterStart = 0;
+
+            if (hasRelatedActivityIdParameter)
+            {
+                parameterStart = 1;
+            }
+
+            for (var i = parameterStart; i < parameters.Count; ++i)
+            {
+                var parameter = parameters[i];
+                var delimiter = i < parameters.Count - 1 ? "," : ")";
+
+                codeBuilder.AppendLineWithIndent($"{parameter.FullyQualifiedTypeName} {parameter.Name}{delimiter}");
+            }
+
+            codeBuilder.Unindent();
+        }
+
+        codeBuilder.AppendLineWithIndent("{");
+        codeBuilder.Indent();
+
+        if (emitRawMethod)
+        {
+            codeBuilder.AppendWithIndent($"this.{methodInfo.MethodName}");
+
+            if (parameters.Count == 0 || (parameters.Count == 1 && hasRelatedActivityIdParameter))
+            {
+                codeBuilder.AppendWithoutIndent("();");
+                codeBuilder.AppendLineWithoutIndent();
+            }
+            else
+            {
+                codeBuilder.AppendWithoutIndent("(");
+
+                for (var i = 0; i < parameters.Count; ++i)
+                {
+                    var parameter = parameters[i];
+
+                    if (parameter.IsRelatedActivityIdParameter)
+                    {
+                        continue;
+                    }
+
+                    codeBuilder.AppendWithoutIndent(parameter.Name);
+
+                    if (i < parameters.Count - 1)
+                    {
+                        codeBuilder.AppendWithoutIndent(", ");
+                    }
+                }
+
+                codeBuilder.AppendWithoutIndent(");");
+                codeBuilder.AppendLineWithoutIndent();
+            }
+        }
+
+        // method
+        codeBuilder.Unindent();
+        codeBuilder.AppendLineWithIndent("}");
     }
 }

@@ -51,7 +51,8 @@ internal static class EventSourceEmitter
         codeBuilder.Indent();
 
         var parameters = methodInfo.Parameters;
-        var parametersCount = parameters.Count;
+        var parameterCount = parameters.Count;
+        var hasRelatedActivityIdParameter = parameterCount != 0 && parameters[0].IsRelatedActivityIdParameter;
 
         // TODO: message
         codeBuilder.AppendLineWithIndent(
@@ -64,7 +65,7 @@ internal static class EventSourceEmitter
 
         codeBuilder.AppendWithIndent($"{methodInfo.AccessibilityKeyword} partial void {methodInfo.MethodName}");
 
-        if (parametersCount == 0)
+        if (parameterCount == 0)
         {
             codeBuilder.AppendWithoutIndent("()");
             codeBuilder.AppendLineWithoutIndent();
@@ -75,12 +76,11 @@ internal static class EventSourceEmitter
             codeBuilder.AppendLineWithoutIndent();
             codeBuilder.Indent();
 
-            var lastParameterIndex = parametersCount - 1;
-
-            for (var i = 0; i <= lastParameterIndex; ++i)
+            var parameterEnd = parameterCount - 1;
+            for (var i = 0; i <= parameterEnd; ++i)
             {
                 var parameter = parameters[i];
-                var delimiter = i < lastParameterIndex ? "," : ")";
+                var delimiter = i < parameterEnd ? "," : ")";
 
                 codeBuilder.AppendLineWithIndent($"{parameter.FullyQualifiedTypeName} {parameter.Name}{delimiter}");
             }
@@ -114,35 +114,32 @@ internal static class EventSourceEmitter
             """);
         codeBuilder.Indent();
 
-        var byteArrayParameterCount = parameters.Count(static x => x.FullyQualifiedTypeName == "global::System.Byte[]");
-
-        if (parametersCount == 0)
+        if (parameterCount == 0)
         {
             codeBuilder.AppendLineWithIndent($"this.WriteEventWithRelatedActivityIdCore({eventId}, null, 0, null);");
         }
         else
         {
-            var dataEntryCount = parametersCount + byteArrayParameterCount;
+            var byteArrayParameterCount = parameters.Count(static x => x.FullyQualifiedTypeName == "global::System.Byte[]");
+
+            var dataEntryCount = parameterCount + byteArrayParameterCount;
+            var parameterStart = 0;
             var relatedActivityIdExpression = "null";
 
-            if (parameters[0] is { IsRelatedActivityIdParameter: true, Name: var isRelatedActivityIdParameterName })
+            if (hasRelatedActivityIdParameter)
             {
-                relatedActivityIdExpression = $"&{isRelatedActivityIdParameterName}";
+                relatedActivityIdExpression = "&relatedActivityId";
+                parameterStart = 1;
                 --dataEntryCount;
             }
 
             codeBuilder.AppendLineWithIndent($"global::System.Diagnostics.Tracing.EventSource.EventData *data = stackalloc global::System.Diagnostics.Tracing.EventSource.EventData[{dataEntryCount}];");
             codeBuilder.AppendLineWithoutIndent();
 
-            for (int i = 0, j = 0, k = 0; i < parametersCount; ++i)
+            for (int i = parameterStart, j = 0, k = 0; i < parameterCount; ++i)
             {
                 var (typeName, parameterName, isEnum, size, isRelatedActivityIdParameter) = parameters[i];
                 var sizeExpression = size?.ToString(CultureInfo.InvariantCulture);
-
-                if (isRelatedActivityIdParameter)
-                {
-                    continue;
-                }
 
                 if (isEnum)
                 {
@@ -281,14 +278,15 @@ internal static class EventSourceEmitter
 
         var code = codeBuilder.ToString();
 
-        var fileNameSegment = new List<string>();
+        var fileNameSegments = new List<string>();
 
-        fileNameSegment.AddRange(methodInfo.NamespaceSegments);
-        fileNameSegment.AddRange(methodInfo.ContainingTypes.Select(static x => x.Name));
-        fileNameSegment.Add(methodInfo.MethodName);
-        fileNameSegment.Add(GeneratedFileExtension);
+        fileNameSegments.AddRange(methodInfo.NamespaceSegments);
+        fileNameSegments.AddRange(methodInfo.ContainingTypes.Select(static x => x.Name));
+        fileNameSegments.Add(methodInfo.ClassName);
+        fileNameSegments.Add(methodInfo.MethodName);
+        fileNameSegments.Add(GeneratedFileExtension);
 
-        var fileName = string.Join(".", fileNameSegment);
+        var fileName = string.Join(".", fileNameSegments);
 
         context.AddSource(fileName, code);
 
