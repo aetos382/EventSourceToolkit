@@ -15,7 +15,7 @@ internal static class EventListenerBaseEmitter
         SourceProductionContext context,
         EventSourceMethodInfoWithDiagnostics input)
     {
-        if (input.MethodInfo is not { } methodInfo)
+        if (input.SourceInfo is not { } methodInfo)
         {
             return;
         }
@@ -41,7 +41,8 @@ internal static class EventListenerBaseEmitter
         }
 
         codeBuilder.AppendLineWithIndent(
-            """
+            $$"""
+            [global::{{GeneratedEventListenerMarkerAttributeFullName}}]
             public abstract partial class ListenerBase : global::System.Diagnostics.Tracing.EventListener
             {
             """);

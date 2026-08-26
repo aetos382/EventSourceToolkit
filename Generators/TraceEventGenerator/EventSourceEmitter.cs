@@ -21,7 +21,7 @@ internal static class EventSourceEmitter
             context.ReportDiagnostic(diagnostic.CreateDiagnostic());
         }
 
-        if (input.MethodInfo is not { } methodInfo)
+        if (input.SourceInfo is not { } methodInfo)
         {
             return;
         }
@@ -49,6 +49,8 @@ internal static class EventSourceEmitter
         var parameters = methodInfo.Parameters;
         var parametersCount = parameters.Count;
 
+        // TODO: message
+        codeBuilder.AppendLineWithIndent("[global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"foobar\")]");
         codeBuilder.AppendWithIndent($"{methodInfo.AccessibilityKeyword} partial void {methodInfo.MethodName}");
 
         if (parametersCount == 0)

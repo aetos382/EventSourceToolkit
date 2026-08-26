@@ -13,8 +13,8 @@ public sealed class Test1
     [TestMethod]
     public void TestMethod1()
     {
-        var source = new SampleEventSource();
-        var listener = new SampleEventListener();
+        using var source = new SampleEventSource();
+        using var listener = new SampleEventListener();
 
         listener.EnableEvents(source, EventLevel.Informational);
 

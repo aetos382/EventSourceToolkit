@@ -13,6 +13,9 @@ internal static class SymbolExtensions
         public IEnumerable<AttributeData> GetAttributes(
             INamedTypeSymbol attributeType)
         {
+            ArgumentNullException.ThrowIfNull(symbol);
+            ArgumentNullException.ThrowIfNull(attributeType);
+
             var comparer = SymbolEqualityComparer.Default;
 
             foreach (var attribute in symbol.GetAttributes())
@@ -27,6 +30,9 @@ internal static class SymbolExtensions
         public AttributeData? GetAttribute(
             INamedTypeSymbol attributeType)
         {
+            ArgumentNullException.ThrowIfNull(symbol);
+            ArgumentNullException.ThrowIfNull(attributeType);
+
             AttributeData? found = null;
 
             foreach (var data in symbol.GetAttributes(attributeType))
@@ -45,14 +51,27 @@ internal static class SymbolExtensions
         public bool HasAttribute(
             INamedTypeSymbol attributeType)
         {
+            ArgumentNullException.ThrowIfNull(symbol);
+            ArgumentNullException.ThrowIfNull(attributeType);
+
             return symbol.GetAttributes(attributeType).Any();
         }
     }
 
     extension(ITypeSymbol symbol)
     {
+        public IEnumerable<IMethodSymbol> GetMethods()
+        {
+            ArgumentNullException.ThrowIfNull(symbol);
+
+            return symbol.GetMembers().OfType<IMethodSymbol>();
+        }
+
         public bool IsDerivedFrom(ITypeSymbol baseType)
         {
+            ArgumentNullException.ThrowIfNull(symbol);
+            ArgumentNullException.ThrowIfNull(baseType);
+
             var currentSymbol = symbol;
             var comparer = SymbolEqualityComparer.Default;
 
@@ -71,6 +90,8 @@ internal static class SymbolExtensions
 
         public string ToFullyQualifiedString()
         {
+            ArgumentNullException.ThrowIfNull(symbol);
+
             // SymbolDisplayFormat では SymbolDisplayMiscellaneousOptions.UseSpecialTypes フラグが含まれていなくても
             // IntPtr / UIntPtr は "nint" / "nuint" になってしまうので、自力で文字列化する。
             // https://github.com/dotnet/roslyn/issues/76895

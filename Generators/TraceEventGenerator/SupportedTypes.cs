@@ -31,8 +31,7 @@ internal sealed class SupportedTypes
             wellKnownTypes.DateTime,
             wellKnownTypes.Guid,
             wellKnownTypes.String,
-            wellKnownTypes.ByteArray,
-            wellKnownTypes.BytePointer
+            wellKnownTypes.ByteArray
         };
 
         this._supportedTypes = list.ToArray();

@@ -158,7 +158,7 @@ internal sealed class EventSourceParser
             parentNode = parentNode.Parent;
         }
 
-        var methodInfo = new EventSourceMethodInfo(
+        var methodInfo = new EventSourceInfo(
             namespaceSegments.ToArray(),
             ancestorTypes.ToArray(),
             syntaxNode.AccessibilityKeyword,
@@ -173,45 +173,9 @@ internal sealed class EventSourceParser
         return methodInfoWithDiagnostics;
     }
 
-    private static bool IsValidClassModifiers(
-        ClassDeclarationSyntax node)
-    {
-        return node is { HasPartialModifier: true, HasFileModifier: false };
-    }
-
     private AttributeData? GetEventSourceAttribute(INamedTypeSymbol type)
     {
         return type.GetAttribute(this._wellKnownTypes.EventSourceAttribute);
-    }
-
-    private string? GetEventSourceName(INamedTypeSymbol type)
-    {
-        var wellKnownTypes = this._wellKnownTypes;
-
-        var attribute = type.GetAttribute(wellKnownTypes.EventSourceAttribute);
-        if (attribute is null)
-        {
-            return null;
-        }
-
-        var comparer = SymbolEqualityComparer.Default;
-
-        foreach (var (name, value) in attribute.NamedArguments)
-        {
-            if (name != nameof(EventSourceAttribute.Name))
-            {
-                continue;
-            }
-
-            if (!comparer.Equals(value.Type, wellKnownTypes.String))
-            {
-                continue;
-            }
-
-            return (string?)value.Value;
-        }
-
-        return null;
     }
 
     private bool IsDerivedFromEventSource(INamedTypeSymbol type)
@@ -259,7 +223,7 @@ internal sealed class EventSourceParser
             switch (key)
             {
                 case nameof(EventAttribute.Level):
-                    level = $"global::System.Diagnostics.Tracing.EventLevel.{Enum.GetName(typeof(EventLevel), value.Value!)}";
+                    level = Enum.GetName(typeof(EventLevel), value.Value!);
                     break;
 
                 case nameof(EventAttribute.Keywords):
@@ -283,6 +247,8 @@ internal sealed class EventSourceParser
         {
             keywords.Add("global::System.Diagnostics.Tracing.EventKeywords.None");
         }
+
+        level = $"global::System.Diagnostics.Tracing.EventLevel.{level}";
 
         return new(id, level, keywords.ToArray());
     }

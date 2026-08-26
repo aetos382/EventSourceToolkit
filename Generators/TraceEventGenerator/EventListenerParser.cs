@@ -38,10 +38,32 @@ internal sealed class EventListenerParser
             return EventListenerInfoWithDiagnostics.Empty;
         }
 
-        if (!symbol.IsDerivedFrom(wellKnownTypes.EventListener))
+        var baseType = symbol.BaseType;
+        while (baseType is not null)
+        {
+            if (baseType.HasAttribute(wellKnownTypes.GeneratedEventListenerMarkerAttribute))
+            {
+                break;
+            }
+
+            baseType = baseType.BaseType;
+        }
+
+        if (baseType is null)
         {
             // TODO: diagnostic
             return EventListenerInfoWithDiagnostics.Empty;
+        }
+
+        foreach (var method in baseType.GetMethods())
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var eventAttribute = method.GetAttribute(wellKnownTypes.GeneratedEventAttribute);
+            if (eventAttribute is null)
+            {
+                continue;
+            }
         }
 
         return EventListenerInfoWithDiagnostics.Empty;

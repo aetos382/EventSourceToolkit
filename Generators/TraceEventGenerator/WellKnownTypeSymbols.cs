@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 using Microsoft.CodeAnalysis;
 
@@ -260,6 +261,15 @@ internal sealed class WellKnownTypeSymbols
         }
     }
 
+    public INamedTypeSymbol GeneratedEventListenerMarkerAttribute
+    {
+        get
+        {
+            field ??= this.GetTypeSymbol(GeneratedEventListenerMarkerAttributeFullName);
+            return field;
+        }
+    }
+
     public INamedTypeSymbol GeneratedEventAttribute
     {
         get
@@ -271,11 +281,17 @@ internal sealed class WellKnownTypeSymbols
 
     private INamedTypeSymbol GetTypeSymbol(string metadataName)
     {
-        return this._compilation.GetTypeByMetadataName(metadataName)!;
+        var symbol = this._compilation.GetTypeByMetadataName(metadataName);
+
+        Debug.Assert(symbol is not null);
+
+        return symbol!;
     }
 
     private INamedTypeSymbol GetTypeSymbol(SpecialType specialType)
     {
-        return this._compilation.GetSpecialType(specialType);
+        var symbol = this._compilation.GetSpecialType(specialType);
+
+        return symbol;
     }
 }
