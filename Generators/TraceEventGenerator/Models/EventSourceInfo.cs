@@ -16,7 +16,7 @@ internal sealed record EventMetadataInfo(
     string Level,
     EquatableArray<string> Keywords);
 
-internal sealed record EventSourceMethodInfo(
+internal sealed record EventSourceInfo(
     EquatableArray<string> NamespaceSegments,
     EquatableArray<ContainingTypeInfo> ContainingTypes,
     string? AccessibilityKeyword,
@@ -25,7 +25,7 @@ internal sealed record EventSourceMethodInfo(
     EquatableArray<EventSourceMethodParameterInfo> Parameters);
 
 internal sealed record EventSourceMethodInfoWithDiagnostics(
-    EventSourceMethodInfo? MethodInfo,
+    EventSourceInfo? SourceInfo,
     EquatableArray<DiagnosticInfo> Diagnostics)
 {
     public static readonly EventSourceMethodInfoWithDiagnostics Empty = new(null, []);

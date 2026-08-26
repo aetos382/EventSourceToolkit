@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -60,6 +62,7 @@ public sealed partial class TraceEventGenerator :
                     return parser.ParseEventListener(
                         (ClassDeclarationSyntax)context.TargetNode,
                         (INamedTypeSymbol)context.TargetSymbol,
+                        context.Attributes,
                         cancellationToken);
                 })
             .WithTrackingName("EventListenerInfo");

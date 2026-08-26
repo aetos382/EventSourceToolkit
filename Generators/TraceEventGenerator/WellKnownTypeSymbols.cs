@@ -2,6 +2,8 @@ using System;
 
 using Microsoft.CodeAnalysis;
 
+using static Aetos.Tracing.Constants;
+
 namespace Aetos.Tracing;
 
 internal sealed class WellKnownTypeSymbols
@@ -177,20 +179,20 @@ internal sealed class WellKnownTypeSymbols
         }
     }
 
-    public IPointerTypeSymbol BytePointer
+    public INamedTypeSymbol EventLevel
     {
         get
         {
-            field ??= this._compilation.CreatePointerTypeSymbol(this.Byte);
+            field ??= this.GetTypeSymbol("System.Diagnostics.Tracing.EventLevel");
             return field;
         }
     }
 
-    public INamedTypeSymbol EventSource
+    public INamedTypeSymbol EventKeywords
     {
         get
         {
-            field ??= this.GetTypeSymbol("System.Diagnostics.Tracing.EventSource");
+            field ??= this.GetTypeSymbol("System.Diagnostics.Tracing.EventKeywords");
             return field;
         }
     }
@@ -222,20 +224,20 @@ internal sealed class WellKnownTypeSymbols
         }
     }
 
-    public INamedTypeSymbol EventLevel
+    public INamedTypeSymbol EventSource
     {
         get
         {
-            field ??= this.GetTypeSymbol("System.Diagnostics.Tracing.EventLevel");
+            field ??= this.GetTypeSymbol("System.Diagnostics.Tracing.EventSource");
             return field;
         }
     }
 
-    public INamedTypeSymbol EventKeywords
+    public INamedTypeSymbol EventListener
     {
         get
         {
-            field ??= this.GetTypeSymbol("System.Diagnostics.Tracing.EventKeywords");
+            field ??= this.GetTypeSymbol("System.Diagnostics.Tracing.EventListener");
             return field;
         }
     }
@@ -244,7 +246,25 @@ internal sealed class WellKnownTypeSymbols
     {
         get
         {
-            field ??= this.GetTypeSymbol("Aetos.Tracing.GeneratedEventSourceAttribute");
+            field ??= this.GetTypeSymbol(GeneratedEventSourceAttributeFullName);
+            return field;
+        }
+    }
+
+    public INamedTypeSymbol GeneratedEventListenerAttribute
+    {
+        get
+        {
+            field ??= this.GetTypeSymbol(GeneratedEventListenerAttributeFullName);
+            return field;
+        }
+    }
+
+    public INamedTypeSymbol GeneratedEventAttribute
+    {
+        get
+        {
+            field ??= this.GetTypeSymbol(GeneratedEventAttributeFullName);
             return field;
         }
     }
