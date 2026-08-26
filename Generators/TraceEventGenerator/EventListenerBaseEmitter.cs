@@ -51,9 +51,50 @@ internal static class EventListenerBaseEmitter
             """);
         codeBuilder.Indent();
 
-        EmitMethod(codeBuilder, methodInfo, true);
+        var metadata = methodInfo.Metadata;
+        var eventId = metadata.EventId;
+        var eventLevel = metadata.Level;
+        var eventKeywords = string.Join(" | ", metadata.Keywords);
+
+        codeBuilder.AppendLineWithIndent(
+            $"[global::{GeneratedEventAttributeFullName}({eventId}, {eventLevel}, {eventKeywords})]");
+
+        codeBuilder.AppendWithIndent($"protected virtual void {methodInfo.MethodName}");
+
+        var parameters = methodInfo.Parameters;
+        var hasRelatedActivityIdParameter = parameters.Count != 0 && parameters[0].IsRelatedActivityIdParameter;
+
+        codeBuilder.AppendWithoutIndent("(");
         codeBuilder.AppendLineWithoutIndent();
-        EmitMethod(codeBuilder, methodInfo, false);
+        codeBuilder.Indent();
+
+        var delimiter = (parameters.Count == 0 || (parameters.Count == 1 && hasRelatedActivityIdParameter)) ? ")" : ",";
+        codeBuilder.AppendLineWithIndent(
+            $"global::System.Diagnostics.Tracing.EventWrittenEventArgs args{delimiter}");
+
+        var parameterStart = 0;
+
+        if (hasRelatedActivityIdParameter)
+        {
+            parameterStart = 1;
+        }
+
+        for (var i = parameterStart; i < parameters.Count; ++i)
+        {
+            var parameter = parameters[i];
+            var delimiter2 = i < parameters.Count - 1 ? "," : ")";
+
+            codeBuilder.AppendLineWithIndent($"{parameter.FullyQualifiedTypeName} {parameter.Name}{delimiter2}");
+        }
+
+        codeBuilder.Unindent();
+
+        codeBuilder.AppendLineWithIndent("{");
+        codeBuilder.Indent();
+
+        // method
+        codeBuilder.Unindent();
+        codeBuilder.AppendLineWithIndent("}");
 
         // class
         codeBuilder.Unindent();
@@ -83,105 +124,5 @@ internal static class EventListenerBaseEmitter
         var fileName = string.Join(".", fileNameSegments);
 
         context.AddSource(fileName, code);
-    }
-
-    private static void EmitMethod(
-        IndentedStringBuilder codeBuilder,
-        EventSourceInfo methodInfo,
-        bool emitRawMethod)
-    {
-        var metadata = methodInfo.Metadata;
-        var eventId = metadata.EventId;
-        var eventLevel = metadata.Level;
-        var eventKeywords = string.Join(" | ", metadata.Keywords);
-
-        if (emitRawMethod)
-        {
-            codeBuilder.AppendLineWithIndent(
-                $"[global::{GeneratedEventAttributeFullName}({eventId}, {eventLevel}, {eventKeywords})]");
-        }
-
-        codeBuilder.AppendWithIndent($"protected virtual void {methodInfo.MethodName}");
-
-        var parameters = methodInfo.Parameters;
-        var hasRelatedActivityIdParameter = parameters.Count != 0 && parameters[0].IsRelatedActivityIdParameter;
-
-        if ((parameters.Count == 0 || (parameters.Count == 1 && hasRelatedActivityIdParameter)) && !emitRawMethod)
-        {
-            codeBuilder.AppendWithoutIndent("()");
-            codeBuilder.AppendLineWithoutIndent();
-        }
-        else
-        {
-            codeBuilder.AppendWithoutIndent("(");
-            codeBuilder.AppendLineWithoutIndent();
-            codeBuilder.Indent();
-
-            if (emitRawMethod)
-            {
-                var delimiter = (parameters.Count == 0 || (parameters.Count == 1 && hasRelatedActivityIdParameter)) ? ")" : ",";
-                codeBuilder.AppendLineWithIndent(
-                    $"global::System.Diagnostics.Tracing.EventWrittenEventArgs args{delimiter}");
-            }
-
-            var parameterStart = 0;
-
-            if (hasRelatedActivityIdParameter)
-            {
-                parameterStart = 1;
-            }
-
-            for (var i = parameterStart; i < parameters.Count; ++i)
-            {
-                var parameter = parameters[i];
-                var delimiter = i < parameters.Count - 1 ? "," : ")";
-
-                codeBuilder.AppendLineWithIndent($"{parameter.FullyQualifiedTypeName} {parameter.Name}{delimiter}");
-            }
-
-            codeBuilder.Unindent();
-        }
-
-        codeBuilder.AppendLineWithIndent("{");
-        codeBuilder.Indent();
-
-        if (emitRawMethod)
-        {
-            codeBuilder.AppendWithIndent($"this.{methodInfo.MethodName}");
-
-            if (parameters.Count == 0 || (parameters.Count == 1 && hasRelatedActivityIdParameter))
-            {
-                codeBuilder.AppendWithoutIndent("();");
-                codeBuilder.AppendLineWithoutIndent();
-            }
-            else
-            {
-                codeBuilder.AppendWithoutIndent("(");
-
-                for (var i = 0; i < parameters.Count; ++i)
-                {
-                    var parameter = parameters[i];
-
-                    if (parameter.IsRelatedActivityIdParameter)
-                    {
-                        continue;
-                    }
-
-                    codeBuilder.AppendWithoutIndent(parameter.Name);
-
-                    if (i < parameters.Count - 1)
-                    {
-                        codeBuilder.AppendWithoutIndent(", ");
-                    }
-                }
-
-                codeBuilder.AppendWithoutIndent(");");
-                codeBuilder.AppendLineWithoutIndent();
-            }
-        }
-
-        // method
-        codeBuilder.Unindent();
-        codeBuilder.AppendLineWithIndent("}");
     }
 }

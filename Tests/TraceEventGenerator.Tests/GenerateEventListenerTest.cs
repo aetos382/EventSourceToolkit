@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 using Microsoft.CodeAnalysis;
@@ -7,6 +9,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 
 using Basic.Reference.Assemblies;
+
+using Shouldly;
 
 namespace Aetos.Tracing.Tests;
 
@@ -46,6 +50,25 @@ public sealed class GenerateEventListenerTest
             }
             """;
 
+        const string EventListenerCode =
+            """
+            using System.Diagnostics.Tracing;
+
+            using Aetos.Tracing;
+
+            namespace Samples;
+
+            [GeneratedEventListener("SampleEvents")]
+            internal sealed partial class SampleEventListener : SampleEventSource.ListenerBase
+            {
+                protected override void Foo(EventWrittenEventArgs args)
+                {
+                }
+            }
+            """;
+
+        var diagnostics = new List<Diagnostic>();
+
         var parseOptions = CSharpParseOptions.Default;
 
         var compilationOptions = new CSharpCompilationOptions(
@@ -79,13 +102,11 @@ public sealed class GenerateEventListenerTest
         eventSourceGeneratorDriver = eventSourceGeneratorDriver.RunGeneratorsAndUpdateCompilation(
             eventSourceCompilation,
             out var updatedEventSourceCompilation,
-            out var eventSourceDiagnostics,
+            out var eventSourceGeneratorDiagnostics,
             testCancellationToken);
 
-        foreach (var eventSourceDiagnostic in eventSourceDiagnostics)
-        {
-            testContext.WriteLine(eventSourceDiagnostic.ToString());
-        }
+        diagnostics.AddRange(updatedEventSourceCompilation.GetDiagnostics(testCancellationToken));
+        diagnostics.AddRange(eventSourceGeneratorDiagnostics);
 
         using var eventSourcePeStream = new MemoryStream();
         using var eventSourcePdbStream = new MemoryStream();
@@ -107,28 +128,18 @@ public sealed class GenerateEventListenerTest
         eventSourcePdbStream.Position = 0;
 
         var eventListenerSyntaxTree = CSharpSyntaxTree.ParseText(
-            """
-            using Aetos.Tracing;
-
-            namespace Samples;
-
-            [GeneratedEventListener("SampleEvents")]
-            internal sealed partial class SampleEventListener : SampleEventSource.ListenerBase
-            {
-                public override void Foo()
-                {
-                }
-            }
-            """);
-
-        var eventSourceAssemblyReference = MetadataReference.CreateFromStream(eventSourcePeStream);
+            EventListenerCode,
+            parseOptions,
+            "EventListener.cs",
+            Encoding.UTF8,
+            testCancellationToken);
 
         var eventListenerCompilation = CSharpCompilation.Create(
             "EventConsumer",
             [eventListenerSyntaxTree],
             [
                 .. Net100.References.All,
-                eventSourceAssemblyReference
+                MetadataReference.CreateFromStream(eventSourcePeStream)
             ],
             compilationOptions);
 
@@ -137,15 +148,21 @@ public sealed class GenerateEventListenerTest
             parseOptions: parseOptions,
             driverOptions: driverOptions);
 
-        eventListenerGeneratorDriver = eventListenerGeneratorDriver.RunGenerators(
-            eventListenerCompilation, testCancellationToken);
+        eventListenerGeneratorDriver = eventListenerGeneratorDriver.RunGeneratorsAndUpdateCompilation(
+            eventListenerCompilation,
+            out var updatedEventListenerCompilation,
+            out var eventListenerGeneratorDiagnostics,
+            testCancellationToken);
 
-        var eventListenerGenerationResult = eventListenerGeneratorDriver.GetRunResult();
+        diagnostics.AddRange(updatedEventListenerCompilation.GetDiagnostics(testCancellationToken));
+        diagnostics.AddRange(eventListenerGeneratorDiagnostics);
 
-        foreach (var eventListenerDiagnostic in eventListenerGenerationResult.Diagnostics)
+        foreach (var diagnostic in diagnostics)
         {
-            testContext.WriteLine(eventListenerDiagnostic.ToString());
+            testContext.WriteLine(diagnostic.ToString());
         }
+
+        diagnostics.ShouldNotContain(static x => x.Severity == DiagnosticSeverity.Error);
     }
 
     public GenerateEventListenerTest(
