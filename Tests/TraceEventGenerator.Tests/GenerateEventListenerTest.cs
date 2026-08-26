@@ -109,7 +109,23 @@ public sealed class GenerateEventListenerTest
             Net100.References.All,
             compilationOptions);
 
-        var compilationWithAnalyzers = eventSourceCompilation
+        var eventSourceGeneratorDriver = (GeneratorDriver)CSharpGeneratorDriver.Create(
+            [new EventSourceAndListenerBaseGenerator().AsSourceGenerator()],
+            [],
+            parseOptions,
+            analyzerConfigOptionsProvider,
+            driverOptions);
+
+        eventSourceGeneratorDriver = eventSourceGeneratorDriver.RunGeneratorsAndUpdateCompilation(
+            eventSourceCompilation,
+            out var updatedEventSourceCompilation,
+            out var eventSourceGeneratorDiagnostics,
+            testCancellationToken);
+
+        diagnostics.AddRange(updatedEventSourceCompilation.GetDiagnostics(testCancellationToken));
+        diagnostics.AddRange(eventSourceGeneratorDiagnostics);
+
+        var compilationWithAnalyzers = updatedEventSourceCompilation
             .WithAnalyzers(
                 [new EventSourceAnalyzer()],
                 analysisOptions);
@@ -120,35 +136,14 @@ public sealed class GenerateEventListenerTest
 
         diagnostics.AddRange(analysisResult.GetAllDiagnostics());
 
-        var eventSourceGeneratorDriver = (GeneratorDriver)CSharpGeneratorDriver.Create(
-            [new EventSourceAndListenerBaseGenerator().AsSourceGenerator()],
-            [],
-            parseOptions,
-            analyzerConfigOptionsProvider,
-            driverOptions);
-
-        eventSourceGeneratorDriver = eventSourceGeneratorDriver.RunGeneratorsAndUpdateCompilation(
-            compilationWithAnalyzers.Compilation,
-            out var updatedEventSourceCompilation,
-            out var eventSourceGeneratorDiagnostics,
-            testCancellationToken);
-
-        diagnostics.AddRange(updatedEventSourceCompilation.GetDiagnostics(testCancellationToken));
-        diagnostics.AddRange(eventSourceGeneratorDiagnostics);
-
         using var eventSourcePeStream = new MemoryStream();
 
-        var emitResult = updatedEventSourceCompilation.Emit(
+        var eventSourceEmitResult = compilationWithAnalyzers.Compilation.Emit(
             eventSourcePeStream,
             options: emitOptions,
             cancellationToken: testCancellationToken);
 
-        foreach (var emitDiagnostic in emitResult.Diagnostics)
-        {
-            testContext.WriteLine(emitDiagnostic.ToString());
-        }
-
-        Assert.IsTrue(emitResult.Success);
+        diagnostics.AddRange(eventSourceEmitResult.Diagnostics);
 
         eventSourcePeStream.Position = 0;
 
@@ -186,12 +181,24 @@ public sealed class GenerateEventListenerTest
         diagnostics.AddRange(updatedEventListenerCompilation.GetDiagnostics(testCancellationToken));
         diagnostics.AddRange(eventListenerGeneratorDiagnostics);
 
+        using var eventListenerPeStream = new MemoryStream();
+
+        var eventListenerEmitResult = updatedEventListenerCompilation.Emit(
+            eventListenerPeStream,
+            options: emitOptions,
+            cancellationToken: testCancellationToken);
+
+        diagnostics.AddRange(eventListenerEmitResult.Diagnostics);
+
         foreach (var diagnostic in diagnostics)
         {
             testContext.WriteLine(diagnostic.ToString());
         }
 
         diagnostics.ShouldNotContain(static x => x.Severity == DiagnosticSeverity.Error);
+
+        Assert.IsTrue(eventSourceEmitResult.Success);
+        Assert.IsTrue(eventListenerEmitResult.Success);
     }
 
     public GenerateEventListenerTest(
