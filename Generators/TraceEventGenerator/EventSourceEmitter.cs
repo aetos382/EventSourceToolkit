@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
+using Microsoft.CodeAnalysis;
+
 using Aetos.Tracing.Models;
 
-using Microsoft.CodeAnalysis;
+using static Aetos.Tracing.Constants;
 
 namespace Aetos.Tracing;
 
@@ -272,7 +274,7 @@ internal static class EventSourceEmitter
         fileNameSegment.AddRange(methodInfo.NamespaceSegments);
         fileNameSegment.AddRange(methodInfo.ContainingTypes.Select(static x => x.Name));
         fileNameSegment.Add(methodInfo.MethodName);
-        fileNameSegment.Add("g.cs");
+        fileNameSegment.Add(GeneratedFileExtension);
 
         var fileName = string.Join(".", fileNameSegment);
 

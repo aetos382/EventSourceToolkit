@@ -1,6 +1,8 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+using static Aetos.Tracing.Constants;
+
 namespace Aetos.Tracing;
 
 [Generator(LanguageNames.CSharp)]
@@ -13,6 +15,13 @@ public sealed partial class TraceEventGenerator :
     {
         context.RegisterPostInitializationOutput(PostInitialize);
 
+        GenerateEventSourceAndListenerBase(context);
+        GenerateDerivedEventListener(context);
+    }
+
+    private static void GenerateEventSourceAndListenerBase(
+        IncrementalGeneratorInitializationContext context)
+    {
         var eventSourceMethodProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "System.Diagnostics.Tracing.EventAttribute",
@@ -35,5 +44,19 @@ public sealed partial class TraceEventGenerator :
         context.RegisterSourceOutput(
             eventSourceMethodProvider,
             EventListenerBaseEmitter.EmitEventListenerBase);
+    }
+
+    private static void GenerateDerivedEventListener(
+        IncrementalGeneratorInitializationContext context)
+    {
+        var eventListenerClassProvider = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                GeneratedEventListenerAttributeFullName,
+                static (node, _) => node is ClassDeclarationSyntax,
+                static (context, cancellationToken) => 1);
+
+        context.RegisterSourceOutput(
+            eventListenerClassProvider,
+            EventListenerEmitter.EmitEventListener);
     }
 }

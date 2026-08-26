@@ -1,10 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 
 using GeneratedEventSourceTests;
 
-using static GeneratedEventListenerTests.SampleEventListener;
+using Shouldly;
 
 namespace GeneratedEventListenerTests;
 
@@ -14,9 +13,8 @@ public sealed class Test1
     [TestMethod]
     public void TestMethod1()
     {
-        var queue = new Queue<FooArguments>();
         var source = new SampleEventSource();
-        var listener = new SampleEventListener(queue);
+        var listener = new SampleEventListener();
 
         listener.EnableEvents(source, EventLevel.Informational);
 
@@ -24,7 +22,12 @@ public sealed class Test1
 
         source.Foo(Guid.NewGuid(), 3, "hello", datetime, [1, 2, 3]);
 
-        Assert.ContainsSingle(queue);
+        var (p0, p1, p2, p3) = listener.Result.ShouldNotBeNull();
+
+        p0.ShouldBe(3);
+        p1.ShouldBe("hello");
+        p2.ShouldBe(datetime);
+        p3.ShouldBe([1, 2, 3]);
     }
 
     public Test1(

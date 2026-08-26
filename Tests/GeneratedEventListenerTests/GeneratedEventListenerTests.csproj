@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Shouldly" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Generators\TraceEventGenerator\TraceEventGenerator.csproj">
       <OutputItemType>analyzer</OutputItemType>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

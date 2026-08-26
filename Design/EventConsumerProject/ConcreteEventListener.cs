@@ -2,6 +2,7 @@ using EventProducerProject;
 
 namespace EventConsumerProject;
 
+[GeneratedEventListener("SampleEvents")]
 public sealed partial class ConcreteEventListener :
     SampleEventListenerBase
 {
