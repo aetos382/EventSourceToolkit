@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Text;
+using System.Threading.Tasks;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Emit;
 
 using Basic.Reference.Assemblies;
@@ -19,7 +20,7 @@ namespace Aetos.Tracing.Tests;
 public sealed class GenerateEventListenerTest
 {
     [TestMethod]
-    public void X()
+    public async Task X()
     {
         var testContext = this._testContext;
         var testCancellationToken = testContext.CancellationToken;
@@ -68,6 +69,8 @@ public sealed class GenerateEventListenerTest
             }
             """;
 
+        var analyzerConfigOptionsProvider = new TestAnalyzerConfigOptionsProvider();
+
         var diagnostics = new List<Diagnostic>();
 
         var parseOptions = CSharpParseOptions.Default;
@@ -77,10 +80,21 @@ public sealed class GenerateEventListenerTest
             allowUnsafe: true,
             nullableContextOptions: NullableContextOptions.Enable);
 
+        var analysisOptions = new CompilationWithAnalyzersOptions(
+            new(
+                [],
+                analyzerConfigOptionsProvider),
+            static (e, a, d) => { },
+            true,
+            true,
+            false,
+            static (e) => true,
+            (a) => analyzerConfigOptionsProvider);
+
         var driverOptions = new GeneratorDriverOptions(
             trackIncrementalGeneratorSteps: true);
 
-        var emitOptions = new EmitOptions();
+        var emitOptions = new EmitOptions(metadataOnly: true);
 
         var eventSourceSyntaxTree = CSharpSyntaxTree.ParseText(
             EventSourceCode,
@@ -95,13 +109,26 @@ public sealed class GenerateEventListenerTest
             Net100.References.All,
             compilationOptions);
 
+        var compilationWithAnalyzers = eventSourceCompilation
+            .WithAnalyzers(
+                [new EventSourceAnalyzer()],
+                analysisOptions);
+
+        var analysisResult = await compilationWithAnalyzers
+            .GetAnalysisResultAsync(testCancellationToken)
+            .ConfigureAwait(false);
+
+        diagnostics.AddRange(analysisResult.GetAllDiagnostics());
+
         var eventSourceGeneratorDriver = (GeneratorDriver)CSharpGeneratorDriver.Create(
             [new EventSourceAndListenerBaseGenerator().AsSourceGenerator()],
-            parseOptions: parseOptions,
-            driverOptions: driverOptions);
+            [],
+            parseOptions,
+            analyzerConfigOptionsProvider,
+            driverOptions);
 
         eventSourceGeneratorDriver = eventSourceGeneratorDriver.RunGeneratorsAndUpdateCompilation(
-            eventSourceCompilation,
+            compilationWithAnalyzers.Compilation,
             out var updatedEventSourceCompilation,
             out var eventSourceGeneratorDiagnostics,
             testCancellationToken);
@@ -110,11 +137,9 @@ public sealed class GenerateEventListenerTest
         diagnostics.AddRange(eventSourceGeneratorDiagnostics);
 
         using var eventSourcePeStream = new MemoryStream();
-        using var eventSourcePdbStream = new MemoryStream();
 
         var emitResult = updatedEventSourceCompilation.Emit(
             eventSourcePeStream,
-            eventSourcePdbStream,
             options: emitOptions,
             cancellationToken: testCancellationToken);
 
@@ -126,7 +151,6 @@ public sealed class GenerateEventListenerTest
         Assert.IsTrue(emitResult.Success);
 
         eventSourcePeStream.Position = 0;
-        eventSourcePdbStream.Position = 0;
 
         var eventListenerSyntaxTree = CSharpSyntaxTree.ParseText(
             EventListenerCode,
@@ -148,8 +172,10 @@ public sealed class GenerateEventListenerTest
 
         var eventListenerGeneratorDriver = (GeneratorDriver)CSharpGeneratorDriver.Create(
             [new EventListenerGenerator().AsSourceGenerator()],
-            parseOptions: parseOptions,
-            driverOptions: driverOptions);
+            [],
+            parseOptions,
+            analyzerConfigOptionsProvider,
+            driverOptions);
 
         eventListenerGeneratorDriver = eventListenerGeneratorDriver.RunGeneratorsAndUpdateCompilation(
             eventListenerCompilation,
