@@ -30,12 +30,12 @@ public sealed partial class TraceEventGenerator :
                 {
                     var parser = new EventSourceParser(context.SemanticModel);
 
-                    return parser.ParseEventSourceMethod(
+                    return parser.ParseEventSource(
                         (MethodDeclarationSyntax)context.TargetNode,
                         (IMethodSymbol)context.TargetSymbol,
                         cancellationToken);
                 })
-            .WithTrackingName("EventSourceMethodInfo");
+            .WithTrackingName("EventSourceInfo");
 
         context.RegisterSourceOutput(
             eventSourceMethodProvider,
@@ -53,7 +53,16 @@ public sealed partial class TraceEventGenerator :
             .ForAttributeWithMetadataName(
                 GeneratedEventListenerAttributeFullName,
                 static (node, _) => node is ClassDeclarationSyntax,
-                static (context, cancellationToken) => 1);
+                static (context, cancellationToken) =>
+                {
+                    var parser = new EventListenerParser(context.SemanticModel);
+
+                    return parser.ParseEventListener(
+                        (ClassDeclarationSyntax)context.TargetNode,
+                        (INamedTypeSymbol)context.TargetSymbol,
+                        cancellationToken);
+                })
+            .WithTrackingName("EventListenerInfo");
 
         context.RegisterSourceOutput(
             eventListenerClassProvider,
