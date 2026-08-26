@@ -125,10 +125,13 @@ internal sealed class EventSourceParser
             parameters.Add(parameterInfo);
         }
 
+        var containingClass = (ClassDeclarationSyntax)syntaxNode.Parent!;
+        var containingClassName = containingClass.Identifier.ValueText;
+
         var ancestorTypes = new List<ContainingTypeInfo>();
         var namespaceSegments = new List<string>();
 
-        var parentNode = syntaxNode.Parent;
+        var parentNode = containingClass.Parent;
         while (parentNode is not null and not CompilationUnitSyntax)
         {
             if (parentNode is TypeDeclarationSyntax parentTypeNode)
@@ -161,6 +164,7 @@ internal sealed class EventSourceParser
         var methodInfo = new EventSourceInfo(
             namespaceSegments.ToArray(),
             ancestorTypes.ToArray(),
+            containingClassName,
             syntaxNode.AccessibilityKeyword,
             syntaxNode.Identifier.Text,
             eventMetadata,

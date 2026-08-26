@@ -18,11 +18,13 @@ internal static class SymbolExtensions
             ArgumentNullException.ThrowIfNull(attributeType);
 
             var comparer = SymbolEqualityComparer.Default;
+            var foundInDerived = false;
 
             foreach (var attribute in symbol.GetAttributes())
             {
                 if (comparer.Equals(attribute.AttributeClass, attributeType))
                 {
+                    foundInDerived = true;
                     yield return attribute;
                 }
             }
@@ -31,6 +33,9 @@ internal static class SymbolExtensions
             {
                 yield break;
             }
+
+            var attributeInherited = true;
+            var attributeAllowMultiple = false;
 
             // Roslyn は AttributeUsageAttribute.Inherited を見てくれないので、自分で継承階層を辿る
             foreach (var attributeOfAttribute in attributeType.GetAttributes())
@@ -43,33 +48,46 @@ internal static class SymbolExtensions
 
                 foreach (var (name, value) in attributeOfAttribute.NamedArguments)
                 {
-                    if (name != nameof(AttributeUsageAttribute.Inherited))
+                    if (name == nameof(AttributeUsageAttribute.Inherited))
                     {
-                        continue;
+                        attributeInherited = (bool)value.Value!;
                     }
-
-                    if ((bool)value.Value!)
+                    else if (name == nameof(AttributeUsageAttribute.AllowMultiple))
                     {
-                        break;
+                        attributeAllowMultiple = (bool)value.Value!;
                     }
-
-                    yield break;
                 }
             }
 
-            if (symbol is IMethodSymbol { OverriddenMethod: {} baseMethodSymbol })
+            if (!attributeInherited)
             {
-                foreach (var attribute in baseMethodSymbol.GetAttributes(attributeType, inherited))
-                {
-                    yield return attribute;
-                }
+                yield break;
             }
-            else if (symbol is ITypeSymbol { BaseType: { } baseTypeSymbol })
+
+            if (!attributeAllowMultiple && foundInDerived)
             {
-                foreach (var attribute in baseTypeSymbol.GetAttributes(attributeType, inherited))
-                {
-                    yield return attribute;
-                }
+                // AllowMultiple = false かつ基底クラスと派生クラスの両方に付いている場合、派生側のみ返す
+                yield break;
+            }
+
+            // Inherited = true でもインターフェイスの属性までは辿らない（リフレクションと同じ挙動）
+            ISymbol? baseSymbol = symbol switch
+            {
+                ITypeSymbol t => t.BaseType,
+                IMethodSymbol m => m.OverriddenMethod,
+                IPropertySymbol p => p.OverriddenProperty,
+                IEventSymbol e => e.OverriddenEvent,
+                _ => null
+            };
+
+            if (baseSymbol is null)
+            {
+                yield break;
+            }
+
+            foreach (var attribute in baseSymbol.GetAttributes(attributeType, true))
+            {
+                yield return attribute;
             }
         }
 
@@ -86,6 +104,7 @@ internal static class SymbolExtensions
             {
                 if (found is not null)
                 {
+                    // TODO: Resource
                     throw new ArgumentException();
                 }
 

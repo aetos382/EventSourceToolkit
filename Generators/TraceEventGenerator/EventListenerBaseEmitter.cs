@@ -40,6 +40,10 @@ internal static class EventListenerBaseEmitter
             codeBuilder.Indent();
         }
 
+        codeBuilder.AppendLineWithIndent($"partial class {methodInfo.ClassName}");
+        codeBuilder.AppendLineWithIndent("{");
+        codeBuilder.Indent();
+
         codeBuilder.AppendLineWithIndent(
             """
             public abstract partial class ListenerBase : global::System.Diagnostics.Tracing.EventListener

@@ -19,6 +19,7 @@ internal sealed record EventMetadataInfo(
 internal sealed record EventSourceInfo(
     EquatableArray<string> NamespaceSegments,
     EquatableArray<ContainingTypeInfo> ContainingTypes,
+    string ClassName,
     string? AccessibilityKeyword,
     string MethodName,
     EventMetadataInfo Metadata,

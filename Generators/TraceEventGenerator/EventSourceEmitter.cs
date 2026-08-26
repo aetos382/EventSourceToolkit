@@ -46,11 +46,22 @@ internal static class EventSourceEmitter
             codeBuilder.Indent();
         }
 
+        codeBuilder.AppendLineWithIndent($"partial class {methodInfo.ClassName}");
+        codeBuilder.AppendLineWithIndent("{");
+        codeBuilder.Indent();
+
         var parameters = methodInfo.Parameters;
         var parametersCount = parameters.Count;
 
         // TODO: message
-        codeBuilder.AppendLineWithIndent("[global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"foobar\")]");
+        codeBuilder.AppendLineWithIndent(
+            """
+            [global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(
+                "ReflectionAnalysis",
+                "IL2026:RequiresUnreferencedCode",
+                Justification = "Parameters to this method are primitive and are trimmer safe")]
+            """);
+
         codeBuilder.AppendWithIndent($"{methodInfo.AccessibilityKeyword} partial void {methodInfo.MethodName}");
 
         if (parametersCount == 0)
