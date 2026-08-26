@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using System.Text;
 
 using Microsoft.CodeAnalysis;
@@ -134,12 +135,14 @@ public sealed class GenerateEventListenerTest
             Encoding.UTF8,
             testCancellationToken);
 
+        using var eventSourceMetadata = AssemblyMetadata.CreateFromStream(eventSourcePeStream, PEStreamOptions.Default);
+
         var eventListenerCompilation = CSharpCompilation.Create(
             "EventConsumer",
             [eventListenerSyntaxTree],
             [
                 .. Net100.References.All,
-                MetadataReference.CreateFromStream(eventSourcePeStream)
+                eventSourceMetadata.GetReference()
             ],
             compilationOptions);
 
