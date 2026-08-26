@@ -57,21 +57,18 @@ internal static class SymbolExtensions
                 }
             }
 
-            if (symbol.IsOverride)
+            if (symbol is IMethodSymbol { OverriddenMethod: {} baseMethodSymbol })
             {
-                if (symbol is IMethodSymbol { OverriddenMethod: {} baseMethodSymbol })
+                foreach (var attribute in baseMethodSymbol.GetAttributes(attributeType, inherited))
                 {
-                    foreach (var attribute in baseMethodSymbol.GetAttributes(attributeType, inherited))
-                    {
-                        yield return attribute;
-                    }
+                    yield return attribute;
                 }
-                else if (symbol is ITypeSymbol { BaseType: { } baseTypeSymbol })
+            }
+            else if (symbol is ITypeSymbol { BaseType: { } baseTypeSymbol })
+            {
+                foreach (var attribute in baseTypeSymbol.GetAttributes(attributeType, inherited))
                 {
-                    foreach (var attribute in baseTypeSymbol.GetAttributes(attributeType, inherited))
-                    {
-                        yield return attribute;
-                    }
+                    yield return attribute;
                 }
             }
         }

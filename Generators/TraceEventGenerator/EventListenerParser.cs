@@ -38,18 +38,7 @@ internal sealed class EventListenerParser
             return EventListenerInfoWithDiagnostics.Empty;
         }
 
-        var baseType = symbol.BaseType;
-        while (baseType is not null)
-        {
-            if (baseType.HasAttribute(wellKnownTypes.GeneratedEventListenerMarkerAttribute))
-            {
-                break;
-            }
-
-            baseType = baseType.BaseType;
-        }
-
-        if (baseType is null)
+        if (!symbol.HasAttribute(wellKnownTypes.GeneratedEventListenerMarkerAttribute, true))
         {
             // TODO: diagnostic
             return EventListenerInfoWithDiagnostics.Empty;

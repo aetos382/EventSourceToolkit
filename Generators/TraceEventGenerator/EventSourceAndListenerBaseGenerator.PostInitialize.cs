@@ -27,7 +27,9 @@ public partial class EventSourceAndListenerBaseGenerator
 
           namespace {{Namespace}}
           {
-              [global::System.AttributeUsage(global::System.AttributeTargets.Class)]
+              [global::System.AttributeUsage(
+                global::System.AttributeTargets.Class,
+                Inherited = true)]
               internal sealed class {{GeneratedEventListenerMarkerAttributeName}} : global::System.Attribute
               {
               }
@@ -43,7 +45,7 @@ public partial class EventSourceAndListenerBaseGenerator
             [global::System.AttributeUsage(
                 global::System.AttributeTargets.Method,
                 Inherited = true)]
-            public sealed class {{GeneratedEventAttributeName}} : global::System.Attribute
+            internal sealed class {{GeneratedEventAttributeName}} : global::System.Attribute
             {
                 public {{GeneratedEventAttributeName}}(
                     int eventId,
