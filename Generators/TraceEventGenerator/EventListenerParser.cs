@@ -38,12 +38,6 @@ internal sealed class EventListenerParser
             return EventListenerInfoWithDiagnostics.Empty;
         }
 
-        if (!symbol.HasAttribute(wellKnownTypes.GeneratedEventListenerMarkerAttribute, true))
-        {
-            // TODO: diagnostic
-            return EventListenerInfoWithDiagnostics.Empty;
-        }
-
         foreach (var method in symbol.GetMethods())
         {
             cancellationToken.ThrowIfCancellationRequested();

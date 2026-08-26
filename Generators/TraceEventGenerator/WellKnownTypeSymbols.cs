@@ -270,15 +270,6 @@ internal sealed class WellKnownTypeSymbols
         }
     }
 
-    public INamedTypeSymbol GeneratedEventListenerMarkerAttribute
-    {
-        get
-        {
-            field ??= this.GetTypeSymbol(GeneratedEventListenerMarkerAttributeFullName);
-            return field;
-        }
-    }
-
     public INamedTypeSymbol GeneratedEventAttribute
     {
         get

@@ -41,8 +41,7 @@ internal static class EventListenerBaseEmitter
         }
 
         codeBuilder.AppendLineWithIndent(
-            $$"""
-            [global::{{GeneratedEventListenerMarkerAttributeFullName}}]
+            """
             public abstract partial class ListenerBase : global::System.Diagnostics.Tracing.EventListener
             {
             """);
