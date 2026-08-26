@@ -259,7 +259,7 @@ internal sealed class EventSourceParser
             switch (key)
             {
                 case nameof(EventAttribute.Level):
-                    level = Enum.GetName(typeof(EventLevel), value.Value!);
+                    level = $"global::System.Diagnostics.Tracing.EventLevel.{Enum.GetName(typeof(EventLevel), value.Value!)}";
                     break;
 
                 case nameof(EventAttribute.Keywords):

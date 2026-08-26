@@ -47,10 +47,16 @@ internal static class EventListenerBaseEmitter
             """);
         codeBuilder.Indent();
 
+        var metadata = methodInfo.Metadata;
+        var eventId = metadata.EventId;
+        var eventLevel = metadata.Level;
+        var eventKeywords = string.Join(" | ", metadata.Keywords);
+
+        codeBuilder.AppendLineWithIndent($"[global::{GeneratedEventAttributeFullName}({eventId}, {eventLevel}, {eventKeywords})]");
+        codeBuilder.AppendWithIndent($"protected virtual void {methodInfo.MethodName}");
+
         var parameters = methodInfo.Parameters;
         var parametersCount = parameters.Count;
-
-        codeBuilder.AppendWithIndent($"protected virtual void {methodInfo.MethodName}");
 
         if (parametersCount == 0)
         {

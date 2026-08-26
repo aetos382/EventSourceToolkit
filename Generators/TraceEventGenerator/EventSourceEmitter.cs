@@ -78,8 +78,10 @@ internal static class EventSourceEmitter
         codeBuilder.AppendLineWithIndent("{");
         codeBuilder.Indent();
 
-        var eventLevel = $"global::System.Diagnostics.Tracing.EventLevel.{methodInfo.Metadata.Level}";
-        var eventKeywords = string.Join(" | ", methodInfo.Metadata.Keywords);
+        var metadata = methodInfo.Metadata;
+        var eventId = metadata.EventId;
+        var eventLevel = metadata.Level;
+        var eventKeywords = string.Join(" | ", metadata.Keywords);
 
         codeBuilder.AppendLineWithIndent(
             $$"""
@@ -91,9 +93,6 @@ internal static class EventSourceEmitter
         codeBuilder.Unindent();
         codeBuilder.AppendLineWithIndent("}");
         codeBuilder.AppendLineWithoutIndent();
-
-        var metadata = methodInfo.Metadata;
-        var eventId = metadata.EventId;
 
         codeBuilder.AppendLineWithIndent(
             """
