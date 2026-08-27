@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-
-using Microsoft.CodeAnalysis;
+using System.Reflection.Metadata;
 
 using Aetos.Tracing.Models;
+
+using Microsoft.CodeAnalysis;
 
 using static Aetos.Tracing.Constants;
 
@@ -52,9 +53,8 @@ internal static class EventSourceEmitter
 
         var parameters = methodInfo.Parameters;
         var parameterCount = parameters.Count;
-        var hasRelatedActivityIdParameter = parameterCount != 0 && parameters[0].IsRelatedActivityIdParameter;
+        var hasRelatedActivityIdParameter = methodInfo.HasRelatedActivityIdParameter;
 
-        // TODO: message
         codeBuilder.AppendLineWithIndent(
             """
             [global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(
@@ -67,7 +67,15 @@ internal static class EventSourceEmitter
 
         if (parameterCount == 0)
         {
-            codeBuilder.AppendWithoutIndent("()");
+            if (hasRelatedActivityIdParameter)
+            {
+                codeBuilder.AppendLineWithIndent("global::System.Guid relatedActivityId)");
+            }
+            else
+            {
+                codeBuilder.AppendWithoutIndent("()");
+            }
+
             codeBuilder.AppendLineWithoutIndent();
         }
         else
@@ -75,6 +83,12 @@ internal static class EventSourceEmitter
             codeBuilder.AppendWithoutIndent("(");
             codeBuilder.AppendLineWithoutIndent();
             codeBuilder.Indent();
+
+            if (hasRelatedActivityIdParameter)
+            {
+                var delimiter = parameterCount != 0 ? "," : ")";
+                codeBuilder.AppendLineWithIndent($"global::System.Guid relatedActivityId{delimiter}");
+            }
 
             var parameterEnd = parameterCount - 1;
             for (var i = 0; i <= parameterEnd; ++i)
@@ -120,6 +134,19 @@ internal static class EventSourceEmitter
         }
         else
         {
+            // string パラメーターに null の場合の既定値を設定
+            foreach (var parameter in parameters)
+            {
+                if (parameter.FullyQualifiedTypeName != "global::System.String")
+                {
+                    continue;
+                }
+
+                codeBuilder.AppendLineWithIndent($"{parameter.Name} ??= null;");
+            }
+
+            codeBuilder.AppendLineWithIndent();
+
             var byteArrayParameterCount = parameters.Count(static x => x.FullyQualifiedTypeName == "global::System.Byte[]");
 
             var dataEntryCount = parameterCount + byteArrayParameterCount;
@@ -138,7 +165,7 @@ internal static class EventSourceEmitter
 
             for (int i = parameterStart, j = 0, k = 0; i < parameterCount; ++i)
             {
-                var (typeName, parameterName, isEnum, size, isRelatedActivityIdParameter) = parameters[i];
+                var (typeName, parameterName, isEnum, size) = parameters[i];
                 var sizeExpression = size?.ToString(CultureInfo.InvariantCulture);
 
                 if (isEnum)

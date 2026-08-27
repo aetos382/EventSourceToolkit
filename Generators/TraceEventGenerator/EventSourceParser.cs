@@ -87,19 +87,20 @@ internal sealed class EventSourceParser
         var semanticModel = this._semanticModel;
         var supportedTypes = new SupportedTypes(wellKnownTypes);
         var comparer = SymbolEqualityComparer.Default;
+        var hasRelatedActivityIdParameter = false;
 
         foreach (var (index, parameter) in parameterList.Index())
         {
             var parameterName = parameter.Identifier.ValueText;
             var parameterSymbol = semanticModel.GetDeclaredSymbol(parameter, cancellationToken)!;
             var parameterTypeSymbol = parameterSymbol.Type;
-            var isRelatedActivityIdParameter = false;
 
             if (index == 0 &&
                 string.Equals(parameterName, "relatedActivityId", StringComparison.OrdinalIgnoreCase) &&
                 comparer.Equals(parameterTypeSymbol, wellKnownTypes.Guid))
             {
-                isRelatedActivityIdParameter = true;
+                hasRelatedActivityIdParameter = true;
+                continue;
             }
 
             if (!supportedTypes.IsSupported(parameterTypeSymbol))
@@ -121,7 +122,7 @@ internal sealed class EventSourceParser
                 }
             }
 
-            var parameterInfo = new EventSourceMethodParameterInfo(parameterTypeName, parameter.Identifier.ValueText, isEnum, size, isRelatedActivityIdParameter);
+            var parameterInfo = new EventSourceMethodParameterInfo(parameterTypeName, parameter.Identifier.ValueText, isEnum, size);
             parameters.Add(parameterInfo);
         }
 
@@ -168,7 +169,8 @@ internal sealed class EventSourceParser
             syntaxNode.AccessibilityKeyword,
             syntaxNode.Identifier.Text,
             eventMetadata,
-            parameters.ToArray());
+            parameters.ToArray(),
+            hasRelatedActivityIdParameter);
 
         var methodInfoWithDiagnostics = new EventSourceMethodInfoWithDiagnostics(
             methodInfo,

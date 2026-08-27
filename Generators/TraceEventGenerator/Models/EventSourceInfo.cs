@@ -8,8 +8,7 @@ internal sealed record EventSourceMethodParameterInfo(
     string FullyQualifiedTypeName,
     string Name,
     bool IsEnum,
-    int? FixedSize,
-    bool IsRelatedActivityIdParameter);
+    int? FixedSize);
 
 internal sealed record EventMetadataInfo(
     int EventId,
@@ -23,7 +22,8 @@ internal sealed record EventSourceInfo(
     string? AccessibilityKeyword,
     string MethodName,
     EventMetadataInfo Metadata,
-    EquatableArray<EventSourceMethodParameterInfo> Parameters);
+    EquatableArray<EventSourceMethodParameterInfo> Parameters,
+    bool HasRelatedActivityIdParameter);
 
 internal sealed record EventSourceMethodInfoWithDiagnostics(
     EventSourceInfo? SourceInfo,
