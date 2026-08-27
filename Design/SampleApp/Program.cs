@@ -1,8 +1,7 @@
 using EventProducerProject;
 using EventConsumerProject;
 
-using var listener = new ConcreteEventListener();
+using var listener = new SampleEventListener();
 listener.Start();
 
-SampleEventSource.Log.Foo(3);
-SampleEventSource.Log.Bar("oops");
+SampleEventSource.Log.Foo(3, 4);

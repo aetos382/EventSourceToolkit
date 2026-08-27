@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\EventConsumerProject.ExternalSource\EventConsumerProject.ExternalSource.csproj" />
     <ProjectReference Include="..\EventConsumerProject\EventConsumerProject.csproj" />
     <ProjectReference Include="..\EventProducerProject\EventProducerProject.csproj" />
   </ItemGroup>

@@ -1,6 +1,6 @@
 <Solution>
+  <Project Path="EventConsumerProject.ExternalSource/EventConsumerProject.ExternalSource.csproj" Id="c7377e07-15e6-4a48-b804-8f4a77846680" />
   <Project Path="EventConsumerProject/EventConsumerProject.csproj" />
   <Project Path="EventProducerProject/EventProducerProject.csproj" />
-  <Project Path="GeneratedCode/GeneratedCode.csproj" />
   <Project Path="SampleApp/SampleApp.csproj" />
 </Solution>

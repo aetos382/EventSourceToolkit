@@ -1,23 +1,19 @@
 using System.Diagnostics.Tracing;
 
-namespace EventProducerProject;
+namespace EventConsumerProject.ExternalSource;
 
-[EventSource(Name = "MyEvents")]
-[GeneratedEventSource]
-public partial class SampleEventSource : EventSource
+public interface IExternalEventSchema
 {
-    public static readonly SampleEventSource Log = new();
-
     [Event(1, Level = EventLevel.Informational, Keywords = Keywords.A)]
-    public partial void Foo(int i1, int i2);
+    void Foo(int i1, int i2);
 
     [Event(2, Level = EventLevel.Verbose, Keywords = Keywords.B, Opcode = EventOpcode.Send)]
-    public partial void Bar(Guid relatedActivityId, string s, int i, byte[] b);
+    void Bar(Guid relatedActivityId, string s, int i, byte[] b);
 
     [Event(3, Level = EventLevel.Warning, Keywords = Keywords.C)]
-    public partial void Baz();
+    void Baz();
 
-#pragma warning disable CA1034
+#pragma warning disable CA1034, IDE0040
     public static class Keywords
     {
         public const EventKeywords A = (EventKeywords)1;

@@ -4,10 +4,11 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GeneratedCode\GeneratedCode.csproj" />
+    <Compile Include="../GeneratedCode/EventSourceGenerator/**/*.cs"/>
   </ItemGroup>
 
 </Project>
