@@ -17,12 +17,17 @@ public partial class EventListenerGenerator
               [global::System.Diagnostics.Conditional("COMPILE_TIME_ONLY")]
               internal sealed class {{GeneratedEventListenerAttributeName}} : global::System.Attribute
               {
-                  public {{GeneratedEventListenerAttributeName}}(string eventSourceName)
+                  public {{GeneratedEventListenerAttributeName}}(
+                      global::System.String eventSourceName,
+                      global::System.Type eventSchema)
                   {
                       this.EventSourceName = eventSourceName;
+                      this.EventSchema = eventSchema;
                   }
 
-                  public string EventSourceName { get; }
+                  public global::System.String EventSourceName { get; }
+
+                  public global::System.Type EventSchema { get; }
               }
           }
           """;
