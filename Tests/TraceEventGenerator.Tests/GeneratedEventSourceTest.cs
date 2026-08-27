@@ -262,7 +262,7 @@ public sealed class GeneratedEventSourceTest
             compilationOptions);
 
         var driver = (GeneratorDriver)CSharpGeneratorDriver.Create(
-            [new EventSourceAndListenerBaseGenerator().AsSourceGenerator()],
+            [new EventSourceGenerator().AsSourceGenerator()],
             parseOptions: parseOptions,
             driverOptions: driverOptions);
 

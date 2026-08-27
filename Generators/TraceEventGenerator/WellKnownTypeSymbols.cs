@@ -270,15 +270,6 @@ internal sealed class WellKnownTypeSymbols
         }
     }
 
-    public INamedTypeSymbol GeneratedEventAttribute
-    {
-        get
-        {
-            field ??= this.GetTypeSymbol(GeneratedEventAttributeFullName);
-            return field;
-        }
-    }
-
     private INamedTypeSymbol GetTypeSymbol(string metadataName)
     {
         var symbol = this._compilation.GetTypeByMetadataName(metadataName);

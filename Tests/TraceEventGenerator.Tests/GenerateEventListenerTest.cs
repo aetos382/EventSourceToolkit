@@ -110,7 +110,7 @@ public sealed class GenerateEventListenerTest
             compilationOptions);
 
         var eventSourceGeneratorDriver = (GeneratorDriver)CSharpGeneratorDriver.Create(
-            [new EventSourceAndListenerBaseGenerator().AsSourceGenerator()],
+            [new EventSourceGenerator().AsSourceGenerator()],
             [],
             parseOptions,
             analyzerConfigOptionsProvider,

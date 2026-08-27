@@ -1,10 +1,12 @@
 <Solution>
   <Folder Name="/Generators/">
     <Project Path="Generators/TraceEventGenerator/TraceEventGenerator.csproj" />
+    <Project Path="TraceEventGenerator.CodeFixes/TraceEventGenerator.CodeFixes.csproj" Id="a69e2952-1789-4429-8c09-d9953cf95180" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="Tests/GeneratedEventListenerTests/GeneratedEventListenerTests.csproj" Id="1d5914e7-9098-4e4c-88d6-ce55278cda7c" />
     <Project Path="Tests/GeneratedEventSourceTests/GeneratedEventSourceTests.csproj" Id="aee56ff0-70e0-4026-be28-69c5867fd326" />
+    <Project Path="Tests/TraceEventGenerator.CodeFixes.Tests/TraceEventGenerator.CodeFixes.Tests.csproj" Id="4d3e3871-d808-4765-bcf1-ecfd08e2d7c1" />
     <Project Path="Tests/TraceEventGenerator.Tests/TraceEventGenerator.Tests.csproj" Id="d2903b8f-ebd3-4b98-81c7-de8b614fadb3" />
   </Folder>
 </Solution>

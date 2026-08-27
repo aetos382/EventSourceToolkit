@@ -3,4 +3,4 @@ using Microsoft.CodeAnalysis.Testing;
 
 namespace Aetos.Tracing.Tests;
 
-internal sealed class Test : CSharpSourceGeneratorTest<EventSourceAndListenerBaseGenerator, DefaultVerifier>;
+internal sealed class Test : CSharpSourceGeneratorTest<EventSourceGenerator, DefaultVerifier>;

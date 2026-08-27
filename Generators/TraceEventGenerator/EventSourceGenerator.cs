@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Aetos.Tracing;
 
 [Generator(LanguageNames.CSharp)]
-public sealed partial class EventSourceAndListenerBaseGenerator :
+public sealed partial class EventSourceGenerator :
     IIncrementalGenerator
 {
     /// <inheritdoc/>
@@ -31,9 +31,5 @@ public sealed partial class EventSourceAndListenerBaseGenerator :
         context.RegisterSourceOutput(
             eventSourceMethodProvider,
             EventSourceEmitter.EmitEventSource);
-
-        context.RegisterSourceOutput(
-            eventSourceMethodProvider,
-            EventListenerBaseEmitter.EmitEventListenerBase);
     }
 }

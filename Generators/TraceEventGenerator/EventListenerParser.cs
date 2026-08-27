@@ -41,12 +41,6 @@ internal sealed class EventListenerParser
         foreach (var method in symbol.GetMethods())
         {
             cancellationToken.ThrowIfCancellationRequested();
-
-            var eventAttribute = method.GetAttribute(wellKnownTypes.GeneratedEventAttribute, true);
-            if (eventAttribute is null)
-            {
-                continue;
-            }
         }
 
         return EventListenerInfoWithDiagnostics.Empty;
