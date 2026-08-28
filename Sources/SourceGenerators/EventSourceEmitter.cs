@@ -6,8 +6,6 @@ using Aetos.EventSourceToolkit.SourceGenerators.Models;
 
 using Microsoft.CodeAnalysis;
 
-using static Aetos.EventSourceToolkit.Constants;
-
 namespace Aetos.EventSourceToolkit.SourceGenerators;
 
 internal static class EventSourceEmitter
@@ -310,7 +308,7 @@ internal static class EventSourceEmitter
         fileNameSegments.AddRange(methodInfo.ContainingTypes.Select(static x => x.Name));
         fileNameSegments.Add(methodInfo.ClassName);
         fileNameSegments.Add(methodInfo.MethodName);
-        fileNameSegments.Add(GeneratedFileExtension);
+        fileNameSegments.Add("g.cs");
 
         var fileName = string.Join(".", fileNameSegments);
 

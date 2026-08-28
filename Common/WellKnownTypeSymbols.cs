@@ -3,8 +3,6 @@ using System.Diagnostics;
 
 using Microsoft.CodeAnalysis;
 
-using static Aetos.EventSourceToolkit.Constants;
-
 namespace Aetos.EventSourceToolkit;
 
 [Embedded]
@@ -257,7 +255,7 @@ internal sealed class WellKnownTypeSymbols
     {
         get
         {
-            field ??= this.GetTypeSymbol(GeneratedEventSourceAttributeFullName);
+            field ??= this.GetTypeSymbol("Aetos.EventSourceToolkit.GeneratedEventSourceAttribute");
             return field;
         }
     }
@@ -266,7 +264,7 @@ internal sealed class WellKnownTypeSymbols
     {
         get
         {
-            field ??= this.GetTypeSymbol(GeneratedEventListenerAttributeFullName);
+            field ??= this.GetTypeSymbol("Aetos.EventSourceToolkit.GeneratedEventListenerAttribute");
             return field;
         }
     }

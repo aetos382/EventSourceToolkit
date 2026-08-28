@@ -1,8 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-using static Aetos.EventSourceToolkit.Constants;
-
 namespace Aetos.EventSourceToolkit.SourceGenerators;
 
 [Generator(LanguageNames.CSharp)]
@@ -17,7 +15,7 @@ public sealed partial class EventListenerGenerator :
 
         var eventListenerClassProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
-                GeneratedEventListenerAttributeFullName,
+                "Aetos.EventSourceToolkit.GeneratedEventListenerAttribute",
                 static (node, _) => node is ClassDeclarationSyntax,
                 static (context, cancellationToken) =>
                 {
