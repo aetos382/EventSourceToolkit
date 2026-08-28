@@ -12,6 +12,7 @@ namespace Aetos.EventSourceToolkit.Analyzers;
 /// <summary>
 /// EventSource 派生クラスは入れ子になった public な 'Keywords', 'Tasks', 'Opcodes' というクラスを要求するが
 /// NetAnalyzers が CS1034 を出してうざいので、それを抑制する。
+/// EventSource に関する一般的な規則なので [GeneratedEventSource] の有無は見ない。
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class EventSourceNestedTypeVisibilitySuppressor :

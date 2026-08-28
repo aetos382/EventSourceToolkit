@@ -59,6 +59,7 @@ public sealed class EventSourceNestedTypeVisibilitySuppressorTest
                 {
                 }
 
+                // こいつは抑制されない
                 public static class {|#3:NotSuppressed|}
                 {
                 }
