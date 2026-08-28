@@ -1,5 +1,7 @@
 using System.Collections.Immutable;
 
+using Aetos.EventSourceToolkit.Analyzers.Properties;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
