@@ -8,4 +8,9 @@ internal static class CustomSymbolDisplayFormats
         SymbolDisplayGlobalNamespaceStyle.Included,
         SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
         memberOptions: SymbolDisplayMemberOptions.IncludeContainingType);
+
+    public static readonly SymbolDisplayFormat FullyQualifiedFormatWithoutGlobalPrefix = new(
+        SymbolDisplayGlobalNamespaceStyle.Omitted,
+        SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+        memberOptions: SymbolDisplayMemberOptions.IncludeContainingType);
 }

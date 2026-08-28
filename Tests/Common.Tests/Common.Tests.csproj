@@ -1,0 +1,15 @@
+﻿<Project Sdk="MSTest.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Aetos.EventSourceToolkit.Tests.Common</AssemblyName>
+    <RootNamespace>$(AssemblyName)</RootNamespace>
+    <IncludeCommon>true</IncludeCommon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Shouldly" />
+  </ItemGroup>
+
+</Project>

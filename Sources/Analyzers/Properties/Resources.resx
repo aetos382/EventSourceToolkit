@@ -118,12 +118,21 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="EventSourceClassMustNotBeAbstractTitle" xml:space="preserve">
-    <value>3</value>
+    <value>2</value>
   </data>
   <data name="EventSourceClassMustNotBeAbstractMessage" xml:space="preserve">
-    <value>3: {0}</value>
+    <value>2: {0}</value>
   </data>
   <data name="EventSourceClassMustNotBeAbstractDescription" xml:space="preserve">
-    <value>foobar.</value>
+    <value>2.</value>
+  </data>
+  <data name="EventSourceClassMustBeInheritFromEventSourceTitle" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="EventSourceClassMustBeInheritFromEventSourceMessage" xml:space="preserve">
+    <value>3: {0}</value>
+  </data>
+  <data name="EventSourceClassMustBeInheritFromEventSourceDescription" xml:space="preserve">
+    <value>3.</value>
   </data>
 </root>

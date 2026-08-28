@@ -126,4 +126,13 @@
   <data name="EventSourceClassMustNotBeAbstractDescription" xml:space="preserve">
     <value>GeneratedEventSourceAttribute を持つイベント ソース クラスを抽象クラスにすることはできません。独自の EventSource 派生クラス階層を持つ必要がある場合は、GeneratedEventSourceAttribute は末端の具象クラスにのみ付与してください。</value>
   </data>
+  <data name="EventSourceClassMustBeInheritFromEventSourceTitle" xml:space="preserve">
+    <value>イベント ソース クラスは System.Diagnostics.Tracing.EventSource から派生しなければなりません。</value>
+  </data>
+  <data name="EventSourceClassMustBeInheritFromEventSourceMessage" xml:space="preserve">
+    <value>イベント ソース クラス '{0}' は System.Diagnostics.Tracing.EventSource クラスから派生していません。</value>
+  </data>
+  <data name="EventSourceClassMustBeInheritFromEventSourceDescription" xml:space="preserve">
+    <value>イベント ソース クラスは System.Diagnostics.Tracing.EventSource から直接的または間接的に派生する必要があります。</value>
+  </data>
 </root>

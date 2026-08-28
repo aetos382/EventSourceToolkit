@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -22,6 +23,14 @@ public sealed class EventSourceClassSignatureAnalyzer :
         DiagnosticSeverity.Error,
         true,
         Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustNotBeAbstractDescription)));
+    private static readonly DiagnosticDescriptor EventSourceClassMustBeInheritFromEventSource = new(
+        DiagnosticIds.EventSourceClassMustBeInheritFromEventSource,
+        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustBeInheritFromEventSourceTitle)),
+        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustBeInheritFromEventSourceMessage)),
+        DiagnosticCategories.General,
+        DiagnosticSeverity.Error,
+        true,
+        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustBeInheritFromEventSourceDescription)));
 
     /// <inheritdoc />
     public override void Initialize(
@@ -38,7 +47,8 @@ public sealed class EventSourceClassSignatureAnalyzer :
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
     [
-        EventSourceClassMustNotBeAbstract
+        EventSourceClassMustNotBeAbstract,
+        EventSourceClassMustBeInheritFromEventSource
     ];
 
     private static void SyntaxNodeAction(
@@ -62,12 +72,25 @@ public sealed class EventSourceClassSignatureAnalyzer :
             return;
         }
 
-        if (symbol.IsAbstract)
+        var symbolFullName = symbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedFormatWithoutGlobalPrefix);
+        var abstractModifierOrNull = node.Modifiers.FirstOrNull(static x => x.IsKind(SyntaxKind.AbstractKeyword));
+
+        if (abstractModifierOrNull is {} abstractModifier)
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 EventSourceClassMustNotBeAbstract,
-                node.GetLocation(),
-                symbol.Name));
+                abstractModifier.GetLocation(),
+                symbolFullName));
+
+            return;
+        }
+
+        if (!symbol.IsDerivedFrom(wellKnownTypes.EventSource))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(
+                EventSourceClassMustBeInheritFromEventSource,
+                node.Identifier.GetLocation(),
+                symbolFullName));
 
             return;
         }

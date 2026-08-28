@@ -5,4 +5,6 @@ public static class DiagnosticIds
     public const string ParameterTypeNotSupported = "EST001";
 
     public const string EventSourceClassMustNotBeAbstract = "EST002";
+
+    public const string EventSourceClassMustBeInheritFromEventSource = "EST003";
 }
