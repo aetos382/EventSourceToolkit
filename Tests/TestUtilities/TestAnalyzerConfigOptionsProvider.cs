@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace Aetos.Diagnostics.Tracing.Tests.TestUtilities;
+namespace Aetos.EventSourceToolkit.Tests.TestUtilities;
 
 public sealed class TestAnalyzerConfigOptionsProvider :
     AnalyzerConfigOptionsProvider

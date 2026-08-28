@@ -29,7 +29,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>BSD-2-Clause-Patent</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <PackageProjectUrl>https://github.com/aetos382/TraceEventGenerator</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/aetos382/EventSourceToolkit</PackageProjectUrl>
     <IncludeSymbols Condition="'$(IncludeSymbols)' == ''">true</IncludeSymbols>
     <GeneratePackageOnBuild Condition="'$(GeneratePackageOnBuild)' == '' and '$(Configuration)' == 'Release' and '$(PublishAot)' != 'true'">true</GeneratePackageOnBuild>
     <GenerateSBOM Condition="'$(GenerateSBOM)' == '' and '$(Configuration)' == 'Release'">true</GenerateSBOM>

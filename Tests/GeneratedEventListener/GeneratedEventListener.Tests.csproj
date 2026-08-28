@@ -1,0 +1,28 @@
+﻿<Project Sdk="MSTest.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Aetos.EventSourceToolkit.Tests.GeneratedEventListener</AssemblyName>
+    <RootNamespace>$(AssemblyName)</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Shouldly" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Sources\Analyzers\Analyzers.csproj">
+      <OutputItemType>analyzer</OutputItemType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+
+    <ProjectReference Include="..\..\Sources\SourceGenerators\SourceGenerators.csproj">
+      <OutputItemType>analyzer</OutputItemType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+
+    <ProjectReference Include="..\GeneratedEventSource\GeneratedEventSource.Tests.csproj" />
+  </ItemGroup>
+
+</Project>

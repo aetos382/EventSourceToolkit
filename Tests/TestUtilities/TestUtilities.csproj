@@ -1,7 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>    <RootNamespace>Aetos.Diagnostics.Tracing.Tests.TestUtilities</RootNamespace>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Aetos.EventSourceToolkit.Tests.TestUtilities</AssemblyName>
+    <RootNamespace>$(AssemblyName)</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

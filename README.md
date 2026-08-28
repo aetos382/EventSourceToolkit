@@ -1,3 +1,3 @@
-# TraceEventGenerator
+# EventSourceToolkit
 
 TBD
