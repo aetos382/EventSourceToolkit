@@ -14,15 +14,6 @@ namespace Aetos.EventSourceToolkit.Analyzers;
 public sealed class EventSourceClassSignatureAnalyzer :
     DiagnosticAnalyzer
 {
-    private static readonly DiagnosticDescriptor EventSourceClassMustEventSourceAttribute = new(
-        DiagnosticIds.EventSourceClassMustHaveEventSourceAttribute,
-        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustHaveEventSourceAttributeTitle)),
-        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustHaveEventSourceAttributeMessage)),
-        DiagnosticCategories.General,
-        DiagnosticSeverity.Error,
-        true,
-        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustHaveEventSourceAttributeDescription)));
-
     private static readonly DiagnosticDescriptor EventSourceClassMustNotBeAbstract = new(
         DiagnosticIds.EventSourceClassMustNotBeAbstract,
         Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustNotBeAbstractTitle)),
@@ -47,7 +38,6 @@ public sealed class EventSourceClassSignatureAnalyzer :
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
     [
-        EventSourceClassMustEventSourceAttribute,
         EventSourceClassMustNotBeAbstract
     ];
 
@@ -76,17 +66,6 @@ public sealed class EventSourceClassSignatureAnalyzer :
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 EventSourceClassMustNotBeAbstract,
-                node.GetLocation(),
-                symbol.Name));
-
-            return;
-        }
-
-        var eventSourceAttribute = symbol.GetAttribute(wellKnownTypes.EventSourceAttribute);
-        if (eventSourceAttribute is null)
-        {
-            context.ReportDiagnostic(Diagnostic.Create(
-                EventSourceClassMustEventSourceAttribute,
                 node.GetLocation(),
                 symbol.Name));
 

@@ -117,15 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="EventSourceClassMustHaveEventSourceAttributeDescription" xml:space="preserve">
-    <value>2</value>
-  </data>
-  <data name="EventSourceClassMustHaveEventSourceAttributeTitle" xml:space="preserve">
-    <value>2</value>
-  </data>
-  <data name="EventSourceClassMustHaveEventSourceAttributeMessage" xml:space="preserve">
-    <value>2: {0}</value>
-  </data>
   <data name="EventSourceClassMustNotBeAbstractTitle" xml:space="preserve">
     <value>3</value>
   </data>
@@ -133,6 +124,6 @@
     <value>3: {0}</value>
   </data>
   <data name="EventSourceClassMustNotBeAbstractDescription" xml:space="preserve">
-    <value>3</value>
+    <value>foobar.</value>
   </data>
 </root>
