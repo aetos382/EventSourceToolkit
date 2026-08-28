@@ -28,6 +28,7 @@ public sealed class GenerateEventListenerTest
         var testContext = this._testContext;
         var testCancellationToken = testContext.CancellationToken;
 
+        /* lang=c# */
         const string EventSourceCode =
             """
             using System;
@@ -55,6 +56,7 @@ public sealed class GenerateEventListenerTest
             }
             """;
 
+        /* lang=c# */
         const string EventListenerCode =
             """
             using System.Diagnostics.Tracing;

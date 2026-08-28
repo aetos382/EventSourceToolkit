@@ -16,6 +16,7 @@ public sealed class EventSourceParserDiagnosticsTest
     [TestMethod]
     public async Task とりあえず正常系()
     {
+        /* lang=c# */
         const string Code =
             """
             using System.Diagnostics.Tracing;

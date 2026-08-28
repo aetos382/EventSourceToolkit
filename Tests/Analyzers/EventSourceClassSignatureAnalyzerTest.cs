@@ -11,7 +11,7 @@ using Aetos.EventSourceToolkit.SourceGenerators;
 namespace Aetos.EventSourceToolkit.Tests.Analyzers;
 
 [TestClass]
-public sealed class Test1
+public sealed class EventSourceClassSignatureAnalyzerTest
 {
     private sealed class Test : CSharpAnalyzerTest<EventSourceClassSignatureAnalyzer, DefaultVerifier>
     {
@@ -25,7 +25,7 @@ public sealed class Test1
     [TestMethod]
     public async Task 正常系()
     {
-        /* lang=c#-test */
+        /* lang=c# */
         const string Code =
             """
             using System.Diagnostics.Tracing;
@@ -42,8 +42,7 @@ public sealed class Test1
 
         var test = new Test
         {
-            TestCode = Code,
-            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+            TestCode = Code
         };
 
         await test.RunAsync(testCancellationToken).ConfigureAwait(false);
@@ -69,8 +68,7 @@ public sealed class Test1
 
         var test = new Test
         {
-            TestCode = Code,
-            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+            TestCode = Code
         };
 
         await test.RunAsync(testCancellationToken).ConfigureAwait(false);
@@ -99,8 +97,7 @@ public sealed class Test1
 
         var test = new Test
         {
-            TestCode = Code,
-            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+            TestCode = Code
         };
 
         await test.RunAsync(testCancellationToken).ConfigureAwait(false);
@@ -126,8 +123,7 @@ public sealed class Test1
 
         var test = new Test
         {
-            TestCode = Code,
-            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+            TestCode = Code
         };
 
         await test.RunAsync(testCancellationToken).ConfigureAwait(false);
@@ -155,8 +151,7 @@ public sealed class Test1
 
         var test = new Test
         {
-            TestCode = Code,
-            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+            TestCode = Code
         };
 
         await test.RunAsync(testCancellationToken).ConfigureAwait(false);
@@ -182,8 +177,7 @@ public sealed class Test1
 
         var test = new Test
         {
-            TestCode = Code,
-            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+            TestCode = Code
         };
 
         await test.RunAsync(testCancellationToken).ConfigureAwait(false);
@@ -192,7 +186,7 @@ public sealed class Test1
     [TestMethod]
     public async Task イベントソースクラスのpartialパーツのいずれかがEventSourceから派生していればEST003は出ない()
     {
-        /* lang=c#-test */
+        /* lang=c# */
         const string Code =
             """
             using System.Diagnostics.Tracing;
@@ -238,8 +232,7 @@ public sealed class Test1
 
         var test = new Test
         {
-            TestCode = Code,
-            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+            TestCode = Code
         };
 
         await test.RunAsync(testCancellationToken).ConfigureAwait(false);
@@ -270,119 +263,13 @@ public sealed class Test1
 
         var test = new Test
         {
-            TestCode = Code,
-            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+            TestCode = Code
         };
 
         await test.RunAsync(testCancellationToken).ConfigureAwait(false);
     }
 
-    /*
-    private static Task<ImmutableArray<Diagnostic>> RunBuildAsync(
-        string code,
-        ImmutableArray<IIncrementalGenerator> sourceGenerators,
-        ImmutableArray<DiagnosticAnalyzer> diagnosticAnalyzers,
-        AnalyzerConfigOptionsProvider optionsProvider,
-        CancellationToken cancellationToken)
-    {
-        var generators = ImmutableArray.CreateBuilder<ISourceGenerator>(sourceGenerators.Length);
-        foreach (var generator in sourceGenerators)
-        {
-            generators.Add(generator.AsSourceGenerator());
-        }
-
-        return RunBuildAsync(
-            code,
-            generators.DrainToImmutable(),
-            diagnosticAnalyzers,
-            optionsProvider,
-            cancellationToken);
-    }
-
-    private static async Task<ImmutableArray<Diagnostic>> RunBuildAsync(
-        string code,
-        ImmutableArray<ISourceGenerator> sourceGenerators,
-        ImmutableArray<DiagnosticAnalyzer> diagnosticAnalyzers,
-        AnalyzerConfigOptionsProvider optionsProvider,
-        CancellationToken cancellationToken)
-    {
-        var diagnostics = ImmutableArray.CreateBuilder<Diagnostic>();
-
-        var parseOptions = CSharpParseOptions.Default;
-
-        var compilationOptions = new CSharpCompilationOptions(
-            OutputKind.DynamicallyLinkedLibrary,
-            allowUnsafe: true,
-            nullableContextOptions: NullableContextOptions.Enable);
-
-        var generatorDriverOptions = new GeneratorDriverOptions(
-            trackIncrementalGeneratorSteps: true);
-
-        var analysisOptions = new CompilationWithAnalyzersOptions(
-            new(
-                [],
-                optionsProvider),
-            (e, a, d) => diagnostics.Add(d),
-            true,
-            true,
-            false,
-            static (e) => true,
-            (a) => optionsProvider);
-
-        var syntaxTree = CSharpSyntaxTree.ParseText(
-            code,
-            parseOptions,
-            "main.cs",
-            Encoding.UTF8,
-            cancellationToken);
-
-        var compilation = (Compilation)CSharpCompilation.Create(
-            "test",
-            [syntaxTree],
-            Net100.References.All,
-            compilationOptions);
-
-        if (sourceGenerators.Length == 0)
-        {
-            diagnostics.AddRange(compilation.GetDiagnostics(cancellationToken));
-        }
-        else
-        {
-            var generatorDriver = (GeneratorDriver)CSharpGeneratorDriver.Create(
-                sourceGenerators,
-                [],
-                parseOptions,
-                optionsProvider,
-                generatorDriverOptions);
-
-            generatorDriver = generatorDriver.RunGeneratorsAndUpdateCompilation(
-                compilation,
-                out var updatedCompilation,
-                out var generatorDiagnostics,
-                cancellationToken);
-
-            compilation = updatedCompilation;
-            diagnostics.AddRange(generatorDiagnostics);
-        }
-
-        if (diagnosticAnalyzers.Length != 0)
-        {
-            var compilationWithAnalyzers = compilation.WithAnalyzers(
-                diagnosticAnalyzers,
-                analysisOptions);
-
-            var analysisResult = await compilationWithAnalyzers
-                .GetAnalysisResultAsync(cancellationToken)
-                .ConfigureAwait(false);
-
-            diagnostics.AddRange(analysisResult.GetAllDiagnostics());
-        }
-
-        return diagnostics.ToImmutable();
-    }
-    */
-
-    public Test1(
+    public EventSourceClassSignatureAnalyzerTest(
         TestContext testContext)
     {
         ArgumentNullException.ThrowIfNull(testContext);

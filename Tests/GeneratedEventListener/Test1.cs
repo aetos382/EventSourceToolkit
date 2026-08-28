@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics.Tracing;
 
-using Aetos.EventSourceToolkit.Tests.GeneratedEventSource;
-
 using Shouldly;
+
+using Aetos.EventSourceToolkit.Tests.GeneratedEventSource;
 
 namespace Aetos.EventSourceToolkit.Tests.GeneratedEventListener;
 

@@ -40,6 +40,7 @@ public sealed class EventSourceNestedTypeVisibilitySuppressorTest
     [TestMethod]
     public async Task 入れ子クラスに関する特定の警告が抑制される()
     {
+        /* lang=c#-test */
         const string Code =
             """
             using System.Diagnostics.Tracing;
@@ -82,6 +83,7 @@ public sealed class EventSourceNestedTypeVisibilitySuppressorTest
     [TestMethod]
     public async Task EventSource派生クラスでなければ抑制されない()
     {
+        /* lang=c#-test */
         const string Code =
             """
             public class MyEventSource
