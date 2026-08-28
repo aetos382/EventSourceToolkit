@@ -1,7 +1,11 @@
+using System;
 using System.Collections.Generic;
 
-namespace System.Linq;
+using Microsoft.CodeAnalysis;
 
+namespace Aetos.EventSourceToolkit;
+
+[Embedded]
 internal static partial class EnumerableExtensions
 {
     public static T? FirstOrNull<T>(
