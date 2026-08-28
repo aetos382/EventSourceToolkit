@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-
-using Basic.Reference.Assemblies;
+using Microsoft.CodeAnalysis.Testing;
 
 using Shouldly;
 
@@ -257,10 +256,14 @@ public sealed class GeneratedEventSourceTest
 
         var syntaxTree = CSharpSyntaxTree.ParseText(inputCode, parseOptions, "main.cs", Encoding.UTF8, cancellationToken);
 
+        var referenceAssemblies = await ReferenceAssemblies.Net.Net100
+            .ResolveAsync(LanguageNames.CSharp, cancellationToken)
+            .ConfigureAwait(false);
+
         var compilation = CSharpCompilation.Create(
             "test",
             [syntaxTree],
-            Net100.References.All,
+            referenceAssemblies,
             compilationOptions);
 
         var driver = (GeneratorDriver)CSharpGeneratorDriver.Create(

@@ -153,4 +153,7 @@
   <data name="EventSourceClassMustNotBeFileLocalClassDescription" xml:space="preserve">
     <value>file ローカル型は、コンパイラーがメタデータ名にファイルごとの要素を埋め込むため、宣言されたファイルごとに別個の同一性を持ちます。そのため、別のファイルから追加された partial パートは、この型を完成させるのではなく、無関係な型を宣言することになり、partial 修飾子をいくつ付けてもソース ジェネレーターが型を拡張できません。メッセージに示された型から file 修飾子を削除してください。その型をファイルの外から見えないようにしておきたい場合、ソース ジェネレーターが扱える範囲で最も近い代替は internal です。partial 修飾子の欠落とは異なり、この失敗は原因を示すコンパイラー エラーを伴わないため、この診断を抑制しないでください。</value>
   </data>
+  <data name="EventSourceNestedTypeVisibilityJustification" xml:space="preserve">
+    <value>EventSource は Keywords、Tasks、Opcodes の値を、それらと同じ名前を持つ public な入れ子クラスからのみ検出するため、入れ子であることと public であることはどちらも偶発的な設計ではなく必須です。</value>
+  </data>
 </root>

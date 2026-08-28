@@ -1,6 +1,9 @@
 using System;
 using System.Threading.Tasks;
 
+using Aetos.EventSourceToolkit.SourceGenerators;
+
+using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
 
 namespace Aetos.EventSourceToolkit.Tests.SourceGenerators;
@@ -8,6 +11,8 @@ namespace Aetos.EventSourceToolkit.Tests.SourceGenerators;
 [TestClass]
 public sealed class EventSourceParserDiagnosticsTest
 {
+    private sealed class Test : CSharpSourceGeneratorTest<EventSourceGenerator, DefaultVerifier>;
+
     [TestMethod]
     public async Task とりあえず正常系()
     {

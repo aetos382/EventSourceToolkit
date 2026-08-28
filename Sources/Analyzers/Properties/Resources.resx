@@ -153,4 +153,7 @@
   <data name="EventSourceClassMustNotBeFileLocalClassDescription" xml:space="preserve">
     <value>A file-local type has a distinct identity in every file that declares it, because the compiler mangles its metadata name with a per-file component. A partial part contributed from another file therefore declares an unrelated type instead of completing this one, which makes the type impossible for the generator to augment no matter how many partial modifiers are present. Remove the file modifier from the type named in the message; if the type must stay invisible outside its file, internal is the closest alternative the generator can work with. Do not suppress this diagnostic; unlike a missing partial modifier, this failure produces no compiler error that names the cause.</value>
   </data>
+  <data name="EventSourceNestedTypeVisibilityJustification" xml:space="preserve">
+    <value>EventSource discovers the Keywords, Tasks, and Opcodes values only in public nested classes with those exact names, so nesting and their public accessibility are required, not accidental design choices.</value>
+  </data>
 </root>

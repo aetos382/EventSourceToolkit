@@ -9,8 +9,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Emit;
-
-using Basic.Reference.Assemblies;
+using Microsoft.CodeAnalysis.Testing;
 
 using Shouldly;
 
@@ -88,12 +87,12 @@ public sealed class GenerateEventListenerTest
             new(
                 [],
                 analyzerConfigOptionsProvider),
-            static (e, a, d) => { },
+            (e, a, d) => diagnostics.Add(d),
             true,
             true,
             false,
             static (e) => true,
-            (a) => analyzerConfigOptionsProvider);
+            null);
 
         var driverOptions = new GeneratorDriverOptions(
             trackIncrementalGeneratorSteps: true);
@@ -107,10 +106,14 @@ public sealed class GenerateEventListenerTest
             Encoding.UTF8,
             testCancellationToken);
 
+        var referenceAssemblies = await ReferenceAssemblies.Net.Net100
+            .ResolveAsync(LanguageNames.CSharp, testCancellationToken)
+            .ConfigureAwait(false);
+
         var eventSourceCompilation = CSharpCompilation.Create(
             "EventProducer",
             [eventSourceSyntaxTree],
-            Net100.References.All,
+            referenceAssemblies,
             compilationOptions);
 
         var eventSourceGeneratorDriver = (GeneratorDriver)CSharpGeneratorDriver.Create(
@@ -131,7 +134,7 @@ public sealed class GenerateEventListenerTest
 
         var compilationWithAnalyzers = updatedEventSourceCompilation
             .WithAnalyzers(
-                [new EventSourceClassSignatureAnalyzer(), new EventSourceDiagnosticSuppressor()],
+                [new EventSourceClassSignatureAnalyzer(), new EventSourceNestedTypeVisibilitySuppressor()],
                 analysisOptions);
 
         var analysisResult = await compilationWithAnalyzers
@@ -163,10 +166,7 @@ public sealed class GenerateEventListenerTest
         var eventListenerCompilation = CSharpCompilation.Create(
             "EventConsumer",
             [eventListenerSyntaxTree],
-            [
-                .. Net100.References.All,
-                eventSourceMetadata.GetReference()
-            ],
+            referenceAssemblies.Add(eventSourceMetadata.GetReference()),
             compilationOptions);
 
         var eventListenerGeneratorDriver = (GeneratorDriver)CSharpGeneratorDriver.Create(

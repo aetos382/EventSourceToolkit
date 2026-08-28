@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Basic.Reference.Assemblies.Net100" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing" />
@@ -20,5 +19,21 @@
     <ProjectReference Include="..\..\Sources\SourceGenerators\SourceGenerators.csproj" />
     <ProjectReference Include="..\TestUtilities\TestUtilities.csproj" />
   </ItemGroup>
+
+  <!--
+    AnalysisLevel によって SDK が暗黙的に登録する Microsoft.CodeAnalysis(.CSharp).NetAnalyzers.dll
+    （%(Analyzer.IsImplicitlyDefined) == true）を、Suppressor テストからアナライザー型として
+    直接 new できるようにコンパイル参照へ昇格させる。SDK 同梱パスをそのまま使うため、
+    バージョン番号や NuGet パッケージへの依存を持たない。
+  -->
+  <Target Name="ReferenceBuiltInNetAnalyzersForTests" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <_NetAnalyzersForTest Include="@(Analyzer)"
+                            Condition="'%(Analyzer.IsImplicitlyDefined)' == 'true' And
+                                       ('%(Analyzer.Filename)' == 'Microsoft.CodeAnalysis.CSharp.NetAnalyzers' Or
+                                        '%(Analyzer.Filename)' == 'Microsoft.CodeAnalysis.NetAnalyzers')" />
+      <Reference Include="@(_NetAnalyzersForTest)" />
+    </ItemGroup>
+  </Target>
 
 </Project>
