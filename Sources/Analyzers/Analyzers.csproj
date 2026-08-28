@@ -5,7 +5,6 @@
     <AssemblyName>Aetos.EventSourceToolkit.Analyzers</AssemblyName>
     <RootNamespace>$(AssemblyName)</RootNamespace>
     <IsRoslynComponent>true</IsRoslynComponent>
-    <IsPackable>true</IsPackable>
     <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 

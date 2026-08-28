@@ -28,6 +28,7 @@
     <Copyright>Copyright (c) 2026 aetos</Copyright>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>BSD-2-Clause-Patent</PackageLicenseExpression>
+    <Authors>aetos</Authors>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageProjectUrl>https://github.com/aetos382/EventSourceToolkit</PackageProjectUrl>
     <IncludeSymbols Condition="'$(IncludeSymbols)' == ''">true</IncludeSymbols>

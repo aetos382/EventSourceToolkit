@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.Build.NoTargets">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>Aetos.EventSourceToolkit</PackageId>
+    <Description>Analyzers, source generators and code fixes for System.Diagnostics.Tracing.EventSource.</Description>
+    <IsPackable>true</IsPackable>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeSymbols>false</IncludeSymbols>
+
+    <!-- NU5128: lib/ が空 -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+
+    <TargetsForTfmSpecificContentInPackage>
+      $(TargetsForTfmSpecificContentInPackage);
+      _PackRoslynComponents
+    </TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <_RoslynComponentProject Include="..\Analyzers\Analyzers.csproj" />
+    <_RoslynComponentProject Include="..\SourceGenerators\SourceGenerators.csproj" />
+    <_RoslynComponentProject Include="..\CodeFixes\CodeFixes.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- ビルド順序の保証のみが目的 -->
+    <ProjectReference Include="@(_RoslynComponentProject)" ReferenceOutputAssembly="false" PrivateAssets="all" />
+  </ItemGroup>
+
+  <Target Name="_PackRoslynComponents">
+    <MSBuild Projects="@(_RoslynComponentProject)" Targets="GetTargetPath">
+      <Output TaskParameter="TargetOutputs" ItemName="_RoslynComponentAssembly" />
+    </MSBuild>
+
+    <MSBuild Projects="@(_RoslynComponentProject)" Targets="SatelliteDllsProjectOutputGroup">
+      <Output TaskParameter="TargetOutputs" ItemName="_RoslynComponentSatellite" />
+    </MSBuild>
+
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="@(_RoslynComponentAssembly)"
+                              PackagePath="analyzers/dotnet/cs/" />
+      <TfmSpecificPackageFile Include="@(_RoslynComponentSatellite)"
+                              PackagePath="analyzers/dotnet/cs/%(_RoslynComponentSatellite.TargetPath)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

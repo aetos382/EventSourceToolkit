@@ -5,7 +5,6 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
-    <Company>aetos</Company>
     <DebugType>portable</DebugType>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
