@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="EventSourceClassMustHaveEventSourceAttributeDescription" xml:space="preserve">
+    <value>GeneratedEventSourceAttribute を持つイベント ソース クラスには、有効な Name パラメーターを持つ EventSourceAttribute を付与する必要があります。</value>
+  </data>
   <data name="ParameterTypeNotSupportedDescription" xml:space="preserve">
     <value>1</value>
   </data>
@@ -125,5 +128,20 @@
   </data>
   <data name="ParameterTypeNotSupportedTitle" xml:space="preserve">
     <value>1</value>
+  </data>
+  <data name="EventSourceClassMustHaveEventSourceAttributeTitle" xml:space="preserve">
+    <value>イベント ソース クラスは有効な EventSourceAttribute を持たなければなりません</value>
+  </data>
+  <data name="EventSourceClassMustHaveEventSourceAttributeMessage" xml:space="preserve">
+    <value>イベント ソース クラス '{0}' は GeneratedEventSourceAttribute を持っていますが、有効な EventSourceAttribute を持っていません。</value>
+  </data>
+  <data name="EventSourceClassMustNotBeAbstractTitle" xml:space="preserve">
+    <value>イベント ソース クラスを抽象クラスにすることはできません。</value>
+  </data>
+  <data name="EventSourceClassMustNotBeAbstractMessage" xml:space="preserve">
+    <value>イベント ソース クラス '{0}' を抽象クラスにすることはできません。</value>
+  </data>
+  <data name="EventSourceClassMustNotBeAbstractDescription" xml:space="preserve">
+    <value>GeneratedEventSourceAttribute を持つイベント ソース クラスを抽象クラスにすることはできません。独自の EventSource 派生クラス階層を持つ必要がある場合は、GeneratedEventSourceAttribute は末端の具象クラスにのみ付与してください。</value>
   </data>
 </root>

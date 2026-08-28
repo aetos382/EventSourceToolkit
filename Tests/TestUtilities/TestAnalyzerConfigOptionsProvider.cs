@@ -3,9 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace Aetos.Tracing.Tests;
+namespace Aetos.Diagnostics.Tracing.Tests.TestUtilities;
 
-internal sealed class TestAnalyzerConfigOptionsProvider :
+public sealed class TestAnalyzerConfigOptionsProvider :
     AnalyzerConfigOptionsProvider
 {
     /// <inheritdoc />

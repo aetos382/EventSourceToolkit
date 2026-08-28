@@ -1,4 +1,4 @@
-﻿<Project Sdk="MSTest.Sdk">
+<Project Sdk="MSTest.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Generators\TraceEventGenerator\TraceEventGenerator.csproj" />
+    <ProjectReference Include="..\..\Sources\TraceEventGenerator\TraceEventGenerator.csproj" />
   </ItemGroup>
 
 </Project>

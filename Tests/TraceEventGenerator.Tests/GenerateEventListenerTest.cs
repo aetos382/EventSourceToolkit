@@ -14,6 +14,8 @@ using Basic.Reference.Assemblies;
 
 using Shouldly;
 
+using Aetos.Diagnostics.Tracing.Tests.TestUtilities;
+
 namespace Aetos.Tracing.Tests;
 
 [TestClass]
@@ -127,7 +129,7 @@ public sealed class GenerateEventListenerTest
 
         var compilationWithAnalyzers = updatedEventSourceCompilation
             .WithAnalyzers(
-                [new EventSourceAnalyzer()],
+                [new EventSourceClassSignatureAnalyzer(), new EventSourceDiagnosticSuppressor()],
                 analysisOptions);
 
         var analysisResult = await compilationWithAnalyzers
