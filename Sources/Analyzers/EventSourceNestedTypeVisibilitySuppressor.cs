@@ -1,15 +1,18 @@
-using System.Collections.Generic;
 using System.Collections.Immutable;
-
-using Aetos.EventSourceToolkit.Analyzers.Properties;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
+using Aetos.EventSourceToolkit.Analyzers.Properties;
+
 namespace Aetos.EventSourceToolkit.Analyzers;
 
+/// <summary>
+/// EventSource 派生クラスは入れ子になった public な 'Keywords', 'Tasks', 'Opcodes' というクラスを要求するが
+/// NetAnalyzers が CS1034 を出してうざいので、それを抑制する。
+/// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class EventSourceNestedTypeVisibilitySuppressor :
     DiagnosticSuppressor
@@ -20,12 +23,17 @@ public sealed class EventSourceNestedTypeVisibilitySuppressor :
         Resources.GetLocalizableResourceString(nameof(Resources.EventSourceNestedTypeVisibilityJustification)));
 
     /// <inheritdoc />
+    public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions { get; } =
+    [
+        EventSourceNestedTypeVisibility
+    ];
+
+    /// <inheritdoc />
     public override void ReportSuppressions(
         SuppressionAnalysisContext context)
     {
         var cancellationToken = context.CancellationToken;
-        var compilation = context.Compilation;
-        var wellKnownTypes = new WellKnownTypeSymbols(compilation);
+        var wellKnownTypes = new WellKnownTypeSymbols(context.Compilation);
 
         foreach (var diagnostic in context.ReportedDiagnostics)
         {
@@ -64,10 +72,4 @@ public sealed class EventSourceNestedTypeVisibilitySuppressor :
             context.ReportSuppression(Suppression.Create(EventSourceNestedTypeVisibility, diagnostic));
         }
     }
-
-    /// <inheritdoc />
-    public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions { get; } =
-    [
-        EventSourceNestedTypeVisibility
-    ];
 }
