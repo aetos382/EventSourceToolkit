@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(IncludeCommon)' == 'true'">
-    <Compile Include="$(MSBuildThisFileDirectory)Sources\Common\**\*.cs" LinkBase="Common" />
+    <Compile Include="$(MSBuildThisFileDirectory)Common\**\*.cs" LinkBase="Common" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(RestorePackagesWithLockFile)' == 'true' and '$(ContinuousIntegrationBuild)' == 'true'">
