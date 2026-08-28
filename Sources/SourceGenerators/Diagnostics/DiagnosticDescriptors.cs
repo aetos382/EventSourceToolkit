@@ -16,7 +16,8 @@ internal static class DiagnosticDescriptors
         DiagnosticCategories.General,
         DiagnosticSeverity.Error,
         true,
-        CreateString(nameof(Resources.ParameterTypeNotSupportedDescription)));
+        CreateString(nameof(Resources.ParameterTypeNotSupportedDescription)),
+        DiagnosticHelpLinks.GetHelpLinkUri(DiagnosticIds.ParameterTypeNotSupported));
 
     private static readonly Dictionary<string, DiagnosticDescriptor> Descriptors = new(StringComparer.Ordinal)
     {

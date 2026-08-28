@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -118,21 +118,39 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="EventSourceClassMustNotBeAbstractTitle" xml:space="preserve">
-    <value>イベント ソース クラスを抽象クラスにすることはできません。</value>
+    <value>イベント ソース クラスは abstract クラスであってはなりません</value>
   </data>
   <data name="EventSourceClassMustNotBeAbstractMessage" xml:space="preserve">
-    <value>イベント ソース クラス '{0}' を抽象クラスにすることはできません。</value>
+    <value>イベント ソース クラス '{0}' が abstract として宣言されています</value>
   </data>
   <data name="EventSourceClassMustNotBeAbstractDescription" xml:space="preserve">
-    <value>GeneratedEventSourceAttribute を持つイベント ソース クラスを抽象クラスにすることはできません。独自の EventSource 派生クラス階層を持つ必要がある場合は、GeneratedEventSourceAttribute は末端の具象クラスにのみ付与してください。</value>
+    <value>EventSource は具象型を前提に設計されています。イベント マニフェストはインスタンス化される型のメンバーから構築され、生成されるイベント書き込みメソッドは EventSource の protected メンバーを呼び出すインスタンス メンバーです。abstract クラスはインスタンス化できないため、そこで宣言したメソッドがイベントを書き込むことは決してありません。abstract 修飾子を削除するか、実際にインスタンス化される具象クラスに GeneratedEventSourceAttribute を移動してください。複数のイベント ソースでメンバーを共有したい場合は、abstract な基底クラスには GeneratedEventSourceAttribute を付けず、末端の具象クラスにのみ付与します。abstract なイベント ソースがイベントを発行できることはないため、この診断を抑制しないでください。</value>
   </data>
-  <data name="EventSourceClassMustBeInheritFromEventSourceTitle" xml:space="preserve">
-    <value>イベント ソース クラスは System.Diagnostics.Tracing.EventSource から派生しなければなりません。</value>
+  <data name="EventSourceClassMustDeriveFromEventSourceTitle" xml:space="preserve">
+    <value>イベント ソース クラスは System.Diagnostics.Tracing.EventSource から派生しなければなりません</value>
   </data>
-  <data name="EventSourceClassMustBeInheritFromEventSourceMessage" xml:space="preserve">
-    <value>イベント ソース クラス '{0}' は System.Diagnostics.Tracing.EventSource クラスから派生していません。</value>
+  <data name="EventSourceClassMustDeriveFromEventSourceMessage" xml:space="preserve">
+    <value>イベント ソース クラス '{0}' が System.Diagnostics.Tracing.EventSource から派生していません</value>
   </data>
-  <data name="EventSourceClassMustBeInheritFromEventSourceDescription" xml:space="preserve">
-    <value>イベント ソース クラスは System.Diagnostics.Tracing.EventSource から直接的または間接的に派生する必要があります。</value>
+  <data name="EventSourceClassMustDeriveFromEventSourceDescription" xml:space="preserve">
+    <value>生成されるメソッド本体は、System.Diagnostics.Tracing.EventSource の protected メンバーである WriteEvent および WriteEventCore を呼び出すため、それらを継承した型の内部でなければコンパイルできません。System.Diagnostics.Tracing.EventSource か、そこから派生したクラスを、イベント ソース クラスの基底クラス リストに追加してください。基底クラス リストはどの partial パートに書いてもかまいません。そのクラスをイベント ソースにする意図がない場合は、GeneratedEventSourceAttribute を削除してください。この診断を抑制すると、失敗が生成されたファイルに移り、編集できないコードを指すエラーになるだけなので、抑制しないでください。</value>
+  </data>
+  <data name="EventSourceClassMustBePartialClassTitle" xml:space="preserve">
+    <value>イベント ソース クラスは partial クラスでなければなりません</value>
+  </data>
+  <data name="EventSourceClassMustBePartialClassMessage" xml:space="preserve">
+    <value>型 '{0}' が partial として宣言されていません</value>
+  </data>
+  <data name="EventSourceClassMustBePartialClassDescription" xml:space="preserve">
+    <value>ソース ジェネレーターは、イベント書き込みメソッドの本体を、イベント ソース クラスの追加の partial パートとして別のファイルに出力します。型を複数のファイルに分割できるのは、関係するすべての宣言が partial である場合だけであり、これはそれを包含する連鎖全体に適用されます。すなわち、イベント ソース クラスが入れ子になっている場合は、それを包含するすべての型も partial でなければなりません。メッセージに示された型に partial 修飾子を追加してください。それはイベント ソース クラス自身とは限りません。この診断を抑制してもコードは生成されず、宣言した partial メソッドは実装されないままになるため、抑制しないでください。</value>
+  </data>
+  <data name="EventSourceClassMustNotBeFileLocalClassTitle" xml:space="preserve">
+    <value>イベント ソース クラスは file ローカル クラスであってはなりません</value>
+  </data>
+  <data name="EventSourceClassMustNotBeFileLocalClassMessage" xml:space="preserve">
+    <value>型 '{0}' が file ローカル型として宣言されています</value>
+  </data>
+  <data name="EventSourceClassMustNotBeFileLocalClassDescription" xml:space="preserve">
+    <value>file ローカル型は、コンパイラーがメタデータ名にファイルごとの要素を埋め込むため、宣言されたファイルごとに別個の同一性を持ちます。そのため、別のファイルから追加された partial パートは、この型を完成させるのではなく、無関係な型を宣言することになり、partial 修飾子をいくつ付けてもソース ジェネレーターが型を拡張できません。メッセージに示された型から file 修飾子を削除してください。その型をファイルの外から見えないようにしておきたい場合、ソース ジェネレーターが扱える範囲で最も近い代替は internal です。partial 修飾子の欠落とは異なり、この失敗は原因を示すコンパイラー エラーを伴わないため、この診断を抑制しないでください。</value>
   </data>
 </root>

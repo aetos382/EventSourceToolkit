@@ -43,7 +43,7 @@ public sealed class EnumerableExtensionsTest
     {
         var items = new[] { 1, 2, 3, 4, 5 };
 
-        var actual = items.FirstOrNull(static x => x == 2);
+        var actual = items.SingleOrNull(static x => x == 2);
 
         actual.ShouldBe(2);
     }
@@ -53,7 +53,7 @@ public sealed class EnumerableExtensionsTest
     {
         var items = new[] { 1, 2, 3, 4, 5 };
 
-        Should.Throw<InvalidOperationException>(() => items.FirstOrNull(static x => x % 2 == 0));
+        Should.Throw<InvalidOperationException>(() => items.SingleOrNull(static x => x % 2 == 0));
     }
 
 
@@ -62,7 +62,7 @@ public sealed class EnumerableExtensionsTest
     {
         var items = new[] { 1, 2, 3, 4, 5 };
 
-        var actual = items.FirstOrNull(static x => x % 2 >= 100);
+        var actual = items.SingleOrNull(static x => x % 2 >= 100);
 
         actual.ShouldBeNull();
     }

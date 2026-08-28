@@ -2,9 +2,13 @@ namespace Aetos.EventSourceToolkit;
 
 public static class DiagnosticIds
 {
-    public const string ParameterTypeNotSupported = "EST001";
+    public const string EventSourceClassMustBePartialClass = "EST001";
 
     public const string EventSourceClassMustNotBeAbstract = "EST002";
 
-    public const string EventSourceClassMustBeInheritFromEventSource = "EST003";
+    public const string EventSourceClassMustDeriveFromEventSource = "EST003";
+
+    public const string EventSourceClassMustNotBeFileLocalClass = "EST004";
+
+    public const string ParameterTypeNotSupported = "EST005";
 }

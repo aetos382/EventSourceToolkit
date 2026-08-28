@@ -25,6 +25,7 @@ public sealed class Test1
     [TestMethod]
     public async Task 正常系()
     {
+        /* lang=c#-test */
         const string Code =
             """
             using System.Diagnostics.Tracing;
@@ -49,8 +50,9 @@ public sealed class Test1
     }
 
     [TestMethod]
-    public async Task イベントソースクラスがabstractの場合はEST002が出る()
+    public async Task イベントソースクラスがpartialでない場合はEST001が出る()
     {
+        /* lang=c#-test */
         const string Code =
             """
             using System.Diagnostics.Tracing;
@@ -58,7 +60,64 @@ public sealed class Test1
             using Aetos.EventSourceToolkit;
 
             [GeneratedEventSource]
-            public {|EST002:abstract|} partial class MyEventSource : EventSource
+            public sealed class {|EST001:MyEventSource|} : EventSource
+            {
+            }
+            """;
+
+        var testCancellationToken = this._testContext.CancellationToken;
+
+        var test = new Test
+        {
+            TestCode = Code,
+            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+        };
+
+        await test.RunAsync(testCancellationToken).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task イベントソースクラスを包含する型がpartialでない場合はEST001が出る()
+    {
+        /* lang=c#-test */
+        const string Code =
+            """
+            using System.Diagnostics.Tracing;
+
+            using Aetos.EventSourceToolkit;
+
+            public static class {|EST001:Outer|}
+            {
+                [GeneratedEventSource]
+                public sealed partial class MyEventSource : EventSource
+                {
+                }
+            }
+            """;
+
+        var testCancellationToken = this._testContext.CancellationToken;
+
+        var test = new Test
+        {
+            TestCode = Code,
+            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+        };
+
+        await test.RunAsync(testCancellationToken).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task イベントソースクラスがabstractの場合はEST002が出る()
+    {
+        /* lang=c#-test */
+        const string Code =
+            """
+            using System.Diagnostics.Tracing;
+
+            using Aetos.EventSourceToolkit;
+
+            [GeneratedEventSource]
+            public abstract partial class {|EST002:MyEventSource|} : EventSource
             {
             }
             """;
@@ -77,6 +136,7 @@ public sealed class Test1
     [TestMethod]
     public async Task GeneratedEventSourceがついていないpartialパーツがabstractでもEST002が出る()
     {
+        /* lang=c#-test */
         const string Code =
             """
             using System.Diagnostics.Tracing;
@@ -88,7 +148,7 @@ public sealed class Test1
             {
             }
 
-            {|EST002:abstract|} partial class MyEventSource;
+            abstract partial class {|EST002:MyEventSource|};
             """;
 
         var testCancellationToken = this._testContext.CancellationToken;
@@ -105,6 +165,7 @@ public sealed class Test1
     [TestMethod]
     public async Task イベントソースクラスがEventSourceから派生していない場合はEST003が出る()
     {
+        /* lang=c#-test */
         const string Code =
             """
             using System.Diagnostics.Tracing;
@@ -129,8 +190,9 @@ public sealed class Test1
     }
 
     [TestMethod]
-    public async Task イベントソースクラスのpartialパーツのどこかがEventSourceから派生していればEST003は出ない()
+    public async Task イベントソースクラスのpartialパーツのいずれかがEventSourceから派生していればEST003は出ない()
     {
+        /* lang=c#-test */
         const string Code =
             """
             using System.Diagnostics.Tracing;
@@ -143,6 +205,65 @@ public sealed class Test1
             }
 
             partial class MyEventSource : EventSource;
+            """;
+
+        var testCancellationToken = this._testContext.CancellationToken;
+
+        var test = new Test
+        {
+            TestCode = Code,
+            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+        };
+
+        await test.RunAsync(testCancellationToken).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task イベントソースクラスがfileローカルクラスの場合はEST004が出る()
+    {
+        /* lang=c#-test */
+        const string Code =
+            """
+            using System.Diagnostics.Tracing;
+
+            using Aetos.EventSourceToolkit;
+
+            [GeneratedEventSource]
+            file sealed partial class {|EST004:MyEventSource|} : EventSource
+            {
+            }
+            """;
+
+        var testCancellationToken = this._testContext.CancellationToken;
+
+        var test = new Test
+        {
+            TestCode = Code,
+            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+        };
+
+        await test.RunAsync(testCancellationToken).ConfigureAwait(false);
+    }
+
+
+
+    [TestMethod]
+    public async Task イベントソースクラスを包含する型がfileローカルクラスの場合はEST004が出る()
+    {
+        /* lang=c#-test */
+        const string Code =
+            """
+            using System.Diagnostics.Tracing;
+
+            using Aetos.EventSourceToolkit;
+
+            file static partial class {|EST004:Outer|}
+            {
+                [GeneratedEventSource]
+                public sealed partial class MyEventSource : EventSource
+                {
+                }
+            }
             """;
 
         var testCancellationToken = this._testContext.CancellationToken;

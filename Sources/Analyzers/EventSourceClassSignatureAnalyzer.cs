@@ -15,6 +15,26 @@ namespace Aetos.EventSourceToolkit.Analyzers;
 public sealed class EventSourceClassSignatureAnalyzer :
     DiagnosticAnalyzer
 {
+    private static readonly DiagnosticDescriptor EventSourceClassMustBePartialClass = new(
+        DiagnosticIds.EventSourceClassMustBePartialClass,
+        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustBePartialClassTitle)),
+        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustBePartialClassMessage)),
+        DiagnosticCategories.General,
+        DiagnosticSeverity.Error,
+        true,
+        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustBePartialClassDescription)),
+        DiagnosticHelpLinks.GetHelpLinkUri(DiagnosticIds.EventSourceClassMustBePartialClass));
+
+    private static readonly DiagnosticDescriptor EventSourceClassMustNotBeFileLocalClass = new(
+        DiagnosticIds.EventSourceClassMustNotBeFileLocalClass,
+        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustNotBeFileLocalClassTitle)),
+        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustNotBeFileLocalClassMessage)),
+        DiagnosticCategories.General,
+        DiagnosticSeverity.Error,
+        true,
+        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustNotBeFileLocalClassDescription)),
+        DiagnosticHelpLinks.GetHelpLinkUri(DiagnosticIds.EventSourceClassMustNotBeFileLocalClass));
+
     private static readonly DiagnosticDescriptor EventSourceClassMustNotBeAbstract = new(
         DiagnosticIds.EventSourceClassMustNotBeAbstract,
         Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustNotBeAbstractTitle)),
@@ -22,15 +42,18 @@ public sealed class EventSourceClassSignatureAnalyzer :
         DiagnosticCategories.General,
         DiagnosticSeverity.Error,
         true,
-        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustNotBeAbstractDescription)));
-    private static readonly DiagnosticDescriptor EventSourceClassMustBeInheritFromEventSource = new(
-        DiagnosticIds.EventSourceClassMustBeInheritFromEventSource,
-        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustBeInheritFromEventSourceTitle)),
-        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustBeInheritFromEventSourceMessage)),
+        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustNotBeAbstractDescription)),
+        DiagnosticHelpLinks.GetHelpLinkUri(DiagnosticIds.EventSourceClassMustNotBeAbstract));
+
+    private static readonly DiagnosticDescriptor EventSourceClassMustDeriveFromEventSource = new(
+        DiagnosticIds.EventSourceClassMustDeriveFromEventSource,
+        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustDeriveFromEventSourceTitle)),
+        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustDeriveFromEventSourceMessage)),
         DiagnosticCategories.General,
         DiagnosticSeverity.Error,
         true,
-        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustBeInheritFromEventSourceDescription)));
+        Resources.GetLocalizableResourceString(nameof(Resources.EventSourceClassMustDeriveFromEventSourceDescription)),
+        DiagnosticHelpLinks.GetHelpLinkUri(DiagnosticIds.EventSourceClassMustDeriveFromEventSource));
 
     /// <inheritdoc />
     public override void Initialize(
@@ -47,8 +70,10 @@ public sealed class EventSourceClassSignatureAnalyzer :
     /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
     [
+        EventSourceClassMustBePartialClass,
+        EventSourceClassMustNotBeFileLocalClass,
         EventSourceClassMustNotBeAbstract,
-        EventSourceClassMustBeInheritFromEventSource
+        EventSourceClassMustDeriveFromEventSource
     ];
 
     private static void SyntaxNodeAction(
@@ -67,31 +92,45 @@ public sealed class EventSourceClassSignatureAnalyzer :
             return;
         }
 
+        // [GeneratedEventSource] が付いていないクラスはチェック対象外。
+        // いずれかの partial パーツについていれば、全てのパーツがチェック対象。
         if (!symbol.HasAttribute(wellKnownTypes.GeneratedEventSourceAttribute))
         {
             return;
         }
 
-        var symbolFullName = symbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedFormatWithoutGlobalPrefix);
-        var abstractModifierOrNull = node.Modifiers.FirstOrNull(static x => x.IsKind(SyntaxKind.AbstractKeyword));
-
-        if (abstractModifierOrNull is {} abstractModifier)
+        // 生成したコードをパートとして追加できなければならない。
+        // すなわち、すべての partial パーツは partial 修飾子を持ち、file 修飾子を持っていてはいけない。
+        // 入れ子クラスの場合、含んでいるクラスもすべて見る。
+        if (node.FindAugmentationBlocker() is var (blockingNode, reason))
         {
-            context.ReportDiagnostic(Diagnostic.Create(
-                EventSourceClassMustNotBeAbstract,
-                abstractModifier.GetLocation(),
-                symbolFullName));
+            var descriptor = reason switch
+            {
+                AugmentationBlockerReason.NotPartial => EventSourceClassMustBePartialClass,
+                AugmentationBlockerReason.FileLocal => EventSourceClassMustNotBeFileLocalClass,
+                _ => throw new InvalidOperationException()
+            };
 
+            context.ReportDiagnostic(Diagnostic.Create(descriptor, blockingNode));
             return;
         }
 
+        // どの partial パートも abstract 修飾子を持っていてはいけない。
+        // 実際に abstract 修飾子を持っているノードのみが対象なので symbol ではなく syntax でチェックする。
+        var abstractModifier = node.Modifiers
+            .FirstOrNull(static x => x.IsKind(SyntaxKind.AbstractKeyword));
+
+        if (abstractModifier is not null)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(EventSourceClassMustNotBeAbstract, node));
+            return;
+        }
+
+        // EventSource から派生していなければいけない。
+        // いずれかの partial パーツで派生していればよいので symbol でチェックする。
         if (!symbol.IsDerivedFrom(wellKnownTypes.EventSource))
         {
-            context.ReportDiagnostic(Diagnostic.Create(
-                EventSourceClassMustBeInheritFromEventSource,
-                node.Identifier.GetLocation(),
-                symbolFullName));
-
+            context.ReportDiagnostic(Diagnostic.Create(EventSourceClassMustDeriveFromEventSource, node));
             return;
         }
     }

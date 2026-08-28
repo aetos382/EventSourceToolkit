@@ -56,6 +56,13 @@ internal sealed class EventSourceParser
             return EventSourceMethodInfoWithDiagnostics.Empty;
         }
 
+        // メソッドを含むクラス（またはそれを包含する型）に partial パートを追加できない → 無視, 生成対象外
+        if (syntaxNode.Parent is not TypeDeclarationSyntax containingTypeNode ||
+            !containingTypeNode.CanBeAugmented)
+        {
+            return EventSourceMethodInfoWithDiagnostics.Empty;
+        }
+
         // メソッドが partial でない → 無視, 生成対象外
         if (!syntaxNode.HasPartialModifier)
         {
