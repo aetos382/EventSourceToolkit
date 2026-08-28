@@ -1,10 +1,10 @@
 using System;
 using System.Threading.Tasks;
 
-using Aetos.EventSourceToolkit.SourceGenerators;
-
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
+
+using Aetos.EventSourceToolkit.SourceGenerators;
 
 namespace Aetos.EventSourceToolkit.Tests.SourceGenerators;
 

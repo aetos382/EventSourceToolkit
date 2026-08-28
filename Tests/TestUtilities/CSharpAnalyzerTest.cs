@@ -28,7 +28,7 @@ public class CSharpAnalyzerTest : AnalyzerTest<DefaultVerifier>
     protected override IEnumerable<DiagnosticAnalyzer> GetDiagnosticAnalyzers() => [];
 
     /// <inheritdoc />
-    protected override string DefaultFileExt => ".cs";
+    protected override string DefaultFileExt => "cs";
 
     /// <inheritdoc />
     public override string Language => LanguageNames.CSharp;
