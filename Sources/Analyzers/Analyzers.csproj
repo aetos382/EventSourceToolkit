@@ -31,7 +31,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Aetos.EventSourceToolkit.Tests.Analyzers" />
-    <InternalsVisibleTo Include="Aetos.EventSourceToolkit.Tests.SourceGenerators" />
   </ItemGroup>
 
 </Project>

@@ -111,7 +111,13 @@ public sealed class EventSourceClassSignatureAnalyzer :
                 _ => throw new InvalidOperationException()
             };
 
-            context.ReportDiagnostic(Diagnostic.Create(descriptor, blockingNode));
+            var identifier = blockingNode.Identifier;
+
+            context.ReportDiagnostic(Diagnostic.Create(
+                descriptor,
+                identifier.GetLocation(),
+                identifier.ValueText));
+
             return;
         }
 
@@ -122,7 +128,13 @@ public sealed class EventSourceClassSignatureAnalyzer :
 
         if (abstractModifier is not null)
         {
-            context.ReportDiagnostic(Diagnostic.Create(EventSourceClassMustNotBeAbstract, node));
+            var identifier = node.Identifier;
+
+            context.ReportDiagnostic(Diagnostic.Create(
+                EventSourceClassMustNotBeAbstract,
+                identifier.GetLocation(),
+                identifier.ValueText));
+
             return;
         }
 
@@ -130,7 +142,13 @@ public sealed class EventSourceClassSignatureAnalyzer :
         // いずれかの partial パーツで派生していればよいので symbol でチェックする。
         if (!symbol.IsDerivedFrom(wellKnownTypes.EventSource))
         {
-            context.ReportDiagnostic(Diagnostic.Create(EventSourceClassMustDeriveFromEventSource, node));
+            var identifier = node.Identifier;
+
+            context.ReportDiagnostic(Diagnostic.Create(
+                EventSourceClassMustDeriveFromEventSource,
+                identifier.GetLocation(),
+                identifier.ValueText));
+
             return;
         }
     }

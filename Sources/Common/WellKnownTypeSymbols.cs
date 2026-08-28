@@ -7,6 +7,7 @@ using static Aetos.EventSourceToolkit.Constants;
 
 namespace Aetos.EventSourceToolkit;
 
+[Embedded]
 internal sealed class WellKnownTypeSymbols
 {
     private readonly Compilation _compilation;

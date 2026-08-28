@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>Aetos.EventSourceToolkit.Tests.Analyzers</AssemblyName>
     <RootNamespace>$(AssemblyName)</RootNamespace>
+    <IncludeCommon>true</IncludeCommon>
   </PropertyGroup>
 
   <ItemGroup>

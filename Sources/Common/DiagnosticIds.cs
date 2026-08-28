@@ -1,5 +1,8 @@
+using Microsoft.CodeAnalysis;
+
 namespace Aetos.EventSourceToolkit;
 
+[Embedded]
 public static class DiagnosticIds
 {
     public const string EventSourceClassMustBePartialClass = "EST001";
