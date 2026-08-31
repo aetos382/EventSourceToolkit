@@ -156,4 +156,13 @@
   <data name="EventSourceNestedTypeVisibilityJustification" xml:space="preserve">
     <value>EventSource discovers the Keywords, Tasks, and Opcodes values only in public nested classes with those exact names, so nesting and their public accessibility are required, not accidental design choices.</value>
   </data>
+  <data name="ParameterTypeNotSupportedTitle" xml:space="preserve">
+    <value>An event method parameter must have a supported type</value>
+  </data>
+  <data name="ParameterTypeNotSupportedMessage" xml:space="preserve">
+    <value>The parameter '{0}' has a type that is not supported</value>
+  </data>
+  <data name="ParameterTypeNotSupportedDescription" xml:space="preserve">
+    <value>EventSource writes event payloads as a flat sequence of fixed-layout fields, so a parameter can only be included in the payload when its type has a size EventSource recognizes. The supported parameter types are bool, byte, char, DateTime, decimal, double, short, int, long, nint, sbyte, float, string, ushort, uint, ulong, Guid, byte[], and any enum type. Change the parameter to one of these types, converting at the call site rather than inside the event method so the conversion does not run when nobody is listening to the event source. Do not suppress this diagnostic; the parameter cannot be written to the payload, so the generated method would either fail to compile or silently drop the value.</value>
+  </data>
 </root>

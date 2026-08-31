@@ -15,7 +15,7 @@ namespace Aetos.EventSourceToolkit.SourceGenerators;
 internal sealed class EventSourceParser
 {
     private readonly SemanticModel _semanticModel;
-    private readonly WellKnownTypeSymbols _wellKnownTypes;
+    private readonly WellKnownSymbols _wellKnownTypes;
 
     public EventSourceParser(
         SemanticModel semanticModel)
@@ -23,7 +23,7 @@ internal sealed class EventSourceParser
         ArgumentNullException.ThrowIfNull(semanticModel);
 
         this._semanticModel = semanticModel;
-        this._wellKnownTypes = new WellKnownTypeSymbols(semanticModel.Compilation);
+        this._wellKnownTypes = new WellKnownSymbols(semanticModel.Compilation);
     }
 
     public EventSourceMethodInfoWithDiagnostics ParseEventSource(
@@ -109,10 +109,10 @@ internal sealed class EventSourceParser
                 continue;
             }
 
+            // パラメーターの型がサポートされていない → 無視, 生成対象外（診断は Analyzer 側が行う）
             if (!supportedTypes.IsSupported(parameterTypeSymbol))
             {
-                // そのメソッドのパラメーターはサポートされているか
-                diagnostics.Add(new DiagnosticInfo(DiagnosticIds.ParameterTypeNotSupported, parameter.GetNodeLocationInfo()));
+                return EventSourceMethodInfoWithDiagnostics.Empty;
             }
 
             var parameterTypeName = parameterTypeSymbol.ToFullyQualifiedString();

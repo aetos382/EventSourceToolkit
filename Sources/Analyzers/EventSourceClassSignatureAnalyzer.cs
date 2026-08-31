@@ -81,7 +81,7 @@ public sealed class EventSourceClassSignatureAnalyzer :
         var cancellationToken = context.CancellationToken;
         var compilation = context.Compilation;
         var semanticModel = context.SemanticModel;
-        var wellKnownTypes = new WellKnownTypeSymbols(compilation);
+        var wellKnownTypes = new WellKnownSymbols(compilation);
 
         var node = (ClassDeclarationSyntax)context.Node;
         var symbol = semanticModel.GetDeclaredSymbol(node, cancellationToken);

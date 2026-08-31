@@ -6,11 +6,11 @@ using Microsoft.CodeAnalysis;
 namespace Aetos.EventSourceToolkit;
 
 [Embedded]
-internal sealed class WellKnownTypeSymbols
+internal sealed class WellKnownSymbols
 {
     private readonly Compilation _compilation;
 
-    public WellKnownTypeSymbols(Compilation compilation)
+    public WellKnownSymbols(Compilation compilation)
     {
         ArgumentNullException.ThrowIfNull(compilation);
 

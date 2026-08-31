@@ -12,7 +12,7 @@ namespace Aetos.EventSourceToolkit.SourceGenerators;
 internal sealed class EventListenerParser
 {
     private readonly SemanticModel _semanticModel;
-    private readonly WellKnownTypeSymbols _wellKnownTypes;
+    private readonly WellKnownSymbols _wellKnownTypes;
 
     public EventListenerParser(
         SemanticModel semanticModel)
@@ -20,7 +20,7 @@ internal sealed class EventListenerParser
         ArgumentNullException.ThrowIfNull(semanticModel);
 
         this._semanticModel = semanticModel;
-        this._wellKnownTypes = new WellKnownTypeSymbols(semanticModel.Compilation);
+        this._wellKnownTypes = new WellKnownSymbols(semanticModel.Compilation);
     }
 
     public EventListenerInfoWithDiagnostics ParseEventListener(

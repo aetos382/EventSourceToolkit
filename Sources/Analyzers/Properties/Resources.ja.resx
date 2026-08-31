@@ -156,4 +156,13 @@
   <data name="EventSourceNestedTypeVisibilityJustification" xml:space="preserve">
     <value>EventSource は Keywords、Tasks、Opcodes の値を、それらと同じ名前を持つ public な入れ子クラスからのみ検出するため、入れ子であることと public であることはどちらも偶発的な設計ではなく必須です。</value>
   </data>
+  <data name="ParameterTypeNotSupportedTitle" xml:space="preserve">
+    <value>イベント メソッドのパラメーターはサポートされている型でなければなりません</value>
+  </data>
+  <data name="ParameterTypeNotSupportedMessage" xml:space="preserve">
+    <value>パラメーター '{0}' の型がサポートされていません</value>
+  </data>
+  <data name="ParameterTypeNotSupportedDescription" xml:space="preserve">
+    <value>EventSource はイベント ペイロードを固定レイアウトのフィールドの並びとして書き込むため、EventSource が認識できるサイズを持つ型のパラメーターしかペイロードに含められません。サポートされているパラメーターの型は、bool、byte、char、DateTime、decimal、double、short、int、long、nint、sbyte、float、string、ushort、uint、ulong、Guid、byte[]、および任意の enum 型です。パラメーターの型をこれらのいずれかに変更してください。変換はイベント メソッドの内部ではなく呼び出し側で行ってください。そうしないと、誰も購読していない場合でも変換が実行されてしまいます。この診断を抑制しないでください。パラメーターをペイロードに書き込めないため、生成されるメソッドはコンパイルに失敗するか、値を黙って破棄することになります。</value>
+  </data>
 </root>

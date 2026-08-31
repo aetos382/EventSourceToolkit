@@ -6,11 +6,11 @@ namespace Aetos.EventSourceToolkit.SourceGenerators;
 
 internal sealed class SupportedTypes
 {
-    private readonly WellKnownTypeSymbols _wellKnownTypes;
+    private readonly WellKnownSymbols _wellKnownTypes;
     private readonly ITypeSymbol[] _supportedTypes;
 
     public SupportedTypes(
-        WellKnownTypeSymbols wellKnownTypes)
+        WellKnownSymbols wellKnownTypes)
     {
         this._wellKnownTypes = wellKnownTypes;
         var list = new List<ITypeSymbol>

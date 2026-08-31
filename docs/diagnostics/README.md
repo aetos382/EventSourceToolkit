@@ -9,7 +9,7 @@ toolkit, regardless of whether it is reported by the analyzer or by the source g
 | [EST002](EST002.md) | An event source class must not be an abstract class | General | Error | Analyzer |
 | [EST003](EST003.md) | An event source class must derive from System.Diagnostics.Tracing.EventSource | General | Error | Analyzer |
 | [EST004](EST004.md) | An event source class must not be a file-local class | General | Error | Analyzer |
-| [EST005](EST005.md) | An event method parameter must have a supported type | General | Error | Source generator |
+| [EST005](EST005.md) | An event method parameter must have a supported type | General | Error | Analyzer |
 
 ## How to read these documents
 

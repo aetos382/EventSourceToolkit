@@ -111,6 +111,8 @@ internal static class SyntaxExtensions
         {
             get
             {
+                // C# では void や System.Void に対して using で別名を付けられないので
+                // symbol を見なくても syntax だけで判定ができる。
                 var returnType = node.ReturnType;
                 if (!returnType.IsKind(SyntaxKind.PredefinedType))
                 {
