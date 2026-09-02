@@ -29,7 +29,7 @@ public sealed class EventSourceMethodSignatureAnalyzer :
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        context.EnableConcurrentExecution();
+        // context.EnableConcurrentExecution();
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
         context.RegisterSyntaxNodeAction(SyntaxNodeAction, SyntaxKind.MethodDeclaration);
@@ -57,6 +57,34 @@ public sealed class EventSourceMethodSignatureAnalyzer :
             return;
         }
 
+        // partial メソッドでない、または既に実装がある場合は検査対象外
+        if (!node.HasPartialModifier ||
+            !symbol.IsPartialDefinition ||
+            symbol.PartialImplementationPart is not null)
+        {
+            return;
+        }
+
+        // 包含クラスが拡張可能でなければ検査対象外
+        if (node.Parent is not ClassDeclarationSyntax classDecl || !classDecl.CanBeAugmented)
+        {
+            return;
+        }
+
+        var containingType = symbol.ContainingType!;
+
+        // 型に [GeneratedEventSource] がついていなければ検査対象外
+        if (!containingType.HasAttribute(wellKnownSymbols.GeneratedEventSourceAttribute))
+        {
+            return;
+        }
+
+        // 型が EventSource から派生していなければ検査対象外
+        if (!containingType.IsDerivedFrom(wellKnownSymbols.EventSource))
+        {
+            return;
+        }
+
         // [NonEvent] がついているメソッドは検査対象外
         if (symbol.HasAttribute(wellKnownSymbols.NonEventAttribute))
         {
@@ -78,16 +106,26 @@ public sealed class EventSourceMethodSignatureAnalyzer :
             }
         }
 
-        var parameters = symbol.Parameters;
+        var parameters = node.ParameterList.Parameters;
         foreach (var parameter in parameters)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var parameterType = parameter.Type;
+            var parameterTypeNode = parameter.Type!;
+            var parameterSymbolInfo = semanticModel.GetSymbolInfo(parameterTypeNode, cancellationToken);
+            var parameterTypeSymbol = (ITypeSymbol)parameterSymbolInfo.Symbol!;
 
-            if (!EventSourceUtilities.IsSupportedParameterType(parameterType, wellKnownSymbols))
+            if (!EventSourceUtilities.IsSupportedParameterType(parameterTypeSymbol, wellKnownSymbols))
             {
-                // TODO: diagnostic
+                var parameterTypeName = parameterTypeNode.SyntaxTree.GetText(cancellationToken).GetSubText(parameterTypeNode.Span);
+
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        ParameterTypeNotSupported,
+                        parameter.GetLocation(),
+                        parameter.Identifier.ValueText,
+                        parameterTypeName));
+
                 continue;
             }
         }

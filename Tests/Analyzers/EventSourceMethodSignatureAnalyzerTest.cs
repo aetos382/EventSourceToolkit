@@ -46,7 +46,7 @@ public sealed class EventSourceMethodSignatureAnalyzerTest
     }
 
     [TestMethod]
-    public async Task Foo()
+    public async Task Diagnosticsなし()
     {
         // lang=c#
         const string Code =
@@ -55,18 +55,208 @@ public sealed class EventSourceMethodSignatureAnalyzerTest
 
             using Aetos.EventSourceToolkit;
 
+            [GeneratedEventSource]
             partial class MyEventSource : EventSource
             {
                 public partial void Foo(E e, int i, byte[] b);
             }
 
-            // Generator が動くようになるまで、エラーを避けるためのダミー実装
             partial class MyEventSource
             {
-                public partial void Foo(E e, int i, byte[] b) { }
+                public partial void Foo(E e, int i, byte[] b)
+                {
+                }
             }
 
             public enum E { A, B, C }
+            """;
+
+        var test = new Test
+        {
+            TestCode = Code
+        };
+
+        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task サポートされていない型のパラメーターがある場合はEST005が出る()
+    {
+        // lang=c#-test
+        const string Code =
+            """
+            using System;
+            using System.Diagnostics.Tracing;
+
+            using Aetos.EventSourceToolkit;
+
+            [GeneratedEventSource]
+            partial class MyEventSource : EventSource
+            {
+                // CS8795 は partial の本体がないエラー
+                public partial void {|CS8795:Foo|}({|EST005:DateTimeOffset d|});
+            }
+            """;
+
+        var test = new Test
+        {
+            TestCode = Code
+        };
+
+        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task 型にGeneratedEventSourceAttributeがついていなければ検査対象外()
+    {
+        // lang=c#-test
+        const string Code =
+            """
+            using System;
+            using System.Diagnostics.Tracing;
+
+            partial class MyEventSource : EventSource
+            {
+                public partial void {|CS8795:Foo|}(DateTimeOffset d);
+            }
+            """;
+
+        var test = new Test
+        {
+            TestCode = Code
+        };
+
+        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task メソッドにNonEventAttributeがついていたら検査対象外()
+    {
+        // lang=c#-test
+        const string Code =
+            """
+            using System;
+            using System.Diagnostics.Tracing;
+
+            partial class MyEventSource : EventSource
+            {
+                [NonEvent]
+                public partial void {|CS8795:Foo|}(DateTimeOffset d);
+            }
+            """;
+
+        var test = new Test
+        {
+            TestCode = Code
+        };
+
+        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task 型がEventSourceから派生していなければ検査対象外()
+    {
+        // lang=c#-test
+        const string Code =
+            """
+            using System;
+            using System.Diagnostics.Tracing;
+
+            partial class MyEventSource
+            {
+                [NonEvent]
+                public partial void {|CS8795:Foo|}(DateTimeOffset d);
+            }
+            """;
+
+        var test = new Test
+        {
+            TestCode = Code
+        };
+
+        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task 型がpartialメソッドでなければ検査対象外()
+    {
+        // lang=c#-test
+        const string Code =
+            """
+            using System;
+            using System.Diagnostics.Tracing;
+
+            using Aetos.EventSourceToolkit;
+
+            [GeneratedEventSource]
+            partial class MyEventSource : EventSource
+            {
+                public void Foo(DateTimeOffset d)
+                {
+                }
+            }
+            """;
+
+        var test = new Test
+        {
+            TestCode = Code
+        };
+
+        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task 型がpartialメソッドの実装を持っていれば検査対象外()
+    {
+        // lang=c#-test
+        const string Code =
+            """
+            using System;
+            using System.Diagnostics.Tracing;
+
+            using Aetos.EventSourceToolkit;
+
+            [GeneratedEventSource]
+            partial class MyEventSource : EventSource
+            {
+                public partial void Foo(DateTimeOffset d);
+            }
+
+            partial class MyEventSource
+            {
+                public partial void Foo(DateTimeOffset d)
+                {
+                }
+            }
+            """;
+
+        var test = new Test
+        {
+            TestCode = Code
+        };
+
+        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task 包含型がpartialでなければ検査対象外()
+    {
+        // lang=c#-test
+        const string Code =
+            """
+            using System;
+            using System.Diagnostics.Tracing;
+
+            using Aetos.EventSourceToolkit;
+
+            class Outer
+            {
+                [GeneratedEventSource]
+                partial class MyEventSource : EventSource
+                {
+                    public partial void {|CS8795:Foo|}(DateTimeOffset d);
+                }
+            }
             """;
 
         var test = new Test

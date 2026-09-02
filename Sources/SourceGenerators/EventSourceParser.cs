@@ -34,6 +34,12 @@ internal sealed class EventSourceParser
         var containingType = symbol.ContainingType;
         var wellKnownSymbols = this._wellKnownSymbols;
 
+        // メソッドが static → 無視, 生成対象外
+        if (symbol.IsStatic)
+        {
+            return null;
+        }
+
         // メソッドを含むクラスに GeneratedEventSourceAttribute がついていない → 無視, 生成対象外
         var markerAttribute = containingType.GetAttribute(wellKnownSymbols.GeneratedEventSourceAttribute);
         if (markerAttribute is null)

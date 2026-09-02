@@ -13,11 +13,15 @@ using Shouldly;
 
 using Aetos.EventSourceToolkit.SourceGenerators;
 
+using Microsoft.CodeAnalysis.CSharp.Testing;
+
 namespace Aetos.EventSourceToolkit.Tests.SourceGenerators;
 
 [TestClass]
 public sealed class GeneratedEventSourceTest
 {
+    private sealed class Test : CSharpSourceGeneratorTest<EventSourceGenerator, DefaultVerifier>;
+
     [TestMethod]
     public async Task 引数がないイベントメソッドの場合()
     {
@@ -236,6 +240,90 @@ public sealed class GeneratedEventSourceTest
             """;
 
         await ValidateGeneratedCodeAsync(Code, "Sample.TestEventSource.Foo.g.cs", ExpectedCode, this._testContext.CancellationToken).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task staticメソッドに対してはコードが生成されない()
+    {
+        /* lang=c# */
+        const string Code =
+            """
+            using System.Diagnostics.Tracing;
+
+            using Aetos.EventSourceToolkit;
+
+            namespace Sample;
+
+            [EventSource(Name = "TestEventSource")]
+            [GeneratedEventSource]
+            partial class TestEventSource : EventSource
+            {
+                [Event(1, Level = EventLevel.Informational)]
+                public static partial void {|CS8795:Foo|}();
+            }
+            """;
+
+        var test = new Test
+        {
+            TestCode = Code,
+            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+        };
+
+        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task 型にGeneratedEventSourceAttributeがついていなければコードが生成されない()
+    {
+        /* lang=c# */
+        const string Code =
+            """
+            using System.Diagnostics.Tracing;
+
+            namespace Sample;
+
+            [EventSource(Name = "TestEventSource")]
+            partial class TestEventSource : EventSource
+            {
+                [Event(1, Level = EventLevel.Informational)]
+                public static partial void {|CS8795:Foo|}();
+            }
+            """;
+
+        var test = new Test
+        {
+            TestCode = Code,
+            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+        };
+
+        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
+    }
+
+    [TestMethod]
+    public async Task 型がEventSourceから派生していなければコードが生成されない()
+    {
+        /* lang=c# */
+        const string Code =
+            """
+            using System.Diagnostics.Tracing;
+
+            namespace Sample;
+
+            [EventSource(Name = "TestEventSource")]
+            partial class TestEventSource
+            {
+                [Event(1, Level = EventLevel.Informational)]
+                public static partial void {|CS8795:Foo|}();
+            }
+            """;
+
+        var test = new Test
+        {
+            TestCode = Code,
+            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
+        };
+
+        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
     }
 
     public GeneratedEventSourceTest(

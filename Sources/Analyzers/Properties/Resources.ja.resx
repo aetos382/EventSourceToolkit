@@ -160,7 +160,7 @@
     <value>イベント メソッドのパラメーターはサポートされている型でなければなりません</value>
   </data>
   <data name="ParameterTypeNotSupportedMessage" xml:space="preserve">
-    <value>パラメーター '{0}' の型がサポートされていません</value>
+    <value>パラメーター '{0}' の型 '{1}' はサポートされていません</value>
   </data>
   <data name="ParameterTypeNotSupportedDescription" xml:space="preserve">
     <value>EventSource はイベント ペイロードを固定レイアウトのフィールドの並びとして書き込むため、EventSource が認識できるサイズを持つ型のパラメーターしかペイロードに含められません。サポートされているパラメーターの型は、bool、byte、char、DateTime、decimal、double、short、int、long、nint、sbyte、float、string、ushort、uint、ulong、Guid、byte[]、および任意の enum 型です。パラメーターの型をこれらのいずれかに変更してください。変換はイベント メソッドの内部ではなく呼び出し側で行ってください。そうしないと、誰も購読していない場合でも変換が実行されてしまいます。この診断を抑制しないでください。パラメーターをペイロードに書き込めないため、生成されるメソッドはコンパイルに失敗するか、値を黙って破棄することになります。</value>
