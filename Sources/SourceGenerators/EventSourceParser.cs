@@ -26,59 +26,56 @@ internal sealed class EventSourceParser
         this._wellKnownTypes = new WellKnownSymbols(semanticModel.Compilation);
     }
 
-    public EventSourceMethodInfoWithDiagnostics ParseEventSource(
+    public EventSourceInfo? ParseEventSource(
         MethodDeclarationSyntax syntaxNode,
         IMethodSymbol symbol,
         CancellationToken cancellationToken)
     {
         var containingType = symbol.ContainingType;
         var wellKnownTypes = this._wellKnownTypes;
-        var diagnostics = new List<DiagnosticInfo>();
-
-        // クラスに対する警告はメソッド単位でのコード生成では大変なので、別の Analyzer を用意する
 
         // メソッドを含むクラスに GeneratedEventSourceAttribute がついていない → 無視, 生成対象外
         var markerAttribute = containingType.GetAttribute(wellKnownTypes.GeneratedEventSourceAttribute);
         if (markerAttribute is null)
         {
-            return EventSourceMethodInfoWithDiagnostics.Empty;
+            return null;
         }
 
         // メソッドを含むクラスが（間接的に）EventSource から派生していない → 警告, 生成対象外
         if (!this.IsDerivedFromEventSource(containingType))
         {
-            return EventSourceMethodInfoWithDiagnostics.Empty;
+            return null;
         }
 
         // メソッドを含むクラスに EventSourceAttribute がついていない → 警告, 生成対象外
         if (this.GetEventSourceAttribute(containingType) is null)
         {
-            return EventSourceMethodInfoWithDiagnostics.Empty;
+            return null;
         }
 
         // メソッドを含むクラス（またはそれを包含する型）に partial パートを追加できない → 無視, 生成対象外
         if (syntaxNode.Parent is not TypeDeclarationSyntax containingTypeNode ||
             !containingTypeNode.CanBeAugmented)
         {
-            return EventSourceMethodInfoWithDiagnostics.Empty;
+            return null;
         }
 
         // メソッドが partial でない → 無視, 生成対象外
         if (!syntaxNode.HasPartialModifier)
         {
-            return EventSourceMethodInfoWithDiagnostics.Empty;
+            return null;
         }
 
         // メソッドの実装が存在する → 無視, 生成対象外
         if (symbol.PartialImplementationPart is not null)
         {
-            return EventSourceMethodInfoWithDiagnostics.Empty;
+            return null;
         }
 
         // メソッドの戻り値が void でない → 無視, 生成対象外
         if (!syntaxNode.ReturnsVoid)
         {
-            return EventSourceMethodInfoWithDiagnostics.Empty;
+            return null;
         }
 
         var keywordsType = containingType.GetTypeMembers("Keywords").SingleOrDefault();
@@ -112,7 +109,7 @@ internal sealed class EventSourceParser
             // パラメーターの型がサポートされていない → 無視, 生成対象外（診断は Analyzer 側が行う）
             if (!supportedTypes.IsSupported(parameterTypeSymbol))
             {
-                return EventSourceMethodInfoWithDiagnostics.Empty;
+                return null;
             }
 
             var parameterTypeName = parameterTypeSymbol.ToFullyQualifiedString();
@@ -178,11 +175,7 @@ internal sealed class EventSourceParser
             parameters.ToArray(),
             hasRelatedActivityIdParameter);
 
-        var methodInfoWithDiagnostics = new EventSourceMethodInfoWithDiagnostics(
-            methodInfo,
-            diagnostics.ToArray());
-
-        return methodInfoWithDiagnostics;
+        return methodInfo;
     }
 
     private AttributeData? GetEventSourceAttribute(INamedTypeSymbol type)

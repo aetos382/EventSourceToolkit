@@ -12,14 +12,9 @@ internal static class EventSourceEmitter
 {
     public static void EmitEventSource(
         SourceProductionContext context,
-        EventSourceMethodInfoWithDiagnostics input)
+        EventSourceInfo? methodInfo)
     {
-        foreach (var diagnostic in input.Diagnostics)
-        {
-            context.ReportDiagnostic(diagnostic.CreateDiagnostic());
-        }
-
-        if (input.SourceInfo is not { } methodInfo)
+        if (methodInfo is null)
         {
             return;
         }
