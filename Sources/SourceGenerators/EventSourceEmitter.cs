@@ -12,7 +12,7 @@ internal static class EventSourceEmitter
 {
     public static void EmitEventSource(
         SourceProductionContext context,
-        EventSourceInfo? methodInfo)
+        EventSourceMethodInfo? methodInfo)
     {
         if (methodInfo is null)
         {

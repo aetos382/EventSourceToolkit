@@ -26,7 +26,7 @@ internal sealed class EventSourceParser
         this._wellKnownTypes = new WellKnownSymbols(semanticModel.Compilation);
     }
 
-    public EventSourceInfo? ParseEventSource(
+    public EventSourceMethodInfo? ParseEventSource(
         MethodDeclarationSyntax syntaxNode,
         IMethodSymbol symbol,
         CancellationToken cancellationToken)
@@ -165,7 +165,7 @@ internal sealed class EventSourceParser
             parentNode = parentNode.Parent;
         }
 
-        var methodInfo = new EventSourceInfo(
+        var methodInfo = new EventSourceMethodInfo(
             namespaceSegments.ToArray(),
             ancestorTypes.ToArray(),
             containingClassName,
