@@ -2,6 +2,7 @@
   <Folder Name="/Sources/">
     <Project Path="Sources/Analyzers/Analyzers.csproj" />
     <Project Path="Sources/CodeFixes/CodeFixes.csproj" />
+    <Project Path="Sources/Common/Common.csproj" />
     <Project Path="Sources/Packaging/Packaging.csproj" />
     <Project Path="Sources/SourceGenerators/SourceGenerators.csproj" />
   </Folder>

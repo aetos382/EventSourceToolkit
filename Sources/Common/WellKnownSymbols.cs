@@ -5,8 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Aetos.EventSourceToolkit;
 
-[Embedded]
-internal sealed class WellKnownSymbols
+public sealed class WellKnownSymbols
 {
     private readonly Compilation _compilation;
 
@@ -17,6 +16,7 @@ internal sealed class WellKnownSymbols
         this._compilation = compilation;
     }
 
+#pragma warning disable CA1720
     public INamedTypeSymbol Boolean
     {
         get
@@ -169,6 +169,7 @@ internal sealed class WellKnownSymbols
             return field;
         }
     }
+#pragma warning restore
 
     public IArrayTypeSymbol ByteArray
     {

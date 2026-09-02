@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-using Microsoft.CodeAnalysis;
-
 namespace Aetos.EventSourceToolkit;
 
-[Embedded]
-internal static partial class EnumerableExtensions
+public static partial class EnumerableExtensions
 {
     public static T? FirstOrNull<T>(
         this IEnumerable<T> source,

@@ -6,8 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Aetos.EventSourceToolkit;
 
-[Embedded]
-internal static class SyntaxExtensions
+public static class SyntaxExtensions
 {
     extension(MemberDeclarationSyntax node)
     {

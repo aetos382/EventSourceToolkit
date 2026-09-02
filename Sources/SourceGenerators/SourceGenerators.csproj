@@ -6,7 +6,6 @@
     <RootNamespace>$(AssemblyName)</RootNamespace>
     <IsRoslynComponent>true</IsRoslynComponent>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <IncludeCommon>true</IncludeCommon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +17,10 @@
       <PrivateAssets>all</PrivateAssets>
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Tracing;
 
 namespace StandardEventSourceTest;
@@ -19,6 +20,7 @@ public sealed class Test1
 
     private sealed class TestEventSource : EventSource
     {
+        [UnconditionalSuppressMessage("ReflectionAnalysis", "IL2026:RequiresUnreferencedCode")]
         public void Test(
             int a, bool b, string c, TestEnum8 d, TestEnum32 e, TestEnum64 f)
         {

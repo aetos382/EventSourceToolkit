@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.Build.NoTargets">
+<Project Sdk="Microsoft.Build.NoTargets">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -23,6 +23,7 @@
     <_RoslynComponentProject Include="..\Analyzers\Analyzers.csproj" />
     <_RoslynComponentProject Include="..\SourceGenerators\SourceGenerators.csproj" />
     <_RoslynComponentProject Include="..\CodeFixes\CodeFixes.csproj" />
+    <_RoslynComponentProject Include="..\Common\Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

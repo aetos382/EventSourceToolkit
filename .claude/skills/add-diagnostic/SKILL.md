@@ -47,7 +47,9 @@ description: EventSourceToolkit に新しい Roslyn 診断（Analyzer/Source Gen
 
 ### 3. ID を採番する
 
-`Sources/Common/DiagnosticIds.cs` に定数を追加する。このクラスは `IncludeCommon=true` によって Analyzers と SourceGenerators の両方にコンパイルされるので、**番号はリポジトリ全体で一意**でなければならない。プロジェクトごとに別の連番を振ってはいけない。
+`Sources/Common/DiagnosticIds.cs` に定数を追加する。Common は `Sources/Common/Common.csproj`（アセンブリ名 `Aetos.EventSourceToolkit`）という独立したプロジェクトで、Analyzers と SourceGenerators がそれぞれ `ProjectReference` で参照する**単一の共有アセンブリ**である。ID の定義は全体で 1 箇所しかないので、**番号はリポジトリ全体で一意**でなければならない。プロジェクトごとに別の連番を振ってはいけない。
+
+Common は参照側とは別アセンブリなので、Analyzers / SourceGenerators から使うものは `public` にする。`InternalsVisibleTo` は張っていないため `internal` では参照できない。`DiagnosticIds`・`DiagnosticCategories`・`DiagnosticHelpLinks` がいずれも `public static class` なのはこのためで、新しい定数もこの形に合わせる。
 
 - 番号は `EST` + 3 桁。既存の最大値 + 1
 - 定数名は Title と同じ規範系の短文にする。`MustBe` / `MustNotBe` / `ShouldBe` / `ShouldNotBe` を含める
@@ -186,18 +188,18 @@ private static readonly DiagnosticDescriptor EventSourceClassMustNotBeFileLocalC
 
 | 目的 | ファイル |
 |---|---|
-| 採番済みの Suppression ID | `Sources/Analyzers/SuppressionIds.cs`（まだ存在しなければ手順 3 で新規作成） |
+| 採番済みの Suppression ID | `Sources/Analyzers/SuppressionIds.cs` |
 | 文字列リソース | `Sources/Analyzers/Properties/Resources.resx` と `Resources.ja.resx` |
 | Suppressor の記述子 | 対象の `Sources/Analyzers/*Suppressor.cs` |
 
 ### 3. ID を採番する
 
-`Sources/Analyzers/SuppressionIds.cs` に定数を追加する（ファイルがなければ新規作成する）。`DiagnosticIds.cs` と違い、このファイルは Analyzers プロジェクトの**ローカル**ファイルであり、`IncludeCommon` で SourceGenerators 側にはコンパイルされない。Suppression ID はプロジェクト外から参照される理由がないため、共有クラスに置く必要がない。
+`Sources/Analyzers/SuppressionIds.cs` に定数を追加する。`DiagnosticIds` が共有アセンブリ Common に置かれているのに対し、こちらは Analyzers プロジェクト**内部**のファイルである。Suppression ID を参照するのは同じプロジェクトの `DiagnosticSuppressor` だけで、SourceGenerators もパッケージの利用者も参照しないため、Common に置く理由がない。
 
 - 番号は `EST`（DiagnosticId と同じアルファベット 3 文字）+ `S` + 数字 3 桁。例: `ESTS001`
-- 採番はこのファイル内で完結する連番。既存の最大値 + 1（ファイルが空、または存在しないなら 001 から）
+- 採番はこのファイル内で完結する連番。既存の最大値 + 1
 - 定数名は「何をどんな状況で抑制するか」が分かる短い名前にする
-- クラスと定数は `internal` にする。`DiagnosticIds` と違い外部プロジェクトから参照されないため `public` にする理由がない
+- クラスと定数は `internal` にする。Common に置く `DiagnosticIds` が `public` なのはアセンブリを越えて参照されるからで、こちらは同一アセンブリ内でしか使わない
 - namespace は対象 Suppressor クラスと同じにする（例: `Aetos.EventSourceToolkit.Analyzers`）
 
 ```csharp
@@ -205,7 +207,9 @@ namespace Aetos.EventSourceToolkit.Analyzers;
 
 internal static class SuppressionIds
 {
-    internal const string Xxx = "ESTS001";
+    internal const string EventSourceNestedTypeVisibility = "ESTS001";
+
+    internal const string Xxx = "ESTS002";
 }
 ```
 
@@ -227,9 +231,15 @@ private static readonly SuppressionDescriptor Xxx = new(
     DiagnosticIds.Yyy, // または "CS0169" のようなコンパイラー診断 ID のリテラル
     Resources.GetLocalizableResourceString(nameof(Resources.XxxJustification)));
 
+/// <inheritdoc />
 public override ImmutableArray<SuppressionDescriptor> SupportedSuppressions { get; } =
-    ImmutableArray.Create(Xxx);
+[
+    EventSourceNestedTypeVisibility,
+    Xxx
+];
 ```
+
+`ImmutableArray.Create(...)` ではなくコレクション式で書く。`SupportedDiagnostics` も含めてリポジトリ全体がこの書き方に揃っているので、ここだけ別の書き方にすると差分が目立つ。
 
 第 2 引数の `SuppressedDiagnosticId` には、このリポジトリの `DiagnosticIds` の定数か、コンパイラー/他アナライザーの ID をそのまま文字列リテラルで書く。`SuppressionDescriptor` に helpLinkUri は存在しないので設定しない。
 
@@ -338,7 +348,7 @@ EST004（`EventSourceClassMustNotBeFileLocalClass`）を追加したときに変
 
 1 件あたりの完全な差分は次の 4 箇所のみ。診断本体の追加より小さい。
 
-1. `Sources/Analyzers/SuppressionIds.cs` — 定数 1 つ（ファイルがなければ新規作成）
+1. `Sources/Analyzers/SuppressionIds.cs` — 定数 1 つ
 2. `Sources/Analyzers/Properties/Resources.resx` — 1 エントリ（Justification のみ）
 3. `Sources/Analyzers/Properties/Resources.ja.resx` — 1 エントリ（Justification のみ）
 4. 対象の `*Suppressor.cs` — 記述子フィールド 1 つと `SupportedSuppressions` の 1 行

@@ -23,3 +23,16 @@ public sealed partial class SampleEventSource :
         DateTime p2,
         byte[] p3);
 }
+
+// TODO: ジェネレーター実装ができるまでコンパイルエラーを回避するためのダミー実装
+partial class SampleEventSource
+{
+    public partial void Foo(
+        Guid relatedActivityId,
+        int p0,
+        string p1,
+        DateTime p2,
+        byte[] p3)
+    {
+    }
+}

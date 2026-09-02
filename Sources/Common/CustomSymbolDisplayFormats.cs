@@ -2,8 +2,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Aetos.EventSourceToolkit;
 
-[Embedded]
-internal static class CustomSymbolDisplayFormats
+public static class CustomSymbolDisplayFormats
 {
     public static readonly SymbolDisplayFormat FullyQualifiedFormat = new(
         SymbolDisplayGlobalNamespaceStyle.Included,

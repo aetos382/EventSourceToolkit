@@ -9,10 +9,6 @@
     </AssemblyAttribute>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(IncludeCommon)' == 'true'">
-    <Compile Include="$(MSBuildThisFileDirectory)Common\**\*.cs" LinkBase="Common" />
-  </ItemGroup>
-
   <PropertyGroup Condition="'$(RestorePackagesWithLockFile)' == 'true' and '$(ContinuousIntegrationBuild)' == 'true'">
     <RestoreLockedMode>true</RestoreLockedMode>
   </PropertyGroup>

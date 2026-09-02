@@ -6,8 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Aetos.EventSourceToolkit;
 
-[Embedded]
-internal static class SymbolExtensions
+public static class SymbolExtensions
 {
     extension(ISymbol symbol)
     {
