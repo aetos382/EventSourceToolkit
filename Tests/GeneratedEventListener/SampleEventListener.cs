@@ -25,7 +25,7 @@ internal sealed partial class SampleEventListener : EventListener
 }
 
 // Generator の修正が終わるまで一時的にエラーを回避するためのダミーコード
-partial class SampleEventListener
+internal partial class SampleEventListener
 {
     partial void Foo(EventWrittenEventArgs args, int p0, string p1, DateTime p2, byte[] p3);
 }

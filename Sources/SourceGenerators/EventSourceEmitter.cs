@@ -282,7 +282,6 @@ internal static class EventSourceEmitter
         string temporaryNamePrefix)
     {
         var (typeName, parameterName, isEnum, fixedSize) = parameter;
-        var sizeExpression = fixedSize?.ToString(CultureInfo.InvariantCulture);
 
         var temporaryValueName = $"{temporaryNamePrefix}Value";
 

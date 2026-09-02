@@ -29,7 +29,7 @@ public sealed class EventSourceMethodSignatureAnalyzer :
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        // context.EnableConcurrentExecution();
+        context.EnableConcurrentExecution();
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
 
         context.RegisterSyntaxNodeAction(SyntaxNodeAction, SyntaxKind.MethodDeclaration);

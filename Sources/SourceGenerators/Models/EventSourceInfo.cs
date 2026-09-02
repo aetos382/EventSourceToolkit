@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace Aetos.EventSourceToolkit.SourceGenerators.Models;
 
 internal sealed record ContainingTypeInfo(
