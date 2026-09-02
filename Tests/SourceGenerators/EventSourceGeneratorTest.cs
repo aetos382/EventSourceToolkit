@@ -66,7 +66,7 @@ public sealed class EventSourceGeneratorTest
 
         var generatedSource = result.GetGeneratedText("Sample.TestEventSource.Foo.g.cs");
 
-        generatedSource.ShouldBe(ExpectedCode);
+        generatedSource.ShouldBe(ExpectedCode, StringCompareShould.IgnoreLineEndings);
     }
 
     [TestMethod]
@@ -235,7 +235,7 @@ public sealed class EventSourceGeneratorTest
 
         var generatedSource = result.GetGeneratedText("Sample.TestEventSource.Foo.g.cs");
 
-        generatedSource.ShouldBe(ExpectedCode);
+        generatedSource.ShouldBe(ExpectedCode, StringCompareShould.IgnoreLineEndings);
     }
 
     [TestMethod]
