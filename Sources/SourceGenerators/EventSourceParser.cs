@@ -15,7 +15,7 @@ namespace Aetos.EventSourceToolkit.SourceGenerators;
 internal sealed class EventSourceParser
 {
     private readonly SemanticModel _semanticModel;
-    private readonly WellKnownSymbols _wellKnownTypes;
+    private readonly WellKnownSymbols _wellKnownSymbols;
 
     public EventSourceParser(
         SemanticModel semanticModel)
@@ -23,7 +23,7 @@ internal sealed class EventSourceParser
         ArgumentNullException.ThrowIfNull(semanticModel);
 
         this._semanticModel = semanticModel;
-        this._wellKnownTypes = new WellKnownSymbols(semanticModel.Compilation);
+        this._wellKnownSymbols = new WellKnownSymbols(semanticModel.Compilation);
     }
 
     public EventSourceMethodInfo? ParseEventSource(
@@ -32,7 +32,7 @@ internal sealed class EventSourceParser
         CancellationToken cancellationToken)
     {
         var containingType = symbol.ContainingType;
-        var wellKnownTypes = this._wellKnownTypes;
+        var wellKnownTypes = this._wellKnownSymbols;
 
         // メソッドを含むクラスに GeneratedEventSourceAttribute がついていない → 無視, 生成対象外
         var markerAttribute = containingType.GetAttribute(wellKnownTypes.GeneratedEventSourceAttribute);
@@ -88,7 +88,6 @@ internal sealed class EventSourceParser
         var parameters = new List<EventSourceMethodParameterInfo>(parameterList.Count);
 
         var semanticModel = this._semanticModel;
-        var supportedTypes = new SupportedTypes(wellKnownTypes);
         var comparer = SymbolEqualityComparer.Default;
         var hasRelatedActivityIdParameter = false;
 
@@ -107,7 +106,7 @@ internal sealed class EventSourceParser
             }
 
             // パラメーターの型がサポートされていない → 無視, 生成対象外（診断は Analyzer 側が行う）
-            if (!supportedTypes.IsSupported(parameterTypeSymbol))
+            if (!EventSourceUtilities.IsSupportedParameterType(parameterTypeSymbol, wellKnownTypes))
             {
                 return null;
             }
@@ -180,19 +179,19 @@ internal sealed class EventSourceParser
 
     private AttributeData? GetEventSourceAttribute(INamedTypeSymbol type)
     {
-        return type.GetAttribute(this._wellKnownTypes.EventSourceAttribute);
+        return type.GetAttribute(this._wellKnownSymbols.EventSourceAttribute);
     }
 
     private bool IsDerivedFromEventSource(INamedTypeSymbol type)
     {
-        return type.IsDerivedFrom(this._wellKnownTypes.EventSource);
+        return type.IsDerivedFrom(this._wellKnownSymbols.EventSource);
     }
 
     private EventMetadataInfo ParseEventAttribute(
         AttributeData data,
         INamedTypeSymbol? keywordsTypeSymbol)
     {
-        var wellKnownTypes = this._wellKnownTypes;
+        var wellKnownTypes = this._wellKnownSymbols;
         var comparer = SymbolEqualityComparer.Default;
 
         var id = 0;

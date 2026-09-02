@@ -29,8 +29,6 @@ internal sealed class EventListenerParser
         ImmutableArray<AttributeData> attributes,
         CancellationToken cancellationToken)
     {
-        var wellKnownTypes = this._wellKnownTypes;
-
         var eventSourceName = this.GetEventSourceName(attributes);
         if (eventSourceName is null)
         {

@@ -81,7 +81,7 @@ public sealed class EventSourceClassSignatureAnalyzer :
         var cancellationToken = context.CancellationToken;
         var compilation = context.Compilation;
         var semanticModel = context.SemanticModel;
-        var wellKnownTypes = new WellKnownSymbols(compilation);
+        var wellKnownSymbols = new WellKnownSymbols(compilation);
 
         var node = (ClassDeclarationSyntax)context.Node;
         var symbol = semanticModel.GetDeclaredSymbol(node, cancellationToken);
@@ -93,7 +93,7 @@ public sealed class EventSourceClassSignatureAnalyzer :
 
         // [GeneratedEventSource] が付いていないクラスはチェック対象外。
         // いずれかの partial パーツについていれば、全てのパーツがチェック対象。
-        if (!symbol.HasAttribute(wellKnownTypes.GeneratedEventSourceAttribute))
+        if (!symbol.HasAttribute(wellKnownSymbols.GeneratedEventSourceAttribute))
         {
             return;
         }
@@ -139,7 +139,7 @@ public sealed class EventSourceClassSignatureAnalyzer :
 
         // EventSource から派生していなければいけない。
         // いずれかの partial パーツで派生していればよいので symbol でチェックする。
-        if (!symbol.IsDerivedFrom(wellKnownTypes.EventSource))
+        if (!symbol.IsDerivedFrom(wellKnownSymbols.EventSource))
         {
             var identifier = node.Identifier;
 
