@@ -91,6 +91,11 @@ public sealed class CSharpGeneratorRunner
                 x.Code, parseOptions, x.FileName, Encoding.UTF8, cancellationToken))
             .ToArray();
 
+        foreach (var syntaxTree in syntaxTrees)
+        {
+            EnsureNoSyntaxError(syntaxTree, cancellationToken);
+        }
+
         var inputCompilation = CSharpCompilation.Create(
             this.AssemblyName,
             syntaxTrees,
@@ -129,6 +134,31 @@ public sealed class CSharpGeneratorRunner
             runResult,
             inputCompilation,
             outputCompilation,
-            generatedSources.ToImmutable());
+            generatedSources.MoveToImmutable());
+    }
+
+    /// <summary>
+    /// 構文エラーを含むソースは意図しないコードを検証することになるため、実行前に落とす。
+    /// テスト マークアップ（<c>{|ID:...|}</c> など）の混入はここで捕まる。
+    /// partial メソッドの実装がないことによる CS8795 などのセマンティック エラーは対象外。
+    /// </summary>
+    private static void EnsureNoSyntaxError(
+        SyntaxTree syntaxTree,
+        CancellationToken cancellationToken)
+    {
+        var errors = syntaxTree
+            .GetDiagnostics(cancellationToken)
+            .Where(static x => x.Severity == DiagnosticSeverity.Error)
+            .ToArray();
+
+        if (errors.Length == 0)
+        {
+            return;
+        }
+
+        var messages = string.Join(Environment.NewLine, errors.Select(static x => x.ToString()));
+
+        throw new InvalidOperationException(
+            $"'{syntaxTree.FilePath}' に構文エラーがあります。{Environment.NewLine}{messages}");
     }
 }

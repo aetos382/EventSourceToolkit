@@ -276,7 +276,7 @@ public sealed class EventSourceGeneratorTest
             partial class TestEventSource : EventSource
             {
                 [Event(1, Level = EventLevel.Informational)]
-                public static partial void {|CS8795:Foo|}();
+                public partial void Foo();
             }
             """;
 
@@ -298,7 +298,7 @@ public sealed class EventSourceGeneratorTest
             partial class TestEventSource
             {
                 [Event(1, Level = EventLevel.Informational)]
-                public static partial void {|CS8795:Foo|}();
+                public partial void Foo();
             }
             """;
 
@@ -315,12 +315,15 @@ public sealed class EventSourceGeneratorTest
             """
             using System.Diagnostics.Tracing;
 
+            using Aetos.EventSourceToolkit;
+
             namespace Sample;
 
-            abstract partial class TestEventSource
+            [GeneratedEventSource]
+            abstract partial class TestEventSource : EventSource
             {
                 [Event(1, Level = EventLevel.Informational)]
-                public static partial void {|CS8795:Foo|}();
+                public partial void Foo();
             }
             """;
 

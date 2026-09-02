@@ -47,6 +47,12 @@ internal sealed class EventSourceParser
             return null;
         }
 
+        // メソッド自体、またはクラスが abstract でない→無視, 生成対象外
+        if (symbol.IsAbstract || containingType.IsAbstract)
+        {
+            return null;
+        }
+
         // メソッドを含むクラスが（間接的に）EventSource から派生していない → 警告, 生成対象外
         if (!this.IsDerivedFromEventSource(containingType))
         {
