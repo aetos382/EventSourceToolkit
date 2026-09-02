@@ -20,7 +20,7 @@ using Aetos.EventSourceToolkit.Tests.TestUtilities;
 namespace Aetos.EventSourceToolkit.Tests.SourceGenerators;
 
 [TestClass]
-public sealed class GenerateEventListenerTest
+public sealed class EventListenerGeneratorTest
 {
     [TestMethod]
     public async Task X()
@@ -207,7 +207,7 @@ public sealed class GenerateEventListenerTest
         Assert.IsTrue(eventListenerEmitResult.Success);
     }
 
-    public GenerateEventListenerTest(
+    public EventListenerGeneratorTest(
         TestContext testContext)
     {
         ArgumentNullException.ThrowIfNull(testContext);

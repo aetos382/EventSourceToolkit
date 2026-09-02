@@ -53,12 +53,6 @@ internal sealed class EventSourceParser
             return null;
         }
 
-        // メソッドを含むクラスに EventSourceAttribute がついていない → 警告, 生成対象外
-        if (this.GetEventSourceAttribute(containingType) is null)
-        {
-            return null;
-        }
-
         // メソッドを含むクラス（またはそれを包含する型）に partial パートを追加できない → 無視, 生成対象外
         if (syntaxNode.Parent is not TypeDeclarationSyntax containingTypeNode ||
             !containingTypeNode.CanBeAugmented)

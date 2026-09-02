@@ -1,27 +1,17 @@
 using System;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Testing;
 
 using Shouldly;
 
 using Aetos.EventSourceToolkit.SourceGenerators;
-
-using Microsoft.CodeAnalysis.CSharp.Testing;
+using Aetos.EventSourceToolkit.Tests.TestUtilities;
 
 namespace Aetos.EventSourceToolkit.Tests.SourceGenerators;
 
 [TestClass]
-public sealed class GeneratedEventSourceTest
+public sealed class EventSourceGeneratorTest
 {
-    private sealed class Test : CSharpSourceGeneratorTest<EventSourceGenerator, DefaultVerifier>;
-
     [TestMethod]
     public async Task 引数がないイベントメソッドの場合()
     {
@@ -34,7 +24,6 @@ public sealed class GeneratedEventSourceTest
 
             namespace Sample;
 
-            [EventSource(Name = "TestEventSource")]
             [GeneratedEventSource]
             partial class TestEventSource : EventSource
             {
@@ -73,7 +62,11 @@ public sealed class GeneratedEventSourceTest
 
             """;
 
-        await ValidateGeneratedCodeAsync(Code, "Sample.TestEventSource.Foo.g.cs", ExpectedCode, this._testContext.CancellationToken).ConfigureAwait(false);
+        var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
+
+        var generatedSource = result.GetGeneratedText("Sample.TestEventSource.Foo.g.cs");
+
+        generatedSource.ShouldBe(ExpectedCode);
     }
 
     [TestMethod]
@@ -89,7 +82,6 @@ public sealed class GeneratedEventSourceTest
 
             namespace Sample;
 
-            [EventSource(Name = "TestEventSource")]
             [GeneratedEventSource]
             partial class TestEventSource : EventSource
             {
@@ -239,7 +231,11 @@ public sealed class GeneratedEventSourceTest
 
             """;
 
-        await ValidateGeneratedCodeAsync(Code, "Sample.TestEventSource.Foo.g.cs", ExpectedCode, this._testContext.CancellationToken).ConfigureAwait(false);
+        var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
+
+        var generatedSource = result.GetGeneratedText("Sample.TestEventSource.Foo.g.cs");
+
+        generatedSource.ShouldBe(ExpectedCode);
     }
 
     [TestMethod]
@@ -254,22 +250,17 @@ public sealed class GeneratedEventSourceTest
 
             namespace Sample;
 
-            [EventSource(Name = "TestEventSource")]
             [GeneratedEventSource]
             partial class TestEventSource : EventSource
             {
                 [Event(1, Level = EventLevel.Informational)]
-                public static partial void {|CS8795:Foo|}();
+                public static partial void Foo();
             }
             """;
 
-        var test = new Test
-        {
-            TestCode = Code,
-            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
-        };
+        var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
 
-        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
+        result.GeneratedSources.ShouldNotContain(static x => x.FileName == "Sample.TestEventSource.Foo.g.cs");
     }
 
     [TestMethod]
@@ -282,7 +273,6 @@ public sealed class GeneratedEventSourceTest
 
             namespace Sample;
 
-            [EventSource(Name = "TestEventSource")]
             partial class TestEventSource : EventSource
             {
                 [Event(1, Level = EventLevel.Informational)]
@@ -290,13 +280,9 @@ public sealed class GeneratedEventSourceTest
             }
             """;
 
-        var test = new Test
-        {
-            TestCode = Code,
-            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
-        };
+        var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
 
-        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
+        result.GeneratedSources.ShouldNotContain(static x => x.FileName == "Sample.TestEventSource.Foo.g.cs");
     }
 
     [TestMethod]
@@ -309,7 +295,6 @@ public sealed class GeneratedEventSourceTest
 
             namespace Sample;
 
-            [EventSource(Name = "TestEventSource")]
             partial class TestEventSource
             {
                 [Event(1, Level = EventLevel.Informational)]
@@ -317,16 +302,35 @@ public sealed class GeneratedEventSourceTest
             }
             """;
 
-        var test = new Test
-        {
-            TestCode = Code,
-            TestBehaviors = TestBehaviors.SkipGeneratedSourcesCheck
-        };
+        var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
 
-        await test.RunAsync(this._testContext.CancellationToken).ConfigureAwait(false);
+        result.GeneratedSources.ShouldNotContain(static x => x.FileName == "Sample.TestEventSource.Foo.g.cs");
     }
 
-    public GeneratedEventSourceTest(
+    [TestMethod]
+    public async Task 型がabstractの場合はコードが生成されない()
+    {
+        /* lang=c# */
+        const string Code =
+            """
+            using System.Diagnostics.Tracing;
+
+            namespace Sample;
+
+            abstract partial class TestEventSource
+            {
+                [Event(1, Level = EventLevel.Informational)]
+                public static partial void {|CS8795:Foo|}();
+            }
+            """;
+
+        var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
+
+        result.GeneratedSources.ShouldNotContain(static x => x.FileName == "Sample.TestEventSource.Foo.g.cs");
+    }
+
+
+    public EventSourceGeneratorTest(
         TestContext testContext)
     {
         ArgumentNullException.ThrowIfNull(testContext);
@@ -334,50 +338,15 @@ public sealed class GeneratedEventSourceTest
         this._testContext = testContext;
     }
 
-    private static async Task ValidateGeneratedCodeAsync(
+    private static async Task<GeneratorTestResult> RunGeneratorAsync(
         string inputCode,
-        string generatedFileName,
-        string expectedGeneratedCode,
         CancellationToken cancellationToken)
     {
-        var parseOptions = CSharpParseOptions.Default;
+        var runner = new CSharpGeneratorRunner(new EventSourceGenerator());
 
-        var compilationOptions = new CSharpCompilationOptions(
-            OutputKind.DynamicallyLinkedLibrary,
-            allowUnsafe: true,
-            nullableContextOptions: NullableContextOptions.Enable);
+        runner.AddSource("main.cs", inputCode);
 
-        var driverOptions = new GeneratorDriverOptions(
-            trackIncrementalGeneratorSteps: true);
-
-        var syntaxTree = CSharpSyntaxTree.ParseText(inputCode, parseOptions, "main.cs", Encoding.UTF8, cancellationToken);
-
-        var referenceAssemblies = await ReferenceAssemblies.Net.Net100
-            .ResolveAsync(LanguageNames.CSharp, cancellationToken)
-            .ConfigureAwait(false);
-
-        var compilation = CSharpCompilation.Create(
-            "test",
-            [syntaxTree],
-            referenceAssemblies,
-            compilationOptions);
-
-        var driver = (GeneratorDriver)CSharpGeneratorDriver.Create(
-            [new EventSourceGenerator().AsSourceGenerator()],
-            parseOptions: parseOptions,
-            driverOptions: driverOptions);
-
-        driver = driver.RunGenerators(compilation, cancellationToken);
-
-        var runResult = driver.GetRunResult();
-
-        var generatedTree = runResult.GeneratedTrees
-            .Single(x => Path.GetFileName(x.FilePath) == generatedFileName);
-
-        var text = await generatedTree.GetTextAsync(cancellationToken).ConfigureAwait(false);
-        var actualText = text.ToString();
-
-        actualText.ShouldBe(expectedGeneratedCode, StringCompareShould.IgnoreLineEndings);
+        return await runner.RunAsync(cancellationToken).ConfigureAwait(false);
     }
 
     private readonly TestContext _testContext;
