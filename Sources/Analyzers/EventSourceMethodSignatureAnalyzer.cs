@@ -47,7 +47,7 @@ public sealed class EventSourceMethodSignatureAnalyzer :
         var cancellationToken = context.CancellationToken;
         var compilation = context.Compilation;
         var semanticModel = context.SemanticModel;
-        var wellKnownTypes = new WellKnownSymbols(compilation);
+        var wellKnownSymbols = new WellKnownSymbols(compilation);
 
         var node = (MethodDeclarationSyntax)context.Node;
         var symbol = semanticModel.GetDeclaredSymbol(node, cancellationToken);
@@ -58,13 +58,13 @@ public sealed class EventSourceMethodSignatureAnalyzer :
         }
 
         // [NonEvent] がついているメソッドは検査対象外
-        if (symbol.HasAttribute(wellKnownTypes.NonEventAttribute))
+        if (symbol.HasAttribute(wellKnownSymbols.NonEventAttribute))
         {
             return;
         }
 
         // [Event] がついていないメソッドは付けるといいよ
-        var eventAttribute = symbol.GetAttribute(wellKnownTypes.EventAttribute);
+        var eventAttribute = symbol.GetAttribute(wellKnownSymbols.EventAttribute);
         if (eventAttribute is null)
         {
             // TODO: Diagnostics
@@ -85,7 +85,7 @@ public sealed class EventSourceMethodSignatureAnalyzer :
 
             var parameterType = parameter.Type;
 
-            if (!EventSourceUtilities.IsSupportedParameterType(parameterType, wellKnownTypes))
+            if (!EventSourceUtilities.IsSupportedParameterType(parameterType, wellKnownSymbols))
             {
                 // TODO: diagnostic
                 continue;

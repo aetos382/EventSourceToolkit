@@ -34,7 +34,7 @@ public sealed class EventSourceNestedTypeVisibilitySuppressor :
         SuppressionAnalysisContext context)
     {
         var cancellationToken = context.CancellationToken;
-        var wellKnownTypes = new WellKnownSymbols(context.Compilation);
+        var wellKnownSymbols = new WellKnownSymbols(context.Compilation);
 
         foreach (var diagnostic in context.ReportedDiagnostics)
         {
@@ -65,7 +65,7 @@ public sealed class EventSourceNestedTypeVisibilitySuppressor :
                 continue;
             }
 
-            if (!eventSourceType.IsDerivedFrom(wellKnownTypes.EventSource))
+            if (!eventSourceType.IsDerivedFrom(wellKnownSymbols.EventSource))
             {
                 continue;
             }

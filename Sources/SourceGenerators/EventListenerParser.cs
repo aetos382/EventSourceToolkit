@@ -12,7 +12,7 @@ namespace Aetos.EventSourceToolkit.SourceGenerators;
 internal sealed class EventListenerParser
 {
     private readonly SemanticModel _semanticModel;
-    private readonly WellKnownSymbols _wellKnownTypes;
+    private readonly WellKnownSymbols _wellKnownSymbols;
 
     public EventListenerParser(
         SemanticModel semanticModel)
@@ -20,7 +20,7 @@ internal sealed class EventListenerParser
         ArgumentNullException.ThrowIfNull(semanticModel);
 
         this._semanticModel = semanticModel;
-        this._wellKnownTypes = new WellKnownSymbols(semanticModel.Compilation);
+        this._wellKnownSymbols = new WellKnownSymbols(semanticModel.Compilation);
     }
 
     public EventListenerInfoWithDiagnostics ParseEventListener(
@@ -47,12 +47,12 @@ internal sealed class EventListenerParser
     private string? GetEventSourceName(
         ImmutableArray<AttributeData> attributes)
     {
-        var wellKnownTypes = this._wellKnownTypes;
+        var wellKnownSymbols = this._wellKnownSymbols;
         var comparer = SymbolEqualityComparer.Default;
 
         foreach (var attribute in attributes)
         {
-            if (comparer.Equals(attribute.AttributeClass, wellKnownTypes.GeneratedEventListenerAttribute))
+            if (comparer.Equals(attribute.AttributeClass, wellKnownSymbols.GeneratedEventListenerAttribute))
             {
                 return (string?)attribute.ConstructorArguments[0].Value;
             }

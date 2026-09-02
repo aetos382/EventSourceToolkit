@@ -32,10 +32,10 @@ internal sealed class EventSourceParser
         CancellationToken cancellationToken)
     {
         var containingType = symbol.ContainingType;
-        var wellKnownTypes = this._wellKnownSymbols;
+        var wellKnownSymbols = this._wellKnownSymbols;
 
         // メソッドを含むクラスに GeneratedEventSourceAttribute がついていない → 無視, 生成対象外
-        var markerAttribute = containingType.GetAttribute(wellKnownTypes.GeneratedEventSourceAttribute);
+        var markerAttribute = containingType.GetAttribute(wellKnownSymbols.GeneratedEventSourceAttribute);
         if (markerAttribute is null)
         {
             return null;
@@ -81,7 +81,7 @@ internal sealed class EventSourceParser
         var keywordsType = containingType.GetTypeMembers("Keywords").SingleOrDefault();
 
         var eventMetadata = this.ParseEventAttribute(
-            symbol.GetAttribute(wellKnownTypes.EventAttribute)!,
+            symbol.GetAttribute(wellKnownSymbols.EventAttribute)!,
             keywordsType);
 
         var parameterList = syntaxNode.ParameterList.Parameters;
@@ -99,14 +99,14 @@ internal sealed class EventSourceParser
 
             if (index == 0 &&
                 string.Equals(parameterName, "relatedActivityId", StringComparison.OrdinalIgnoreCase) &&
-                comparer.Equals(parameterTypeSymbol, wellKnownTypes.Guid))
+                comparer.Equals(parameterTypeSymbol, wellKnownSymbols.Guid))
             {
                 hasRelatedActivityIdParameter = true;
                 continue;
             }
 
             // パラメーターの型がサポートされていない → 無視, 生成対象外（診断は Analyzer 側が行う）
-            if (!EventSourceUtilities.IsSupportedParameterType(parameterTypeSymbol, wellKnownTypes))
+            if (!EventSourceUtilities.IsSupportedParameterType(parameterTypeSymbol, wellKnownSymbols))
             {
                 return null;
             }
@@ -191,7 +191,7 @@ internal sealed class EventSourceParser
         AttributeData data,
         INamedTypeSymbol? keywordsTypeSymbol)
     {
-        var wellKnownTypes = this._wellKnownSymbols;
+        var wellKnownSymbols = this._wellKnownSymbols;
         var comparer = SymbolEqualityComparer.Default;
 
         var id = 0;
@@ -206,7 +206,7 @@ internal sealed class EventSourceParser
                 .GetMembers()
                 .OfType<IFieldSymbol>()
                 .Where(static x => x is { IsConst: true, HasConstantValue: true })
-                .Where(x => comparer.Equals(x.Type, wellKnownTypes.EventKeywords))
+                .Where(x => comparer.Equals(x.Type, wellKnownSymbols.EventKeywords))
                 .Select(static x => (Keyword: (EventKeywords)x.ConstantValue!, Symbol: x))
                 .ToArray();
         }
@@ -215,7 +215,7 @@ internal sealed class EventSourceParser
         if (ctorArgs.Length == 1)
         {
             var idArg = ctorArgs[0];
-            if (idArg.Kind == TypedConstantKind.Primitive && comparer.Equals(idArg.Type, wellKnownTypes.Int32) && idArg.Value is int idValue)
+            if (idArg.Kind == TypedConstantKind.Primitive && comparer.Equals(idArg.Type, wellKnownSymbols.Int32) && idArg.Value is int idValue)
             {
                 id = idValue;
             }

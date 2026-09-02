@@ -48,6 +48,10 @@ public sealed class GeneratedEventSourceTest
             {
                 partial class TestEventSource
                 {
+                    [global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(
+                        "ReflectionAnalysis",
+                        "IL2026:RequiresUnreferencedCode",
+                        Justification = "Parameters to this method are primitive and are trimmer safe")]
                     public partial void Foo()
                     {
                         if (!this.IsEnabled(global::System.Diagnostics.Tracing.EventLevel.Informational, global::System.Diagnostics.Tracing.EventKeywords.None))
@@ -112,6 +116,10 @@ public sealed class GeneratedEventSourceTest
             {
                 partial class TestEventSource
                 {
+                    [global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(
+                        "ReflectionAnalysis",
+                        "IL2026:RequiresUnreferencedCode",
+                        Justification = "Parameters to this method are primitive and are trimmer safe")]
                     public partial void Foo(
                         global::System.Guid relatedActivityId,
                         global::System.Boolean p0,

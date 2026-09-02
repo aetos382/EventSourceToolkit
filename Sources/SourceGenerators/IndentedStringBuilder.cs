@@ -1,13 +1,20 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Aetos.EventSourceToolkit.SourceGenerators;
 
 internal sealed class IndentedStringBuilder
 {
+    private const string IndentScopeDescription = "(indent)";
+
     private readonly string _indent;
     private readonly string _newLine;
     private readonly StringBuilder _stringBuilder;
+    private readonly Stack<ScopeInfo> _openScopes;
+
+    private bool _atLineStart = true;
+    private int _indentationLevel;
 
     public IndentedStringBuilder(
         string indent = "    ",
@@ -17,86 +24,71 @@ internal sealed class IndentedStringBuilder
         this._newLine = newLine;
 
         this._stringBuilder = new StringBuilder();
+        this._openScopes = new Stack<ScopeInfo>();
     }
 
-    public int IndentationLevel { get; private set; }
-
-    public IndentedStringBuilder Indent()
+    public BlockScope Block(
+        string? header = null,
+        string? close = "}")
     {
-        ++this.IndentationLevel;
-        return this;
-    }
-
-    public IndentedStringBuilder Unindent()
-    {
-        if (this.IndentationLevel == 0)
+        if (!string.IsNullOrEmpty(header))
         {
-            throw new InvalidOperationException();
+            this.AppendLine(header);
         }
 
-        --this.IndentationLevel;
-        return this;
+        this.AppendLine("{");
+
+        return this.PushScope(close, header ?? "{");
     }
 
-    public IndentedStringBuilder AppendLineWithIndent()
+    public BlockScope Indent()
     {
-        this.AppendCore("", true, true);
-        return this;
+        return this.PushScope(null, IndentScopeDescription);
     }
 
-    public IndentedStringBuilder AppendLineWithoutIndent()
+    public IndentedStringBuilder AppendLine()
     {
-        this.AppendCore("", false, true);
+        this.AppendNewLine();
         return this;
     }
 
-    public IndentedStringBuilder AppendLineWithIndent(string? value)
+    public IndentedStringBuilder AppendLine(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            this.AppendNewLine();
+            return this;
+        }
+
+        var lines = value!.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);
+        foreach (var line in lines)
+        {
+            this.AppendCore(line);
+            this.AppendNewLine();
+        }
+
+        return this;
+    }
+
+    public IndentedStringBuilder Append(string? value)
     {
         if (!string.IsNullOrEmpty(value))
         {
-            var lines = value!.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);
-            foreach (var line in lines)
-            {
-                this.AppendCore(line, true, true);
-            }
+            this.AppendCore(value!);
         }
 
         return this;
     }
 
-    public IndentedStringBuilder AppendWithIndent(string? value)
+    public string Build()
     {
-        if (!string.IsNullOrEmpty(value))
+        if (this._openScopes.Count != 0)
         {
-            this.AppendCore(value, true, false);
+            throw new InvalidOperationException(
+                $"The scope '{this._openScopes.Peek().Description}' has not been closed.");
         }
 
-        return this;
-    }
-
-    public IndentedStringBuilder AppendWithoutIndent(string? value)
-    {
-        if (!string.IsNullOrEmpty(value))
-        {
-            this.AppendCore(value, false, false);
-        }
-
-        return this;
-    }
-
-    private void AppendCore(string? value, bool indent, bool newLine)
-    {
-        if (indent)
-        {
-            this.AddIndent();
-        }
-
-        this._stringBuilder.Append(value);
-
-        if (newLine)
-        {
-            this._stringBuilder.Append(this._newLine);
-        }
+        return this._stringBuilder.ToString();
     }
 
     /// <inheritdoc />
@@ -105,11 +97,99 @@ internal sealed class IndentedStringBuilder
         return this._stringBuilder.ToString();
     }
 
-    private void AddIndent()
+    private BlockScope PushScope(
+        string? close,
+        string description)
     {
-        for (var i = 0; i < this.IndentationLevel; ++i)
+        this._openScopes.Push(new ScopeInfo(close, description));
+        ++this._indentationLevel;
+
+        return new BlockScope(this, this._openScopes.Count);
+    }
+
+    private void CloseScope(
+        int depth)
+    {
+        if (this._openScopes.Count != depth)
+        {
+            throw new InvalidOperationException(
+                $"The scope at depth {depth} is being closed while the current depth is {this._openScopes.Count}.");
+        }
+
+        var scope = this._openScopes.Pop();
+        --this._indentationLevel;
+
+        if (scope.Close is not null)
+        {
+            this.AppendLine(scope.Close);
+        }
+    }
+
+    private void AppendCore(string value)
+    {
+        if (value.Length == 0)
+        {
+            return;
+        }
+
+        if (this._atLineStart)
+        {
+            this.AppendIndent();
+        }
+
+        this._stringBuilder.Append(value);
+
+        this._atLineStart = value[value.Length - 1] is '\n' or '\r';
+    }
+
+    private void AppendNewLine()
+    {
+        this._stringBuilder.Append(this._newLine);
+        this._atLineStart = true;
+    }
+
+    private void AppendIndent()
+    {
+        for (var i = 0; i < this._indentationLevel; ++i)
         {
             this._stringBuilder.Append(this._indent);
+        }
+    }
+
+    private readonly struct ScopeInfo
+    {
+        public ScopeInfo(
+            string? close,
+            string description)
+        {
+            this.Close = close;
+            this.Description = description;
+        }
+
+        /// <summary>
+        /// スコープを閉じるときに出力する文字列。<see langword="null" /> の場合は何も出力しない。
+        /// </summary>
+        public string? Close { get; }
+
+        public string Description { get; }
+    }
+
+    internal readonly ref struct BlockScope
+    {
+        private readonly IndentedStringBuilder _builder;
+        private readonly int _depth;
+
+        internal BlockScope(
+            IndentedStringBuilder builder,
+            int depth)
+        {
+            this._builder = builder;
+            this._depth = depth;
+        }
+
+        public void Dispose()
+        {
+            this._builder.CloseScope(this._depth);
         }
     }
 }
