@@ -191,22 +191,85 @@ internal static class EventSourceEmitter
         codeBuilder.AppendLine($"global::System.Diagnostics.Tracing.EventSource.EventData *data = stackalloc global::System.Diagnostics.Tracing.EventSource.EventData[{dataEntryCount}];");
         codeBuilder.AppendLine();
 
-        var dataEntryIndex = 0;
-        var temporaryValueIndex = 0;
+        EmitStringParameterInitializations(codeBuilder, parameters);
 
+        var fixedStatements = GetFixedStatements(parameters);
+
+        using (codeBuilder.BlockIf(fixedStatements is not null, fixedStatements))
+        {
+            var dataEntryIndex = 0;
+
+            for (var i = 0; i < parameters.Count; ++i)
+            {
+                dataEntryIndex += EmitParameterDataEntries(
+                    codeBuilder,
+                    parameters[i],
+                    dataEntryIndex,
+                    GetTemporaryNamePrefix(i));
+            }
+
+            codeBuilder.AppendLine(
+                $"this.WriteEventWithRelatedActivityIdCore({eventId}, {relatedActivityIdExpression}, {dataEntryCount}, data);");
+        }
+    }
+
+    private static void EmitStringParameterInitializations(
+        IndentedStringBuilder codeBuilder,
+        IEnumerable<EventSourceMethodParameterInfo> parameters)
+    {
         foreach (var parameter in parameters)
         {
-            dataEntryIndex += EmitParameterDataEntries(
-                codeBuilder,
-                parameter,
-                dataEntryIndex,
-                $"__arg{temporaryValueIndex}Value");
+            if (parameter.FullyQualifiedTypeName != "global::System.String")
+            {
+                continue;
+            }
 
-            ++temporaryValueIndex;
+            codeBuilder.AppendLine($"{parameter.Name} ??= \"\";");
+        }
+    }
+
+    private static bool RequiresPinning(EventSourceMethodParameterInfo parameter)
+    {
+        var type = parameter.FullyQualifiedTypeName;
+
+        return type is "global::System.String" or "global::System.Byte[]";
+    }
+
+    /// <summary>
+    /// 固定が必要なパラメーターに対する fixed ステートメントを改行区切りで連結して返す。
+    /// 固定が必要なパラメーターがない場合は <see langword="null" />。
+    /// </summary>
+    private static string? GetFixedStatements(
+        EquatableArray<EventSourceMethodParameterInfo> parameters)
+    {
+        List<string>? statements = null;
+
+        for (var i = 0; i < parameters.Count; ++i)
+        {
+            var parameter = parameters[i];
+
+            if (!RequiresPinning(parameter))
+            {
+                continue;
+            }
+
+            var pointerType = parameter.FullyQualifiedTypeName == "global::System.String"
+                ? "global::System.Char"
+                : "global::System.Byte";
+
+            statements ??= [];
+
+            statements.Add(
+                $"fixed ({pointerType} *{GetTemporaryNamePrefix(i)}Pointer = {parameter.Name})");
         }
 
-        codeBuilder.AppendLine(
-            $"this.WriteEventWithRelatedActivityIdCore({eventId}, {relatedActivityIdExpression}, {dataEntryCount}, data);");
+        return statements is null ? null : string.Join("\n", statements);
+    }
+
+    private static string GetTemporaryNamePrefix(
+        int parameterIndex)
+    {
+        return $"__arg{parameterIndex}";
     }
 
     /// <summary>
@@ -216,10 +279,12 @@ internal static class EventSourceEmitter
         IndentedStringBuilder codeBuilder,
         EventSourceMethodParameterInfo parameter,
         int dataEntryIndex,
-        string temporaryValueName)
+        string temporaryNamePrefix)
     {
         var (typeName, parameterName, isEnum, fixedSize) = parameter;
         var sizeExpression = fixedSize?.ToString(CultureInfo.InvariantCulture);
+
+        var temporaryValueName = $"{temporaryNamePrefix}Value";
 
         if (isEnum)
         {
@@ -227,7 +292,7 @@ internal static class EventSourceEmitter
                 codeBuilder,
                 dataEntryIndex,
                 parameterName,
-                sizeExpression!);
+                fixedSize!.Value);
 
             return 1;
         }
@@ -236,7 +301,7 @@ internal static class EventSourceEmitter
         {
             case "global::System.Boolean":
                 codeBuilder.AppendLine($"int {temporaryValueName} = {parameterName} ? 1 : 0;");
-                EmitDataEntry(codeBuilder, dataEntryIndex, temporaryValueName, "4");
+                EmitDataEntry(codeBuilder, dataEntryIndex, temporaryValueName, 4);
                 break;
 
             case "global::System.Byte":
@@ -252,27 +317,22 @@ internal static class EventSourceEmitter
             case "global::System.Double":
             case "global::System.Guid":
             case "global::System.Decimal":
-                EmitDataEntry(codeBuilder, dataEntryIndex, parameterName, sizeExpression!);
+                EmitDataEntry(codeBuilder, dataEntryIndex, parameterName, fixedSize!.Value);
                 break;
 
             case "global::System.String":
-                codeBuilder.AppendLine($$"""{{parameterName}} ??= "";""");
+                // null は EmitStringParameterInitializations で "" に置き換えられている
+                EmitDataEntryWithPointer(
+                    codeBuilder,
+                    dataEntryIndex,
+                    $"{temporaryNamePrefix}Pointer",
+                    $"({parameterName}.Length + 1) * 2");
 
-                using (codeBuilder.Block($"fixed (char *{temporaryValueName} = {parameterName})"))
-                {
-                    codeBuilder.AppendLine(
-                        $$"""
-                          data[{{dataEntryIndex}}].DataPointer = (global::System.IntPtr){{temporaryValueName}};
-                          data[{{dataEntryIndex}}].Size = ({{parameterName}}.Length + 1) * 2;
-                          """);
-                }
-
-                codeBuilder.AppendLine();
                 break;
 
             case "global::System.DateTime":
                 codeBuilder.AppendLine($"long {temporaryValueName} = {parameterName}.ToFileTimeUtc();");
-                EmitDataEntry(codeBuilder, dataEntryIndex, temporaryValueName, "8");
+                EmitDataEntry(codeBuilder, dataEntryIndex, temporaryValueName, 8);
                 break;
 
             case "global::System.IntPtr":
@@ -280,41 +340,48 @@ internal static class EventSourceEmitter
                 break;
 
             case "global::System.Byte[]":
-                using (codeBuilder.Block($"if ({parameterName} == null || {parameterName}.Length == 0)"))
+            {
+                var blobSizeName = $"{temporaryNamePrefix}Size";
+                var blobPointerName = $"{temporaryNamePrefix}Pointer";
+
+                codeBuilder.AppendLine(
+                    $"int {blobSizeName} = {parameterName} == null ? 0 : {parameterName}.Length;");
+
+                EmitDataEntry(codeBuilder, dataEntryIndex, blobSizeName, 4);
+
+                // null または空の配列では固定されたポインターが null になるため、長さの変数を指しておく
+                using (codeBuilder.Block($"if ({blobSizeName} == 0)"))
                 {
                     codeBuilder.AppendLine(
                         $$"""
-                          int blobSize = 0;
-                          data[{{dataEntryIndex}}].DataPointer = (global::System.IntPtr)(&blobSize);
-                          data[{{dataEntryIndex}}].Size = 4;
-                          data[{{dataEntryIndex + 1}}].DataPointer = (global::System.IntPtr)(&blobSize);
+                          data[{{dataEntryIndex + 1}}].DataPointer = (global::System.IntPtr)(&{{blobSizeName}});
                           data[{{dataEntryIndex + 1}}].Size = 0;
                           """);
                 }
 
                 using (codeBuilder.Block("else"))
                 {
-                    codeBuilder.AppendLine($"int blobSize = {parameterName}.Length;");
-
-                    using (codeBuilder.Block($"fixed (byte *blob = &{parameterName}[0])"))
-                    {
-                        codeBuilder.AppendLine(
-                            $$"""
-                              data[{{dataEntryIndex}}].DataPointer = (global::System.IntPtr)(&blobSize);
-                              data[{{dataEntryIndex}}].Size = 4;
-                              data[{{dataEntryIndex + 1}}].DataPointer = (global::System.IntPtr)blob;
-                              data[{{dataEntryIndex + 1}}].Size = blobSize;
-                              """);
-                    }
+                    codeBuilder.AppendLine(
+                        $$"""
+                          data[{{dataEntryIndex + 1}}].DataPointer = (global::System.IntPtr){{blobPointerName}};
+                          data[{{dataEntryIndex + 1}}].Size = {{blobSizeName}};
+                          """);
                 }
 
                 codeBuilder.AppendLine();
                 return 2;
+            }
+
+            default:
+                break;
         }
 
         return 1;
     }
 
+    /// <summary>
+    /// 変数のアドレスを指す <c>EventData</c> エントリを出力する。
+    /// </summary>
     private static void EmitDataEntry(
         IndentedStringBuilder codeBuilder,
         int dataEntryIndex,
@@ -324,6 +391,33 @@ internal static class EventSourceEmitter
         codeBuilder.AppendLine(
             $$"""
               data[{{dataEntryIndex}}].DataPointer = (global::System.IntPtr)(&{{valueName}});
+              data[{{dataEntryIndex}}].Size = {{sizeExpression}};
+              """);
+
+        codeBuilder.AppendLine();
+    }
+
+    private static void EmitDataEntry(
+        IndentedStringBuilder codeBuilder,
+        int dataEntryIndex,
+        string valueName,
+        int size)
+    {
+        EmitDataEntry(codeBuilder, dataEntryIndex, valueName, size.ToString(CultureInfo.InvariantCulture));
+    }
+
+    /// <summary>
+    /// fixed ステートメントで固定済みのポインターを指す <c>EventData</c> エントリを出力する。
+    /// </summary>
+    private static void EmitDataEntryWithPointer(
+        IndentedStringBuilder codeBuilder,
+        int dataEntryIndex,
+        string pointerName,
+        string sizeExpression)
+    {
+        codeBuilder.AppendLine(
+            $$"""
+              data[{{dataEntryIndex}}].DataPointer = (global::System.IntPtr){{pointerName}};
               data[{{dataEntryIndex}}].Size = {{sizeExpression}};
               """);
 

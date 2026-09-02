@@ -41,6 +41,18 @@ internal sealed class IndentedStringBuilder
         return this.PushScope(close, header ?? "{");
     }
 
+    /// <summary>
+    /// <paramref name="condition" /> が <see langword="true" /> の場合のみブロックを開く。
+    /// <see langword="false" /> の場合は何も出力せず、インデントも変えない。
+    /// </summary>
+    public BlockScope BlockIf(
+        bool condition,
+        string? header = null,
+        string? close = "}")
+    {
+        return condition ? this.Block(header, close) : default;
+    }
+
     public BlockScope Indent()
     {
         return this.PushScope(null, IndentScopeDescription);
@@ -189,7 +201,8 @@ internal sealed class IndentedStringBuilder
 
         public void Dispose()
         {
-            this._builder.CloseScope(this._depth);
+            // default(BlockScope) は何もしないスコープ。BlockIf が条件不成立の場合に返す
+            this._builder?.CloseScope(this._depth);
         }
     }
 }

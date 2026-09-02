@@ -151,87 +151,83 @@ public sealed class GeneratedEventSourceTest
                         {
                             global::System.Diagnostics.Tracing.EventSource.EventData *data = stackalloc global::System.Diagnostics.Tracing.EventSource.EventData[20];
 
-                            int __arg0Value = p0 ? 1 : 0;
-                            data[0].DataPointer = (global::System.IntPtr)(&__arg0Value);
-                            data[0].Size = 4;
-
-                            data[1].DataPointer = (global::System.IntPtr)(&p1);
-                            data[1].Size = 1;
-
-                            data[2].DataPointer = (global::System.IntPtr)(&p2);
-                            data[2].Size = 1;
-
-                            data[3].DataPointer = (global::System.IntPtr)(&p3);
-                            data[3].Size = 2;
-
-                            data[4].DataPointer = (global::System.IntPtr)(&p4);
-                            data[4].Size = 2;
-
-                            data[5].DataPointer = (global::System.IntPtr)(&p5);
-                            data[5].Size = 2;
-
-                            data[6].DataPointer = (global::System.IntPtr)(&p6);
-                            data[6].Size = 4;
-
-                            data[7].DataPointer = (global::System.IntPtr)(&p7);
-                            data[7].Size = 4;
-
-                            data[8].DataPointer = (global::System.IntPtr)(&p8);
-                            data[8].Size = 8;
-
-                            data[9].DataPointer = (global::System.IntPtr)(&p9);
-                            data[9].Size = 8;
-
-                            data[10].DataPointer = (global::System.IntPtr)(&p10);
-                            data[10].Size = 4;
-
-                            data[11].DataPointer = (global::System.IntPtr)(&p11);
-                            data[11].Size = 8;
-
                             p12 ??= "";
-                            fixed (char *__arg12Value = p12)
+                            fixed (global::System.Char *__arg12Pointer = p12)
+                            fixed (global::System.Byte *__arg17Pointer = p17)
                             {
-                                data[12].DataPointer = (global::System.IntPtr)__arg12Value;
+                                int __arg0Value = p0 ? 1 : 0;
+                                data[0].DataPointer = (global::System.IntPtr)(&__arg0Value);
+                                data[0].Size = 4;
+
+                                data[1].DataPointer = (global::System.IntPtr)(&p1);
+                                data[1].Size = 1;
+
+                                data[2].DataPointer = (global::System.IntPtr)(&p2);
+                                data[2].Size = 1;
+
+                                data[3].DataPointer = (global::System.IntPtr)(&p3);
+                                data[3].Size = 2;
+
+                                data[4].DataPointer = (global::System.IntPtr)(&p4);
+                                data[4].Size = 2;
+
+                                data[5].DataPointer = (global::System.IntPtr)(&p5);
+                                data[5].Size = 2;
+
+                                data[6].DataPointer = (global::System.IntPtr)(&p6);
+                                data[6].Size = 4;
+
+                                data[7].DataPointer = (global::System.IntPtr)(&p7);
+                                data[7].Size = 4;
+
+                                data[8].DataPointer = (global::System.IntPtr)(&p8);
+                                data[8].Size = 8;
+
+                                data[9].DataPointer = (global::System.IntPtr)(&p9);
+                                data[9].Size = 8;
+
+                                data[10].DataPointer = (global::System.IntPtr)(&p10);
+                                data[10].Size = 4;
+
+                                data[11].DataPointer = (global::System.IntPtr)(&p11);
+                                data[11].Size = 8;
+
+                                data[12].DataPointer = (global::System.IntPtr)__arg12Pointer;
                                 data[12].Size = (p12.Length + 1) * 2;
-                            }
 
-                            long __arg13Value = p13.ToFileTimeUtc();
-                            data[13].DataPointer = (global::System.IntPtr)(&__arg13Value);
-                            data[13].Size = 8;
+                                long __arg13Value = p13.ToFileTimeUtc();
+                                data[13].DataPointer = (global::System.IntPtr)(&__arg13Value);
+                                data[13].Size = 8;
 
-                            data[14].DataPointer = (global::System.IntPtr)(&p14);
-                            data[14].Size = 16;
+                                data[14].DataPointer = (global::System.IntPtr)(&p14);
+                                data[14].Size = 16;
 
-                            data[15].DataPointer = (global::System.IntPtr)(&p15);
-                            data[15].Size = 16;
+                                data[15].DataPointer = (global::System.IntPtr)(&p15);
+                                data[15].Size = 16;
 
-                            data[16].DataPointer = (global::System.IntPtr)(&p16);
-                            data[16].Size = global::System.IntPtr.Size;
+                                data[16].DataPointer = (global::System.IntPtr)(&p16);
+                                data[16].Size = global::System.IntPtr.Size;
 
-                            if (p17 == null || p17.Length == 0)
-                            {
-                                int blobSize = 0;
-                                data[17].DataPointer = (global::System.IntPtr)(&blobSize);
+                                int __arg17Size = p17 == null ? 0 : p17.Length;
+                                data[17].DataPointer = (global::System.IntPtr)(&__arg17Size);
                                 data[17].Size = 4;
-                                data[18].DataPointer = (global::System.IntPtr)(&blobSize);
-                                data[18].Size = 0;
-                            }
-                            else
-                            {
-                                int blobSize = p17.Length;
-                                fixed (byte *blob = &p17[0])
+
+                                if (__arg17Size == 0)
                                 {
-                                    data[17].DataPointer = (global::System.IntPtr)(&blobSize);
-                                    data[17].Size = 4;
-                                    data[18].DataPointer = (global::System.IntPtr)blob;
-                                    data[18].Size = blobSize;
+                                    data[18].DataPointer = (global::System.IntPtr)(&__arg17Size);
+                                    data[18].Size = 0;
                                 }
+                                else
+                                {
+                                    data[18].DataPointer = (global::System.IntPtr)__arg17Pointer;
+                                    data[18].Size = __arg17Size;
+                                }
+
+                                data[19].DataPointer = (global::System.IntPtr)(&p18);
+                                data[19].Size = 4;
+
+                                this.WriteEventWithRelatedActivityIdCore(1, &relatedActivityId, 20, data);
                             }
-
-                            data[19].DataPointer = (global::System.IntPtr)(&p18);
-                            data[19].Size = 4;
-
-                            this.WriteEventWithRelatedActivityIdCore(1, &relatedActivityId, 20, data);
                         }
                     }
                 }
