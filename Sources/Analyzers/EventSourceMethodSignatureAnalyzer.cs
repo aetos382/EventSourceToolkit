@@ -66,7 +66,7 @@ public sealed class EventSourceMethodSignatureAnalyzer :
         }
 
         // 包含クラスが拡張可能でなければ検査対象外
-        if (node.Parent is not ClassDeclarationSyntax classDecl || !classDecl.CanBeAugmented)
+        if (node.Parent is not ClassDeclarationSyntax { CanBeAugmented: true })
         {
             return;
         }
