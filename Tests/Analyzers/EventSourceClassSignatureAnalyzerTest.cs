@@ -107,7 +107,7 @@ public sealed class EventSourceClassSignatureAnalyzerTest
 
             using Aetos.EventSourceToolkit;
 
-            public static class {|EST001:Outer|}
+            public sealed class {|EST001:Outer|}
             {
                 [GeneratedEventSource]
                 public sealed partial class MyEventSource : EventSource
@@ -270,7 +270,7 @@ public sealed class EventSourceClassSignatureAnalyzerTest
 
             using Aetos.EventSourceToolkit;
 
-            file static partial class {|EST004:Outer|}
+            file sealed partial class {|EST004:Outer|}
             {
                 [GeneratedEventSource]
                 public sealed partial class MyEventSource : EventSource
