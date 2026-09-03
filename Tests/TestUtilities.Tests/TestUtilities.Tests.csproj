@@ -1,0 +1,26 @@
+﻿<Project Sdk="MSTest.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Aetos.EventSourceToolkit.Tests.TestUtilities.Tests</AssemblyName>
+    <RootNamespace>$(AssemblyName)</RootNamespace>
+
+    <!--
+      Fixtures にあるのはドライバーを動かすためのダミーの Analyzer / CodeFix / ジェネレーターであり、
+      配布しないため、コンパイラ拡張機能の作成に関する規則は適用しない。
+    -->
+    <NoWarn>$(NoWarn);RS1036;RS1038;RS1041;RS2008</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
+    <PackageReference Include="Shouldly" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TestUtilities\TestUtilities.csproj" />
+  </ItemGroup>
+
+</Project>

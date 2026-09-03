@@ -15,5 +15,6 @@
     <Project Path="Tests/SourceGenerators/SourceGenerators.Tests.csproj" Id="d2903b8f-ebd3-4b98-81c7-de8b614fadb3" />
     <Project Path="Tests/StandardEventSourceTest/StandardEventSourceTest.csproj" Id="aed19e53-1be1-4721-b46f-d5b32b6413c8" />
     <Project Path="Tests/TestUtilities/TestUtilities.csproj" Id="f236d8df-e813-45cf-ab00-0c26a23c3857" />
+    <Project Path="Tests/TestUtilities.Tests/TestUtilities.Tests.csproj" />
   </Folder>
 </Solution>

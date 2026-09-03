@@ -23,7 +23,7 @@ internal sealed class EventListenerParser
         this._wellKnownSymbols = new WellKnownSymbols(semanticModel.Compilation);
     }
 
-    public EventListenerInfoWithDiagnostics ParseEventListener(
+    public EventListenerInfo? ParseEventListener(
         ClassDeclarationSyntax syntaxNode,
         INamedTypeSymbol symbol,
         ImmutableArray<AttributeData> attributes,
@@ -33,7 +33,7 @@ internal sealed class EventListenerParser
         if (eventSourceName is null)
         {
             // TODO: diagnostic
-            return EventListenerInfoWithDiagnostics.Empty;
+            return null;
         }
 
         foreach (var method in symbol.GetMethods())
@@ -41,7 +41,7 @@ internal sealed class EventListenerParser
             cancellationToken.ThrowIfCancellationRequested();
         }
 
-        return EventListenerInfoWithDiagnostics.Empty;
+        return null;
     }
 
     private string? GetEventSourceName(

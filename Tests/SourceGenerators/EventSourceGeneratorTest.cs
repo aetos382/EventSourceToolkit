@@ -62,7 +62,7 @@ public sealed class EventSourceGeneratorTest
 
             """;
 
-        var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
+        using var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
 
         var generatedSource = result.GetGeneratedText("Sample.TestEventSource.Foo.g.cs");
 
@@ -231,7 +231,7 @@ public sealed class EventSourceGeneratorTest
 
             """;
 
-        var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
+        using var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
 
         var generatedSource = result.GetGeneratedText("Sample.TestEventSource.Foo.g.cs");
 
@@ -258,7 +258,7 @@ public sealed class EventSourceGeneratorTest
             }
             """;
 
-        var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
+        using var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
 
         result.GeneratedSources.ShouldNotContain(static x => x.FileName == "Sample.TestEventSource.Foo.g.cs");
     }
@@ -280,7 +280,7 @@ public sealed class EventSourceGeneratorTest
             }
             """;
 
-        var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
+        using var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
 
         result.GeneratedSources.ShouldNotContain(static x => x.FileName == "Sample.TestEventSource.Foo.g.cs");
     }
@@ -302,7 +302,7 @@ public sealed class EventSourceGeneratorTest
             }
             """;
 
-        var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
+        using var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
 
         result.GeneratedSources.ShouldNotContain(static x => x.FileName == "Sample.TestEventSource.Foo.g.cs");
     }
@@ -327,7 +327,7 @@ public sealed class EventSourceGeneratorTest
             }
             """;
 
-        var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
+        using var result = await RunGeneratorAsync(Code, this._testContext.CancellationToken).ConfigureAwait(false);
 
         result.GeneratedSources.ShouldNotContain(static x => x.FileName == "Sample.TestEventSource.Foo.g.cs");
     }
@@ -341,15 +341,15 @@ public sealed class EventSourceGeneratorTest
         this._testContext = testContext;
     }
 
-    private static async Task<GeneratorTestResult> RunGeneratorAsync(
+    private static async Task<CSharpCompilerResult> RunGeneratorAsync(
         string inputCode,
         CancellationToken cancellationToken)
     {
-        var runner = new CSharpGeneratorRunner(new EventSourceGenerator());
+        var driver = new CSharpCompilerDriver()
+            .WithSourceGenerators(new EventSourceGenerator())
+            .AddSource("main.cs", inputCode);
 
-        runner.AddSource("main.cs", inputCode);
-
-        return await runner.RunAsync(cancellationToken).ConfigureAwait(false);
+        return await driver.RunAsync(cancellationToken).ConfigureAwait(false);
     }
 
     private readonly TestContext _testContext;

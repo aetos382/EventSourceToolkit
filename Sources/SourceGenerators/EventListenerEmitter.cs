@@ -8,14 +8,9 @@ internal static class EventListenerEmitter
 {
     public static void EmitEventListener(
         SourceProductionContext context,
-        EventListenerInfoWithDiagnostics input)
+        EventListenerInfo? listenerInfo)
     {
-        foreach (var diagnostic in input.Diagnostics)
-        {
-            context.ReportDiagnostic(diagnostic.CreateDiagnostic());
-        }
-
-        if (input.ListenerInfo is not { } listenerInfo)
+        if (listenerInfo is null)
         {
             return;
         }
